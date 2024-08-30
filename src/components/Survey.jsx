@@ -154,7 +154,7 @@ function Survey() {
   const totalQuestions = selectedQuestions.length;
 
   return (
-    <div className="flex flex-col lg:flex-row w-full lg:w-[60vw] h-[80vh] overflow-auto mx-auto p-6 bg-white shadow-md rounded-lg">
+    <div className="flex flex-col lg:flex-row max-w-screen w-full lg:w-[60vw]  mb-5 md:mb-0 h-[80vh] overflow-auto mx-auto p-6 bg-white shadow-md rounded-lg">
       {showSuccessMessage ? (
         <div className="flex-1 flex flex-col items-center justify-center p-6 bg-green-100 rounded-lg shadow-md">
           <FaCheck className="text-green-500 mb-4" size={40} />
@@ -223,7 +223,7 @@ function Survey() {
                           onClick={() => handlePaginationClick(index + pageStartIndex)}
                           className={`w-8 h-8 rounded-full shadow-md focus:outline-none ${
                             currentQuestionIndex === index + pageStartIndex
-                              ? 'text-[#56a4ff]'
+                              ? 'text-white bg-[#56a4ff]'
                               : 'text-gray-700 hover:bg-gray-300'
                           }`}
                         >

@@ -9,6 +9,9 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  width: 100vw;
+  overflow-x: hidden;
+  overflow-y: auto;
 }
 
 code {
@@ -25,16 +28,22 @@ code {
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: #888; /* Color of the scrollbar thumb */
-  border-radius: 10px; /* Rounded corners for the scrollbar thumb */
+  background: #888; 
+  border-radius: 10px; 
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: #555; /* Color of the scrollbar thumb on hover */
+  background: #555; 
 }
 
-/* For Firefox */
 .custom-scrollbar {
-  scrollbar-width: thin; /* Thin scrollbar for Firefox */
-  scrollbar-color: #888 #f1f1f1; /* Thumb color and track color */
+  scrollbar-width: thin; 
+  scrollbar-color: #888 #f1f1f1; 
+}
+/* Global styles */
+html, body {
+  overflow-x: hidden;
+  width: 100%;
+  margin: 0;
+  padding: 0;
 }

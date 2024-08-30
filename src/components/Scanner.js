@@ -1,7 +1,14 @@
 import React, { useState } from 'react';
-import { FaBarcode } from 'react-icons/fa';
+import { FaBarcode, FaWeightHanging, FaGem, FaInfoCircle } from 'react-icons/fa';
+import { GiCutDiamond } from 'react-icons/gi';
+import { MdColorLens } from 'react-icons/md';
 import QrReader from 'react-qr-barcode-scanner';
 import ring from "../Assets/Ring.png";
+import { faBarcode, faArrowRight } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import Scannericon from '../Assets/Qrcode.png'
+import { FaQrcode } from 'react-icons/fa';
+
 
 const productData = {
   jobid: '1/14804',
@@ -22,10 +29,10 @@ const productData = {
   colorstonepcs: '11 pcs',
   Miscctw: '0.5 ctw',
   MiscPcs: '2 pcs',
-  Status: 'Success',
+  Status: 'Approved',
 };
 
-const Scanner = () => {
+const Scanner = ({ togglePanel }) => {
   const [hasCamera, setHasCamera] = useState(true);
   const [code, setCode] = useState('');
   const [scannedCode, setScannedCode] = useState('');
@@ -43,125 +50,120 @@ const Scanner = () => {
   };
 
   return (
-    <div className="w-full min-h-screen bg-gray-50 flex flex-col items-center p-4">
-      <div className="w-full max-w-lg mt-10 flex justify-center">
-        {hasCamera ? (
-          <div className="h-72 w-72 flex items-center justify-center bg-white rounded-lg shadow-xl">
-            <QrReader
-              delay={300}
-              onScan={handleScan}
-              onError={() => setHasCamera(false)}
-              style={{ width: '100%', height: '100%' }}
-            />
-          </div>
-        ) : (
-          <div className="h-48 w-48 bg-gray-200 flex items-center justify-center rounded-lg shadow-xl">
-            <FaBarcode className="text-gray-700 text-6xl" />
-          </div>
-        )}
-      </div>
-
-      <div className="w-full max-w-lg mt-6">
-      <div className='flex items-center pr-0 bg-white border border-gray-300 rounded-lg shadow-lg overflow-hidden'>
-        <input
-            type="text"
-            className="p-2 w-full text-gray-700 placeholder-gray-400 focus:outline-none "
-            placeholder="Enter job ID"
-            value={scannedCode || code}
-            onChange={(e) => setCode(e.target.value)}
-          />
-          <button
-            className="bg-gradient-to-r from-green-500 to-green-600 my-0 h-full text-white px-5 py-3 font-semibold rounded-r-lg hover:from-green-600 hover:to-green-700 shadow-md transition duration-200 ease-in-out"
-            onClick={handleCodeSubmit}
-          >
-            Go
-          </button>
+    <div className="w-screen min-h-screen  flex-col overflow-x-hidden md:h-screen md:max-h-screen bg-transparent md:bg-gray-100 flex items-center justify-between p-0 md:px-4 py-4">
+     <div className='flex pl-4 h-fit w-screen '>
+       <div
+          className=" p-2 bg-gray-800 text-white rounded"
+          onClick={togglePanel}
+        >
+          <FontAwesomeIcon icon={faArrowRight} />
         </div>
-      </div>
-
-      {showDetails && (
-        <div className="w-full max-w-4xl mt-10 p-6 bg-white rounded-xl shadow-lg">
-          <div className="flex flex-col items-center mb-6">
-            <p className="text-gray-900 font-bold text-xl flex gap-2 mb-4">
-              <span className="text-blue-600">{code || scannedCode} (T321)</span> For Bunty
-            </p>
+       </div>   
+      <div className="w-full bg-white my-auto min-h-[82vh]  lg:max-w-4xl md:rounded-xl md:shadow-xl overflow-auto flex flex-col md:flex-row" >
+    
+        <div className="w-full md:w-[40%] p-6 bg-transparent md:bg-gray-50 md:  pt-20   flex flex-col items-center justify-start">
+          {hasCamera ? (
+            <div className="h-64  w-64 flex items-center justify-center bg-gray-100 rounded-lg shadow-lg">
+              <QrReader
+                delay={300}
+                onScan={handleScan}
+                onError={() => setHasCamera(false)}
+                style={{ width: '100%', height: '100%' }}
+              />
+            </div>
+          ) : (
+            <div className="h-64  w-64  bg-white flex items-center justify-center rounded-lg shadow-lg">
+              <img src={Scannericon} alt="scannergif" className='h-full w-full object-contain' />
+            </div>
+          )}
+          <div className=" mt-6">
+            <div className="flex items-center justify-between pr-0 bg-white border border-gray-300 rounded-lg shadow-lg overflow-hidden">
+              <input
+                type="text"
+                className="p-3 w-64 text-gray-700 placeholder-gray-400 focus:outline-none"
+                placeholder="Enter job ID"
+                value={scannedCode || code}
+                onChange={(e) => setCode(e.target.value)}
+              />
+              <button
+                className=" bg-gradient-to-r from-[#26cc00] to-[#009c1a] h-full text-white px-5 py-3 font-semibold rounded-r-lg hover:bg-green-600 shadow-md transition duration-200 ease-in-out"
+                onClick={handleCodeSubmit}
+              >
+                Go
+              </button>
+            </div>
           </div>
-          <div className="flex flex-col md:flex-row w-full gap-8">
-            <div className="w-full md:w-1/3 flex justify-center">
+        </div>
+
+        {showDetails && ( 
+          <div className="w-screen md:w-[60%] md:p-6   flex flex-col justify-center overflow-auto">
+            <div className="text-center mb-4">
+              <p className="text-gray-800 font-bold text-xl">
+                <span className="text-[#56a4ff]">{code || scannedCode} (T321)</span> For Bunty
+              </p>
+            </div>
+            <div className="w-full flex justify-center ">
               <img
                 src={productData.image}
                 alt="Product"
-                className="w-40 h-40 object-cover rounded-lg shadow-md"
+                className="w-32 h-32 object-cover rounded-lg shadow-md"
               />
             </div>
-            <div className="w-full md:w-2/3 flex flex-col gap-4">
-              <div className="flex items-center">
-                <span className="w-32 text-sm text-gray-600">Gross Wt:</span>
-                <div className="flex flex-col">
-                  <span className="text-green-800 font-semibold">{productData.GrossWt}</span>
-                  <span className="text-gray-600 text-sm">{productData.estmatedGrossWt}</span>
+            <div className="grid  w-screen md:w-auto px-2  md:mt-auto grid-cols-2 gap-4">
+              <div className="bg-[rgba(227,227,227,0.2)] shadow-xl border-gray-100 p-4 rounded-lg ">
+                <div className="flex items-center">
+                  <span className="text-sm text-gray-400">Gross Wt:</span>
+                </div>
+                <div className="mt-0">
+                  <span className="text-xl text-[#56a4ff] font-semibold">{productData.GrossWt}</span>
+                  <div className="text-xs text-gray-500"> {productData.estmatedGrossWt}</div>
                 </div>
               </div>
-              <div className="flex items-center">
-                <span className="w-32 text-sm text-gray-600">Net Weight:</span>
-                <div className="flex flex-col">
-                  <span className="text-green-800 font-semibold">{productData.NetWt}</span>
-                  <span className="text-gray-600 text-sm">{productData.estmatedNetWt}</span>
+              <div className="bg-[rgba(227,227,227,0.2)] shadow-xl border-gray-100 p-4 rounded-lg ">
+                <div className="flex items-center">
+                  <span className="text-sm text-gray-400">Net Weight:</span>
+                </div>
+                <div className="mt-0">
+                  <span className="text-xl text-[#56a4ff] font-semibold">{productData.NetWt}</span>
+                  <div className="text-xs text-gray-500"> {productData.estmatedNetWt}</div>
                 </div>
               </div>
-              <div className="flex items-center">
-                <span className="w-32 text-sm text-gray-600">Diamond:</span>
-                <div className="flex flex-row gap-4">
-                  <div className="flex flex-col">
-                    <span className="text-green-800 font-semibold">{productData.Diamondctw}</span>
-                    <span className="text-gray-600 text-sm">{productData.estmatedDiamondctw}</span>
-                  </div>
-                  <div className="flex flex-col">
-                    <span className="text-green-800 font-semibold">{productData.Diamondpcs}</span>
-                    <span className="text-gray-600 text-sm">{productData.estmatedDiamondpcs}</span>
-                  </div>
+              <div className="bg-[rgba(227,227,227,0.2)] shadow-xl border-gray-100 p-4 rounded-lg ">
+                  <span className="text-sm text-gray-400">Diamond:</span>
+                <div className="mt-0">
+                  <span className="text-xl text-[#56a4ff] font-semibold">{productData.Diamondctw} | {productData.Diamondpcs}</span>
+                  <div className="text-xs text-gray-500"> {productData.estmatedDiamondctw} | {productData.estmatedDiamondpcs}</div>
                 </div>
               </div>
-              <div className="flex items-center">
-                <span className="w-32 text-sm text-gray-600">Colorstone:</span>
-                <div className="flex flex-row gap-4">
-                  <div className="flex flex-col">
-                    <span className="text-green-800 font-semibold">{productData.Colorstonectw}</span>
-                    <span className="text-gray-600 text-sm">{productData.estmatedColorstonectw}</span>
-                  </div>
-                  <div className="flex flex-col">
-                    <span className="text-green-800 font-semibold">{productData.colorstonepcs}</span>
-                    <span className="text-gray-600 text-sm">{productData.estmatedcolorstonepcs}</span>
-                  </div>
+              <div className="bg-[rgba(227,227,227,0.2)] shadow-xl border-gray-100 p-4 rounded-lg ">
+                  <span className="text-sm text-gray-400">Colorstone:</span>
+                <div className="mt-0">
+                  <span className="text-xl text-[#56a4ff] font-semibold">{productData.Colorstonectw} | {productData.colorstonepcs}</span>
+                  <div className="text-xs text-gray-500"> {productData.estmatedColorstonectw} | {productData.estmatedcolorstonepcs}</div>
                 </div>
               </div>
-              <div className="flex items-center">
-                <span className="w-32 text-sm text-gray-600">Misc:</span>
-                <div className="flex flex-row gap-4">
-                  <div className="flex flex-col">
-                    <span className="text-green-800 font-semibold">{productData.Miscctw}</span>
-                    <span className="text-gray-600 text-sm">{productData.estmatedMiscctw}</span>
-                  </div>
-                  <div className="flex flex-col">
-                    <span className="text-green-800 font-semibold">{productData.MiscPcs}</span>
-                    <span className="text-gray-600 text-sm">{productData.estmatedMiscPcs}</span>
-                  </div>
+              <div className="bg-[rgba(227,227,227,0.2)] shadow-xl border-gray-100 p-4 rounded-lg ">
+                  <span className="text-sm text-gray-400">Misc:</span>
+                <div className="mt-0">
+                  <span className="text-xl text-[#56a4ff] font-semibold">{productData.Miscctw} | {productData.MiscPcs}</span>
+                  <div className="text-xs text-gray-500"> {productData.estmatedMiscctw} | {productData.estmatedMiscPcs}</div>
                 </div>
               </div>
-              <div className="flex items-center">
-                <span className="w-32 text-sm text-gray-600">Status:</span>
-                <div className="flex flex-col">
-                  <span className="text-green-800 font-semibold">{productData.Status}</span>
+              {/* <div className="bg-[rgba(227,227,227,0.2)] shadow-xl border-gray-100 p-4 rounded-lg  col-span-2"> */}
+              <div className="  col-span-2">
+                <div className="flex items-center">
+                  <span className="text-sm text-gray-400">Status:</span>
+                </div>
+                <div className="mt-1 bg-green-600 rounded-md w-fit p-3 py-2">
+                  <span className="text-lg text-white font-semibold">{productData.Status}</span>
                 </div>
               </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 };
 
 export default Scanner;
-
-// in this code in the place of barcode icon use a bit animated lottie kind of file in which scaning line will be moving and a bitattractive and also make this Data rpresentation Good Looking and more attractive
