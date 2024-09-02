@@ -1,7 +1,8 @@
 import axios from 'axios';
-import { atom, useSetRecoilState } from 'recoil';
-import { useEffect, useState } from 'react';
+import { atom, useRecoilState, useSetRecoilState } from 'recoil';
+import { useEffect } from 'react';
 
+// Recoil atoms
 export const rdState = atom({
   key: 'rdState', 
   default: [], 
@@ -26,19 +27,21 @@ export const rd4State = atom({
   key: 'rd4State',
   default: [],
 });
+
 export const YearCodeState = atom({
   key: 'YearCodeState',
-  default: [],
+  default: '', // Initial state as a string for Yearcode
 });
 
 function FetchDataComponent() {
-  const [yc,setYc]= useState();
   const setRd = useSetRecoilState(rdState);
   const setRd1 = useSetRecoilState(rd1State);
   const setRd2 = useSetRecoilState(rd2State);
   const setRd3 = useSetRecoilState(rd3State);
   const setRd4 = useSetRecoilState(rd4State);
-  const setYearCode = useSetRecoilState(YearCodeState);
+  const [yearCode, setYearCode] = useRecoilState(YearCodeState);
+
+  // First useEffect to fetch Yearcode
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -61,9 +64,8 @@ function FetchDataComponent() {
         };
 
         const response = await axios.post('http://zen/api/ReactStore.aspx', data, config);
-        const responseData=response.data.Data.rd[0].yearcode;
-        setYearCode(responseData);
-        setYc(responseData);
+        const responseData = response.data.Data.rd[0].yearcode;
+        setYearCode(responseData); // Set the Yearcode in the Recoil state
 
       } catch (error) {
         console.error('Error fetching data:', error);
@@ -71,17 +73,20 @@ function FetchDataComponent() {
     };
 
     fetchData();
-  }, [setYearCode,setYc]);
+  }, [setYearCode]);
 
+  // Second useEffect to fetch other data based on the Yearcode
   useEffect(() => {
+    if (!yearCode) return; // Prevent running this useEffect if Yearcode is not yet set
+
     const headers = {
-      Authorization: "Bearer 9065471700535651",
-      Yearcode: yc,
-      Version: "v1",
-      sp: "4",
-      domain: "",
-      "Content-Type": "application/json",
-      Cookie: "ASP.NET_SessionId=i4btgm10k555buulfvmqyeyc",
+      Authorization: 'Bearer 9065471700535651',
+      Yearcode: yearCode, // Use the Yearcode from the Recoil state
+      Version: 'v1',
+      sp: '4',
+      domain: '',
+      'Content-Type': 'application/json',
+      Cookie: 'ASP.NET_SessionId=i4btgm10k555buulfvmqyeyc',
     };
 
     const data = {
@@ -103,9 +108,8 @@ function FetchDataComponent() {
       .catch((error) => {
         console.error('Error fetching data:', error);
       });
-  }, [setRd, setRd1, setRd2, setRd3, setRd4]);
- 
-// console.log("yc",);
+  }, [yearCode, setRd, setRd1, setRd2, setRd3, setRd4]);
+
 
 }
 

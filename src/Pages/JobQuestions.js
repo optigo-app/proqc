@@ -3,6 +3,10 @@ import SideDetails from '../components/SideDetails';
 import Survey from '../components/Survey';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faBarcode, faArrowRight } from '@fortawesome/free-solid-svg-icons';
+import { useRecoilValue } from 'recoil';
+
+import { rdState, rd1State,rd2State } from '../Recoil/FetchDataComponent';
+
 import Scanner from '../components/Scanner';
 // import axios from "axios";
 
@@ -14,7 +18,10 @@ const JobQuestions = () => {
 
   };
  
-
+console.log("rdState, rd1State,rd2State",
+useRecoilValue(rdState),
+useRecoilValue(rd1State),
+useRecoilValue(rd2State) );
   
     // useEffect(() => {
     //   const fetchData = async () => {
