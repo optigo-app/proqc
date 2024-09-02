@@ -14,7 +14,7 @@ const Question=[
     {
         "id": 3,
         "question": "How does the jewelry compare to your expectations?",
-        "options":"Far Exceeds Expectations,Exceeds Expectations,Meets Expectations,Almost Meets Expectations,Below Expectations,Far Below Expectations,Significantly Below Expectations,Not What I Expected,Unexpectedly Good,Unexpectedly Bad,Neutral"
+        "options":"Exceeds Expectations,Meets Expectations,Almost Meets Expectations,Below Expectations,Far Below Expectations,Significantly Below Expectations,Not What I Expected,Unexpectedly Good,Unexpectedly Bad,Neutral"
         
     },
     {

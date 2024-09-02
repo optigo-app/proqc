@@ -1,5 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { FaChevronLeft, FaChevronRight, FaCheck, FaRegThumbsUp, FaRegThumbsDown, FaPause, FaEllipsisH, FaQuestionCircle, FaCheckCircle, FaRegEdit } from 'react-icons/fa';
+import { BiSolidImageAdd } from "react-icons/bi";
+import { IoCloseOutline } from "react-icons/io5";
+
 import Question from './Question';
 
 function Survey() {
@@ -11,6 +14,7 @@ function Survey() {
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
   const [remarks, setRemarks] = useState({});
   const [editingRemark, setEditingRemark] = useState(null);
+  const [images, setImages] = useState([]); 
 
   const allQuestions = Question;
   const filteredQuestions = allQuestions.filter(q => selectedQuestions.includes(q.id));
@@ -142,6 +146,7 @@ function Survey() {
     setEditingRemark(null);
     handleRemarkChange(questionId, remarks[questionId] || '');
   };
+
   const toggleSelectAll = () => {
     if (selectedQuestions.length === allQuestions.length) {
       setSelectedQuestions([]);
@@ -149,61 +154,78 @@ function Survey() {
       setSelectedQuestions(allQuestions.map(q => q.id));
     }
   };
-  
+
+  const handleImageUpload = (event) => {
+    const files = Array.from(event.target.files);
+    const newImages = files.map(file => URL.createObjectURL(file));
+    setImages(prevImages => [
+      ...prevImages,
+      ...newImages
+    ].slice(0, 4)); 
+  };
+
+  const handleRemoveImage = (index) => {
+    setImages(prevImages => prevImages.filter((_, i) => i !== index));
+  };
+
   const currentQuestionNumber = currentQuestionIndex + 1;
   const totalQuestions = selectedQuestions.length;
 
   return (
-    <div className="flex flex-col lg:flex-row max-w-screen w-full lg:w-[60vw]  mb-5 md:mb-0 h-[80vh] overflow-auto mx-auto p-6 bg-white shadow-md rounded-lg">
+    <div className="flex flex-col lg:flex-row max-w-screen w-full lg:w-[60vw]  mb-5 md:mb-5 h-fit  overflow-auto mx-auto p-6 bg-white shadow-md rounded-lg">
       {showSuccessMessage ? (
-        <div className="flex-1 flex flex-col items-center justify-center p-6 bg-green-100 rounded-lg shadow-md">
+        <div className="flex-1  flex flex-col items-center justify-center p-6 bg-green-100 rounded-lg shadow-md">
+        <div className='h-64'></div>
           <FaCheck className="text-green-500 mb-4" size={40} />
+        
           <h2 className="text-2xl font-semibold mb-2">Answers Submitted Successfully!</h2>
           <p className="text-gray-700">Thank you.</p>
+          <div className='h-64'></div>
+
         </div>
       ) : (
         <div className="flex w-full flex-col lg:flex-row lg:pr-4">
           <div className="flex-1">
             {showSelection ? (
               <div className="flex flex-col mb-2  p-4 pt-0">
-           <div className='flex flex-row w-full justify-between'>
-           <h2 className="text-3xl font-semibold mb-6 text-[#56a4ff] flex items-center">
-                <FaQuestionCircle className="mr-2" />
-                Select Your Questions
-              </h2>
-              
-              <div
-                onClick={toggleSelectAll}
-                className="text-[#56a4ff]  cursor-pointer underline  "
-              >
-                {selectedQuestions.length === allQuestions.length ? 'Deselect All' : 'Select All'}
-              </div>
-           </div>
-            
-              {allQuestions.map((q) => (
-                <div key={q.id} className="flex items-center mb-3 p-2 hover:bg-gray-100 rounded transition-colors">
-                  <input
-                    type="checkbox"
-                    checked={selectedQuestions.includes(q.id)}
-                    onChange={() => handleQuestionSelectionChange(q.id)}
-                    className="mr-2 h-5 w-5"
-                  />
-                  <span className="text-lg">{q.question}</span>
+                <div className='flex flex-row w-full justify-between'>
+                  <h2 className="text-3xl font-semibold mb-6 text-[#56a4ff] flex items-center">
+                    <FaQuestionCircle className="mr-2" />
+                    Select Your Questions
+                  </h2>
+
+                  <div
+                    onClick={toggleSelectAll}
+                    className="text-[#56a4ff] cursor-pointer underline"
+                  >
+                    {selectedQuestions.length === allQuestions.length ? 'Deselect All' : 'Select All'}
+                  </div>
                 </div>
-              ))}
-            
-              <button
-                onClick={() => setShowSelection(false)}
-                disabled={selectedQuestions.length === 0}
-                className={`flex items-center justify-center py-3 px-5 mt-4 rounded-full shadow-md transition-all ${
-                  selectedQuestions.length === 0 ? 'bg-gray-300 text-xl text-gray-700 cursor-not-allowed' : 'bg-[#56a4ff] text-white hover:bg-[#4b93e2]'
-                }`}
-              >
-                <FaCheckCircle className="mr-2 text-xl" />
-                Start
-              </button>
-            </div>
-            
+
+                {allQuestions.map((q) => (
+                  <div key={q.id} className="flex items-center mb-3 p-2 hover:bg-gray-100 rounded transition-colors">
+                    <input
+                      type="checkbox"
+                      checked={selectedQuestions.includes(q.id)}
+                      onChange={() => handleQuestionSelectionChange(q.id)}
+                      className="mr-2 h-5 w-5"
+                    />
+                    <span className="text-lg">{q.question}</span>
+                  </div>
+                ))}
+
+                <button
+                  onClick={() => setShowSelection(false)}
+                  disabled={selectedQuestions.length === 0}
+                  className={`flex items-center justify-center py-3 px-5 mt-4 rounded-full shadow-md transition-all ${
+                    selectedQuestions.length === 0 ? 'bg-gray-300 text-xl text-gray-700 cursor-not-allowed' : 'bg-[#56a4ff] text-white hover:bg-[#4b93e2]'
+                  }`}
+                >
+                  <FaCheckCircle className="mr-2 text-xl" />
+                  Start
+                </button>
+              </div>
+
             ) : (
               <>
                 <div className="flex w-full justify-between items-center mb-4">
@@ -211,8 +233,8 @@ function Survey() {
                     <button
                       onClick={handleScrollLeft}
                       disabled={pageStartIndex === 0}
-                      className={`w-8 h-8 rounded-full shadow-md focus:outline-none text-[#56a4ff] hover:bg-gray-300  justify-center items-center disabled:text-gray-300 ${selectedQuestions.length > 5 ? 'flex' : 'hidden'}`}
-                    >                    
+                      className={`w-8 h-8 rounded-full shadow-md focus:outline-none text-[#56a4ff] hover:bg-gray-300 justify-center items-center disabled:text-gray-300 ${selectedQuestions.length > 5 ? 'flex' : 'hidden'}`}
+                    >
                       <FaChevronLeft />
                     </button>
 
@@ -223,7 +245,7 @@ function Survey() {
                           onClick={() => handlePaginationClick(index + pageStartIndex)}
                           className={`w-8 h-8 rounded-full shadow-md focus:outline-none ${
                             currentQuestionIndex === index + pageStartIndex
-                              ? 'text-white bg-[#56a4ff]'
+                              ? ' text-[#fff] hover:bg-[#56a4ff] bg-[#56a5ffb9]'
                               : 'text-gray-700 hover:bg-gray-300'
                           }`}
                         >
@@ -235,7 +257,7 @@ function Survey() {
                     <button
                       onClick={handleScrollRight}
                       disabled={pageStartIndex + 5 >= questionsToDisplay.length}
-                      className={`w-8 h-8 rounded-full shadow-md focus:outline-none text-[#56a4ff] hover:bg-gray-300  justify-center items-center disabled:text-gray-300 ${selectedQuestions.length > 5 ? 'flex' : 'hidden'}`}
+                      className={`w-8 h-8 rounded-full shadow-md focus:outline-none text-[#56a4ff] hover:bg-gray-300 justify-center items-center disabled:text-gray-300 ${selectedQuestions.length > 5 ? 'flex' : 'hidden'}`}
                     >
                       <FaChevronRight />
                     </button>
@@ -251,15 +273,14 @@ function Survey() {
                   </div>
                   <h2 className="text-2xl flex-1">{currentQuestion.question}</h2>
                   <button
-  onClick={() => handleRemarkEdit(currentQuestion.id)}
-  className="ml-4 p-3 rounded-full  text-white  focus:outline-none focus:ring-2 focus:ring-blue-300 transition duration-300 ease-in-out transform hover:scale-105"
->
-  <FaRegEdit className="text-2xl transition text-blue-600 duration-300 ease-in-out hover:text-blue-200" />
-</button>
-
+                    onClick={() => handleRemarkEdit(currentQuestion.id)}
+                    className="ml-4 p-3 rounded-full text-white focus:outline-none focus:ring-2 focus:ring-blue-300 transition duration-300 ease-in-out transform hover:scale-105"
+                  >
+                    <FaRegEdit className="text-2xl transition text-blue-600 duration-300 ease-in-out hover:text-blue-200" />
+                  </button>
                 </div>
 
-                <div className="flex flex-wrap gap-3 mb-6">
+                <div className="flex  flex-wrap gap-3 mb-6">
                   {currentQuestion.options.split(',').map((option) => (
                     <button
                       key={option}
@@ -275,34 +296,72 @@ function Survey() {
                   ))}
                 </div>
 
-                <div>
+                <div className='h-96'>
                   {isLastQuestion ? (
                     <>
                       <div className="mt-6">
                         <h2 className="text-3xl font-bold mb-6 text-gray-800">{conclusionQuestion.question}</h2>
-                        <div className="flex flex-wrap gap-4 mb-8">
-                          {conclusionQuestion.options.split(',').map((option) => {
-                            const icons = {
-                              Approved: <FaRegThumbsUp size={24} color="#4CAF50" />,
-                              Rejected: <FaRegThumbsDown size={24} color="#F44336" />,
-                              "On Hold": <FaPause size={24} color="#FF9800" />,
-                            };
-                            return (
-                              <button
-                                key={option}
-                                onClick={() => handleOptionClick(option)}
-                                className={`flex flex-col items-center py-4 px-6 rounded-lg shadow-lg border border-gray-300 focus:outline-none transition-transform transform ${
-                                  answers[conclusionQuestion.id]?.includes(option)
-                                    ? 'bg-[#56a4ff] text-white scale-105'
-                                    : 'bg-white text-gray-700 hover:bg-teal-100'
-                                }`}
-                              >
-                                {icons[option]}
-                                <span className="mt-2 text-lg font-medium">{option}</span>
-                              </button>
-                            );
-                          })}
+                     <div className='flex flex-col '>
+                     <div className='flex flex-wrap gap-4 mb-2'>
+                          <div className="flex flex-wrap gap-4 mb-8">
+                            {conclusionQuestion.options.split(',').map((option) => {
+                              const icons = {
+                                Approved: <FaRegThumbsUp size={24} color="#4CAF50" />,
+                                Rejected: <FaRegThumbsDown size={24} color="#F44336" />,
+                                "On Hold": <FaPause size={24} color="#FF9800" />,
+                              };
+                              return (
+                                <button
+                                  key={option}
+                                  onClick={() => handleOptionClick(option)}
+                                  className={`flex flex-col items-center py-4 px-6 rounded-lg shadow-lg border border-gray-300 focus:outline-none transition-transform transform 'bg-white text-gray-700 hover:bg-teal-100`}
+                                >
+                                  {icons[option]}
+                                  <span className="mt-2 text-lg font-medium">{option}</span>
+                                </button>
+                              );
+                            })}
+                          </div>
+
+                          <div className="flex flex-wrap gap-4 mb-8">
+                            <label
+                              htmlFor="file-input"
+                              className={`flex flex-col items-center py-4 px-6 rounded-lg shadow-lg border border-gray-300 cursor-pointer ${images.length >= 4 ? 'bg-gray-300 text-gray-700 cursor-not-allowed' : 'bg-white text-gray-700 hover:bg-teal-100'}`}
+                            >
+                              <BiSolidImageAdd size={30} color="#a9a9a9" />
+                              <span className="mt-2 text-base font-medium">Add Photo</span>
+                              <input
+                                id="file-input"
+                                type="file"
+                                accept="image/*"
+                                multiple
+                                onChange={handleImageUpload}
+                                className="hidden"
+                                disabled={images.length >= 4}
+                              />
+                            </label>
+                          </div>
+
+                         
                         </div>
+                        <div className="flex  h-32 flex-wrap gap-4 mb-8">
+                          {images.length > 0 && (
+                              <div className="flex flex-wrap gap-4">
+                                {images.map((img, index) => (
+                                  <div key={index} className="relative rounded-lg shadow-lg border border-gray-300">
+                                    <img src={img} alt={`Uploaded ${index}`} className="w-32 h-32 object-cover rounded-md" />
+                                    <button
+                                      onClick={() => handleRemoveImage(index)}
+                                      className="absolute top-[-10px]   right-[-5px] bg-gray-500 text-white rounded-full p-1"
+                                    >
+<IoCloseOutline size={15} color="white" />
+                                    </button>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                     </div>
                       </div>
                     </>
                   ) : null}
@@ -366,3 +425,4 @@ function Survey() {
 }
 
 export default Survey;
+

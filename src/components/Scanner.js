@@ -1,13 +1,10 @@
 import React, { useState } from 'react';
-import { FaBarcode, FaWeightHanging, FaGem, FaInfoCircle } from 'react-icons/fa';
-import { GiCutDiamond } from 'react-icons/gi';
-import { MdColorLens } from 'react-icons/md';
 import QrReader from 'react-qr-barcode-scanner';
 import ring from "../Assets/Ring.png";
-import { faBarcode, faArrowRight } from '@fortawesome/free-solid-svg-icons';
+import {  faArrowRight } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import Scannericon from '../Assets/Qrcode.png'
-import { FaQrcode } from 'react-icons/fa';
+import { MdStart } from "react-icons/md";
 
 
 const productData = {
@@ -32,7 +29,7 @@ const productData = {
   Status: 'Approved',
 };
 
-const Scanner = ({ togglePanel }) => {
+const Scanner = ({ togglePanel,visibility,handlenext }) => {
   const [hasCamera, setHasCamera] = useState(true);
   const [code, setCode] = useState('');
   const [scannedCode, setScannedCode] = useState('');
@@ -51,7 +48,7 @@ const Scanner = ({ togglePanel }) => {
 
   return (
     <div className="w-screen min-h-screen  flex-col overflow-x-hidden md:h-screen md:max-h-screen bg-transparent md:bg-gray-100 flex items-center justify-between p-0 md:px-4 py-4">
-     <div className='flex pl-4 h-fit w-screen '>
+     <div className={ `${visibility} pl-4 h-fit w-screen`}>
        <div
           className=" p-2 bg-gray-800 text-white rounded"
           onClick={togglePanel}
@@ -59,7 +56,7 @@ const Scanner = ({ togglePanel }) => {
           <FontAwesomeIcon icon={faArrowRight} />
         </div>
        </div>   
-      <div className="w-full bg-white my-auto min-h-[82vh]  lg:max-w-4xl md:rounded-xl md:shadow-xl overflow-auto flex flex-col md:flex-row" >
+      <div className="w-full bg-white my-auto  lg:max-w-4xl md:rounded-xl md:shadow-xl overflow-auto flex flex-col md:flex-row" >
     
         <div className="w-full md:w-[40%] p-6 bg-transparent md:bg-gray-50 md:  pt-20   flex flex-col items-center justify-start">
           {hasCamera ? (
@@ -73,14 +70,14 @@ const Scanner = ({ togglePanel }) => {
             </div>
           ) : (
             <div className="h-64  w-64  bg-white flex items-center justify-center rounded-lg shadow-lg">
-              <img src={Scannericon} alt="scannergif" className='h-full w-full object-contain' />
+              <img src={Scannericon} alt="scanner" className='h-full w-full object-contain' />
             </div>
           )}
           <div className=" mt-6">
             <div className="flex items-center justify-between pr-0 bg-white border border-gray-300 rounded-lg shadow-lg overflow-hidden">
               <input
                 type="text"
-                className="p-3 w-64 text-gray-700 placeholder-gray-400 focus:outline-none"
+                className="p-3 w-full max-w-64 text-gray-700 placeholder-gray-400 focus:outline-none"
                 placeholder="Enter job ID"
                 value={scannedCode || code}
                 onChange={(e) => setCode(e.target.value)}
@@ -94,16 +91,17 @@ const Scanner = ({ togglePanel }) => {
             </div>
           </div>
         </div>
+        <div className="w-screen md:w-[60%]  h-[50rem]  flex  justify-center overflow-auto">
 
         {showDetails && ( 
-          <div className="w-screen md:w-[60%] md:p-6   flex flex-col justify-center overflow-auto">
+          <div className="md:p-6    flex flex-col justify-center ">
             <div className="text-center mb-4">
               <p className="text-gray-800 font-bold text-xl">
                 <span className="text-[#56a4ff]">{code || scannedCode} (T321)</span> For Bunty
               </p>
             </div>
-            <div className="w-full flex justify-center ">
-              <img
+            <div className="w-full flex justify-center h-full items-center ">
+            <img
                 src={productData.image}
                 alt="Product"
                 className="w-32 h-32 object-cover rounded-lg shadow-md"
@@ -151,17 +149,35 @@ const Scanner = ({ togglePanel }) => {
               </div>
               {/* <div className="bg-[rgba(227,227,227,0.2)] shadow-xl border-gray-100 p-4 rounded-lg  col-span-2"> */}
               <div className="  col-span-2">
-                <div className="flex items-center">
+               <div className='w-full h-fit flex justify-between'>
+              <div>
+              <div className="flex items-center">
                   <span className="text-sm text-gray-400">Status:</span>
                 </div>
                 <div className="mt-1 bg-green-600 rounded-md w-fit p-3 py-2">
                   <span className="text-lg text-white font-semibold">{productData.Status}</span>
                 </div>
               </div>
+              <div>
+              <div className="flex items-center">
+                  <span className="h-[1.25rem] text-white"></span>
+                </div>
+                <div className="mt-1 w-fit p-3 gap-2 py-2 bg-gradient-to-r   to-[#55a1f6] from-[#3f78ba] rounded-full shadow-lg flex items-center cursor-pointer transform transition duration-300 hover:scale-105 hover:shadow-xl"
+                onClick={handlenext}
+                >
+      <span className="text-lg text-white font-semibold">Start QC</span>
+      <MdStart size={24} className="text-white" />
+    </div>
+
+              </div>
+               </div>
+              </div>
             </div>
           </div>
         )}
+        </div>
       </div>
+      
     </div>
   );
 };
