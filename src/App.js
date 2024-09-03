@@ -13,7 +13,7 @@ const App = () => {
 <Router basename="/proqc">
   <Routes>
     <Route path="/" element={<Scanemp/>} />
-    <Route path="/ScannerPage" element={<ScannerPage />} />
+    <Route path="/ScannerPage/*" element={<ScannerPage />} />
     <Route path="/job-questions" element={<JobQuestions />} />
   </Routes>
 </Router>

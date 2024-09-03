@@ -18,10 +18,7 @@ const JobQuestions = () => {
 
   };
  
-console.log("rdState, rd1State,rd2State",
-useRecoilValue(rdState),
-useRecoilValue(rd1State),
-useRecoilValue(rd2State) );
+
   
     // useEffect(() => {
     //   const fetchData = async () => {

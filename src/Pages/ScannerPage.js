@@ -1,12 +1,21 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
 import Scanner from '../components/Scanner';
+import { useLocation, useNavigate } from "react-router-dom";
+
+const useQueryParams = () => {
+  const location = useLocation();
+  return new URLSearchParams(location.search);
+};
 
 const ScannerPage = () => {
   const navigate = useNavigate();
+  const queryParams = useQueryParams();
+    const qcID = queryParams.get('QCID');
+    console.log('qcID',qcID);
+
 
   const handleNext = () => {
-    navigate('/job-questions');
+    navigate(`/job-questions?QCID=${qcID}`);
   };
 
   return (

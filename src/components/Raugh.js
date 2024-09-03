@@ -1,11 +1,18 @@
 import React, { useState, useEffect } from 'react';
-import { FaChevronLeft, FaChevronRight, FaCheck, FaRegThumbsUp, FaRegThumbsDown, FaPause, FaQuestionCircle, FaCheckCircle, FaRegEdit } from 'react-icons/fa';
+import { FaChevronLeft, FaChevronRight, FaCheck, FaRegThumbsUp, FaRegThumbsDown, FaPause, FaEllipsisH, FaQuestionCircle, FaCheckCircle, FaRegEdit } from 'react-icons/fa';
 import { BiSolidImageAdd } from "react-icons/bi";
 import { IoCloseOutline } from "react-icons/io5";
+import { useRecoilValue } from 'recoil';
+import { rdState, rd1State, rd2State, rd5State } from '../Recoil/FetchDataComponent';
 import Question from './Question';
+import { useLocation } from "react-router-dom";
+
+const useQueryParams = () => {
+  const location = useLocation();
+  return new URLSearchParams(location.search);
+};
 
 function Survey() {
-  // State declarations...
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [answers, setAnswers] = useState({});
   const [selectedQuestions, setSelectedQuestions] = useState([]);
@@ -15,24 +22,62 @@ function Survey() {
   const [remarks, setRemarks] = useState({});
   const [editingRemark, setEditingRemark] = useState(null);
   const [images, setImages] = useState([]); 
+  const [noQuestionsAvailable, setNoQuestionsAvailable] = useState(false);
 
-  // All questions and filtered questions setup...
-  const allQuestions = Question;
-  const filteredQuestions = allQuestions.filter(q => selectedQuestions.includes(q.id));
-  const questionsToDisplay = showSelection ? allQuestions : filteredQuestions;
+  const queryParams = useQueryParams();
+  const qcID = queryParams.get('QCID');
+  console.log('qcID', qcID);
+  const questionsData = useRecoilValue(rdState);
+  const optionsData = useRecoilValue(rd1State);
+  const bindedData = useRecoilValue(rd2State);
+  const bindedQuestionsData = useRecoilValue(rd5State);
 
-  // Conclusion question setup...
+  const Questions = questionsData.length ? questionsData : JSON.parse(localStorage.getItem('rd')) || [];
+  const Options = optionsData.length ? optionsData : JSON.parse(localStorage.getItem('rd1')) || [];
+  const Binded = bindedData.length ? bindedData : JSON.parse(localStorage.getItem('rd2')) || [];
+  const BindedQuestions = bindedQuestionsData.length ? bindedQuestionsData : JSON.parse(localStorage.getItem('rd5')) || [];
+
+  const filteredBindedQuestions = BindedQuestions.filter(bq => bq.qcdeptid === Number(qcID));
+  const bindedQuestionIds = filteredBindedQuestions.flatMap(bq => bq.que.split(',').map(Number));
+
+  const filteredQuestions = Questions.filter(q => bindedQuestionIds.includes(q.id));
+
+  const QuestionOptBinded = Binded.map((bind) => {
+    const question = filteredQuestions.find(q => q.id === bind.queid);
+    if (question) {
+      const optionIds = bind.opt.split(',').map(Number);
+      const questionOptions = Options.filter(option => optionIds.includes(option.id));
+      return {
+        id: question.id,
+        question: question.que,
+        options: questionOptions.map(opt => opt.opt).join(', ')
+      };
+    }
+    return null;
+  }).filter(item => item !== null);
+
+  useEffect(() => {
+    if (QuestionOptBinded.length > 0) {
+      setNoQuestionsAvailable(false);
+      const allQuestions = QuestionOptBinded;
+      const filteredQuestionsList = allQuestions.filter(q => selectedQuestions.includes(q.id));
+      setQuestionsToDisplay(showSelection ? allQuestions : filteredQuestionsList);
+    } else {
+      setNoQuestionsAvailable(true);
+    }
+  }, [QuestionOptBinded, selectedQuestions, showSelection]);
+
+  const [questionsToDisplay, setQuestionsToDisplay] = useState([]);
+
   const conclusionQuestion = {
     id: 'conclusion',
     question: 'Conclusion',
     options: 'Approved,Rejected,On Hold',
   };
 
-  // Current question and last question setup...
   const currentQuestion = questionsToDisplay[currentQuestionIndex];
   const isLastQuestion = currentQuestionIndex === questionsToDisplay.length - 1;
 
-  // Local storage setup...
   useEffect(() => {
     const storedAnswers = JSON.parse(localStorage.getItem('answers'));
     const storedSelectedQuestions = JSON.parse(localStorage.getItem('selectedQuestions'));
@@ -51,7 +96,6 @@ function Survey() {
     }
   }, []);
 
-  // Success message timeout...
   useEffect(() => {
     if (showSuccessMessage) {
       setTimeout(() => {
@@ -63,7 +107,6 @@ function Survey() {
     }
   }, [showSuccessMessage]);
 
-  // Handle option click for regular and conclusion options...
   const handleOptionClick = (option) => {
     const selectedOptions = answers[currentQuestion.id] || [];
     const updatedOptions = selectedOptions.includes(option)
@@ -74,7 +117,6 @@ function Survey() {
     localStorage.setItem('answers', JSON.stringify(updatedAnswers));
   };
 
-  // Navigation and pagination...
   const handleNext = () => {
     if (currentQuestionIndex < questionsToDisplay.length - 1) {
       setCurrentQuestionIndex(currentQuestionIndex + 1);
@@ -102,21 +144,6 @@ function Survey() {
     }
   };
 
-  // Image upload and remove...
-  const handleImageUpload = (event) => {
-    const files = Array.from(event.target.files);
-    const newImages = files.map(file => URL.createObjectURL(file));
-    setImages(prevImages => [
-      ...prevImages,
-      ...newImages
-    ].slice(0, 4)); // Keep only the first 4 images
-  };
-
-  const handleRemoveImage = (index) => {
-    setImages(prevImages => prevImages.filter((_, i) => i !== index));
-  };
-
-  // Additional handlers...
   const handleScrollRight = () => {
     if (pageStartIndex + 5 < questionsToDisplay.length) {
       setPageStartIndex(pageStartIndex + 5);
@@ -136,6 +163,10 @@ function Survey() {
     setAnswers({});
     setRemarks({});
     setShowSuccessMessage(true);
+  };
+
+  const getSelectedCount = () => {
+    return (answers[currentQuestion.id] || []).length;
   };
 
   const handleQuestionSelectionChange = (questionId) => {
@@ -166,158 +197,178 @@ function Survey() {
   };
 
   const toggleSelectAll = () => {
-    if (selectedQuestions.length === allQuestions.length) {
+    if (selectedQuestions.length === QuestionOptBinded.length) {
       setSelectedQuestions([]);
     } else {
-      setSelectedQuestions(allQuestions.map(q => q.id));
+      setSelectedQuestions(QuestionOptBinded.map(q => q.id));
     }
   };
 
-  const getSelectedCount = () => {
-    return (answers[currentQuestion.id] || []).length;
+  const handleImageUpload = (event) => {
+    const files = Array.from(event.target.files);
+    const newImages = files.map(file => URL.createObjectURL(file));
+    setImages(prevImages => [
+      ...prevImages,
+      ...newImages
+    ].slice(0, 4)); 
+  };
+
+  const handleRemoveImage = (index) => {
+    setImages(prevImages => prevImages.filter((_, i) => i !== index));
   };
 
   const currentQuestionNumber = currentQuestionIndex + 1;
   const totalQuestions = selectedQuestions.length;
 
-  // Icon color mapping for conclusion options
-  const conclusionOptionStyles = {
-    Approved: "border-green-500 text-green-500",
-    Rejected: "border-red-500 text-red-500",
-    "On Hold": "border-yellow-500 text-yellow-500",
-  };
-
   return (
-    <div className="flex flex-col lg:flex-row max-w-screen w-full lg:w-[60vw]  mb-5 md:mb-5 h-fit  overflow-auto mx-auto p-6 bg-white shadow-md rounded-lg">
-      {showSuccessMessage ? (
-        <div className="flex-1  flex flex-col items-center justify-center p-6 bg-green-100 rounded-lg shadow-md">
-          <div className='h-64'></div>
-          <FaCheck className="text-green-500 mb-4" size={40} />
-          <h2 className="text-2xl font-semibold mb-2">Answers Submitted Successfully!</h2>
-          <p className="text-gray-700">Thank you.</p>
-          <div className='h-64'></div>
-        </div>
-      ) : (
-        <div className="flex w-full flex-col lg:flex-row lg:pr-4">
-          <div className="flex-1">
-            {showSelection ? (
-<></>            ) : (
-              <>
-                <div className="flex items-center mb-6">
-                  <div className="text-lg font-semibold mr-4 text-[#39aa78]" >
-                    {currentQuestionNumber}/{totalQuestions}
-                  </div>
-                  <h2 className="text-2xl flex-1">{currentQuestion.question}</h2>
+    <div className="flex flex-col lg:flex-row max-w-screen w-full  lg:w-[60vw]  mb-5 md:mb-5 h-fit  overflow-auto mx-auto p-6 bg-white shadow-md rounded-lg">
+      <div className="flex-grow">
+        {noQuestionsAvailable ? (
+          <div>No Questions Available</div>
+        ) : (
+          <div>
+            {questionsToDisplay.length > 0 && (
+              <div className="flex flex-col lg:flex-row mb-4">
+                <div className="flex-none lg:w-32 lg:mr-4">
                   <button
-                    onClick={() => handleRemarkEdit(currentQuestion.id)}
-                    className="ml-4 p-3 rounded-full text-white focus:outline-none focus:ring-2 focus:ring-blue-300 transition duration-300 ease-in-out transform hover:scale-105"
-                  >
-                    <FaRegEdit className="text-2xl transition text-blue-600 duration-300 ease-in-out hover:text-blue-200" />
-                  </button>
-                </div>
-
-                <div className="flex  flex-wrap gap-3 mb-6">
-                  {currentQuestion.options.split(',').map((option) => (
-                    <button
-                      key={option}
-                      onClick={() => handleOptionClick(option)}
-                      className={`py-2 px-4 rounded-full shadow-md border border-gray-300 focus:outline-none ${
-                        answers[currentQuestion.id]?.includes(option)
-                          ? `bg-[#56a4ff] text-white ${conclusionOptionStyles[option]}` // Apply dynamic border color
-                          : 'bg-white text-gray-700 hover:bg-teal-100'
-                      }`}
-                    >
-                      {option}
-                    </button>
-                  ))}
-                </div>
-
-                {editingRemark === currentQuestion.id ? (
-                  <div className="mb-4">
-                    <textarea
-                      value={remarks[currentQuestion.id] || ''}
-                      onChange={(e) => handleRemarkChange(currentQuestion.id, e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-300"
-                      rows="4"
-                    />
-                    <div className="flex justify-end mt-2">
-                      <button
-                        onClick={() => handleRemarkSave(currentQuestion.id)}
-                        className="px-4 py-2 bg-blue-500 text-white rounded-full shadow-md focus:outline-none hover:bg-blue-600 transition duration-300 ease-in-out transform hover:scale-105"
-                      >
-                        Save
-                      </button>
-                    </div>
-                  </div>
-                ) : remarks[currentQuestion.id] ? (
-                  <div className="mb-4 p-3 bg-gray-100 rounded-lg shadow-inner">
-                    <p className="text-gray-700">{remarks[currentQuestion.id]}</p>
-                  </div>
-                ) : null}
-
-                <div className="flex justify-between">
-                  <button
+                    className="bg-gray-200 text-gray-800 px-4 py-2 rounded-lg"
                     onClick={handlePrevious}
                     disabled={currentQuestionIndex === 0}
-                    className="p-3 rounded-full text-white focus:outline-none focus:ring-2 focus:ring-blue-300 transition duration-300 ease-in-out transform hover:scale-105"
                   >
-                    <FaChevronLeft className="text-xl transition duration-300 ease-in-out hover:text-blue-600" />
+                    <FaChevronLeft />
                   </button>
-                  {isLastQuestion && !showSuccessMessage && (
-                    <button
-                      onClick={handleSubmit}
-                      className="px-4 py-2 bg-blue-500 text-white rounded-full shadow-md focus:outline-none hover:bg-blue-600 transition duration-300 ease-in-out transform hover:scale-105"
-                    >
-                      Submit
-                    </button>
-                  )}
                   <button
+                    className="bg-gray-200 text-gray-800 px-4 py-2 rounded-lg ml-2"
                     onClick={handleNext}
                     disabled={isLastQuestion}
-                    className="p-3 rounded-full text-white focus:outline-none focus:ring-2 focus:ring-blue-300 transition duration-300 ease-in-out transform hover:scale-105"
                   >
-                    <FaChevronRight className="text-xl transition duration-300 ease-in-out hover:text-blue-600" />
+                    <FaChevronRight />
                   </button>
                 </div>
-              </>
-            )}
-          </div>
-          {!showSelection && (
-            <div className="flex-1 flex flex-col items-center justify-center bg-gray-100 p-6 rounded-lg shadow-md">
-              <div className="flex justify-center items-center w-48 h-48 mb-4 rounded-full bg-gray-200 cursor-pointer overflow-hidden relative">
-                <label className="cursor-pointer absolute inset-0 flex items-center justify-center">
-                  {images.length === 0 ? (
-                    <BiSolidImageAdd className="text-gray-400 text-4xl" />
+                <div className="flex-grow">
+                  {showSelection ? (
+                    <div className="mb-4">
+                      {QuestionOptBinded.map(q => (
+                        <div key={q.id} className="border p-4 mb-4 rounded-lg">
+                          <h3 className="text-lg font-semibold">{q.question}</h3>
+                          <div>
+                            {q.options.split(', ').map(option => (
+                              <label key={option} className="block">
+                                <input
+                                  type="checkbox"
+                                  checked={selectedQuestions.includes(q.id)}
+                                  onChange={() => handleQuestionSelectionChange(q.id)}
+                                />
+                                {option}
+                              </label>
+                            ))}
+                          </div>
+                        </div>
+                      ))}
+                      <button
+                        onClick={toggleSelectAll}
+                        className="bg-blue-500 text-white px-4 py-2 rounded-lg mt-4"
+                      >
+                        {selectedQuestions.length === QuestionOptBinded.length ? 'Deselect All' : 'Select All'}
+                      </button>
+                    </div>
                   ) : (
-                    images.map((image, index) => (
-                      <div key={index} className="relative">
-                        <img
-                          src={image}
-                          alt={`Uploaded ${index}`}
-                          className="w-48 h-48 rounded-full object-cover"
-                        />
-                        <button
-                          onClick={() => handleRemoveImage(index)}
-                          className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 focus:outline-none"
-                        >
-                          <IoCloseOutline />
-                        </button>
-                      </div>
-                    ))
+                    <div>
+                      {currentQuestion && (
+                        <div>
+                          <h2 className="text-xl font-bold mb-2">{currentQuestion.question}</h2>
+                          <div className="mb-4">
+                            {currentQuestion.options.split(', ').map(option => (
+                              <button
+                                key={option}
+                                className={`bg-gray-200 text-gray-800 px-4 py-2 rounded-lg mr-2 mb-2 ${
+                                  (answers[currentQuestion.id] || []).includes(option) ? 'bg-blue-500 text-white' : ''
+                                }`}
+                                onClick={() => handleOptionClick(option)}
+                              >
+                                {option}
+                              </button>
+                            ))}
+                          </div>
+                          <div className="mb-4">
+                            <label htmlFor="remark" className="block mb-2 text-lg font-semibold">Remarks:</label>
+                            {editingRemark === currentQuestion.id ? (
+                              <div className="flex items-center">
+                                <input
+                                  type="text"
+                                  value={remarks[currentQuestion.id] || ''}
+                                  onChange={(e) => handleRemarkChange(currentQuestion.id, e.target.value)}
+                                  className="border px-2 py-1 rounded-lg"
+                                />
+                                <button
+                                  onClick={() => handleRemarkSave(currentQuestion.id)}
+                                  className="bg-green-500 text-white px-4 py-2 rounded-lg ml-2"
+                                >
+                                  Save
+                                </button>
+                                <button
+                                  onClick={() => setEditingRemark(null)}
+                                  className="bg-red-500 text-white px-4 py-2 rounded-lg ml-2"
+                                >
+                                  Cancel
+                                </button>
+                              </div>
+                            ) : (
+                              <div className="flex items-center">
+                                <span className="flex-grow">{remarks[currentQuestion.id]}</span>
+                                <button
+                                  onClick={() => handleRemarkEdit(currentQuestion.id)}
+                                  className="bg-yellow-500 text-white px-4 py-2 rounded-lg"
+                                >
+                                  Edit
+                                </button>
+                              </div>
+                            )}
+                          </div>
+                          <div className="mb-4">
+                            <label htmlFor="images" className="block mb-2 text-lg font-semibold">Upload Images:</label>
+                            <input
+                              type="file"
+                              id="images"
+                              accept="image/*"
+                              multiple
+                              onChange={handleImageUpload}
+                              className="block"
+                            />
+                            <div className="flex mt-2">
+                              {images.map((image, index) => (
+                                <div key={index} className="relative">
+                                  <img src={image} alt={`Uploaded ${index}`} className="w-20 h-20 object-cover rounded-lg mr-2" />
+                                  <button
+                                    onClick={() => handleRemoveImage(index)}
+                                    className="absolute top-0 right-0 bg-red-500 text-white rounded-full p-1"
+                                  >
+                                    <IoCloseOutline />
+                                  </button>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
                   )}
-                </label>
-                <input
-                  type="file"
-                  accept="image/*"
-                  multiple
-                  onChange={handleImageUpload}
-                  className="hidden"
-                />
+                </div>
               </div>
+            )}
+            <div className="flex justify-between items-center">
+              <button
+                onClick={handleSubmit}
+                className="bg-green-500 text-white px-4 py-2 rounded-lg"
+                disabled={showSelection || questionsToDisplay.length === 0}
+              >
+                Submit
+              </button>
+              {showSuccessMessage && <p className="text-green-500">Survey submitted successfully!</p>}
             </div>
-          )}
-        </div>
-      )}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

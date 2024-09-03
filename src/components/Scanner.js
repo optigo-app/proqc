@@ -5,7 +5,7 @@ import {  faArrowRight } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import Scannericon from '../Assets/Qrcode.png'
 import { MdStart } from "react-icons/md";
-
+import './Sacnner.css'
 
 const productData = {
   jobid: '1/14804',
@@ -69,9 +69,13 @@ const Scanner = ({ togglePanel,visibility,handlenext }) => {
               />
             </div>
           ) : (
-            <div className="h-64  w-64  bg-white flex items-center justify-center rounded-lg shadow-lg">
-              <img src={Scannericon} alt="scanner" className='h-full w-full object-contain' />
-            </div>
+            <div className="h-64 w-64 bg-white flex items-center justify-center rounded-lg shadow-lg relative overflow-hidden">
+      <img src={Scannericon} alt="scanner" className="h-full w-full object-contain" />
+      
+      <div className="absolute top-0 left-0 w-full h-full">
+        <div className="w-full h-2 bg-red-500 animate-scanner-line"></div>
+      </div>
+    </div>
           )}
           <div className=" mt-6">
             <div className="flex items-center justify-between pr-0 bg-white border border-gray-300 rounded-lg shadow-lg overflow-hidden">
