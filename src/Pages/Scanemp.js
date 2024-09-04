@@ -83,7 +83,7 @@ console.log("YearCodeState",yc);
           setIsModalOpen(true);
         } else if (filteredQcdeptNames.length === 1) {
           const qcdeptId = filteredQcdeptIds[0];
-          navigate(`/ScannerPage?QCID=${qcdeptId}`);
+          navigate(`/ScannerPage?QCID=${qcdeptId}&empbarcode=${barcode}`);
         }
       })
       .catch((error) => {
@@ -93,7 +93,7 @@ console.log("YearCodeState",yc);
   
   
   const handlebuttonclick = (qcdeptId) => {
-    navigate(`/ScannerPage?QCID=${qcdeptId}`);
+    navigate(`/ScannerPage?QCID=${qcdeptId}&empbarcode=${barcode}`);
   }
   
 

@@ -154,9 +154,9 @@ const handleScrollLeft = () => {
 
 const handleSubmit = () => {
   const dataToSave = {
-    empid: "empp0054", // Replace with the actual employee ID
-    QCdeptId: qcID,    // Using the QC ID from the query parameter
-    jobid: "1/107643", // Replace with the actual job ID
+    empid: "empp0054", 
+    QCdeptId: qcID,   
+    jobid: "1/107643", 
   };
 
   selectedQuestions.forEach((questionId) => {
@@ -170,12 +170,11 @@ const handleSubmit = () => {
     };
   });
 
-  dataToSave.Conclusion = answers[conclusionQuestion.id] ? answers[conclusionQuestion.id][0] : ''; // Assuming only one conclusion can be selected
+  dataToSave.Conclusion = answers[conclusionQuestion.id] ? answers[conclusionQuestion.id][0] : ''; 
   dataToSave.Image = images.join(',');
 
   localStorage.setItem('surveyData', JSON.stringify(dataToSave));
 
-  // Clear local storage and state
   localStorage.removeItem('answers');
   localStorage.removeItem('selectedQuestions');
   localStorage.removeItem('remarks');
@@ -241,6 +240,8 @@ const handleRemoveImage = (index) => {
 const currentQuestionNumber = currentQuestionIndex + 1;
 const totalQuestions = selectedQuestions.length;
 
+
+console.log("allQuestions",allQuestions);
 return (
   <div className="flex flex-col lg:flex-row max-w-screen w-full  lg:w-[60vw]  mb-5 md:mb-5 h-fit  overflow-auto mx-auto p-6 bg-white shadow-md rounded-lg">
     {showSuccessMessage ? (<div className="flex-1  flex flex-col items-center justify-center p-6 bg-green-100 rounded-lg shadow-md">
@@ -251,10 +252,11 @@ return (
         <p className="text-gray-700">Thank you.</p>
         <div className='h-64'></div>
         </div>
-    ) : hasQuestions ? (
+    ) : hasQuestions  && allQuestions.length === 1 ? ( 
+      
       <div className="flex w-full flex-col lg:flex-row lg:pr-4">
         <div className="flex-1">
-          {showSelection ? (
+          {showSelection && allQuestions.length > 1? (
             <div className="flex flex-col mb-2  p-4 pt-0">
               <div className='flex flex-row w-full justify-between'>
                 <h2 className="text-3xl font-semibold mb-6 text-[#56a4ff] flex items-center">
@@ -504,18 +506,10 @@ return (
 
     )}
   </div>
-);
-}
+);  
+}                                         
 
 export default Survey;
 
-// empid: "empp0054",
-// QCdeptId: "1", 
-// jobid: "1/107643",
-// Status:"Approved",
-// How satisfied are you with the craftsmanship?: {options: " Extremely Satisfied, Not Applicable, Approved", Remark: ""}
-// How would you rate the overall quality of the jewelry?:{options: "Excellent, Very Good, Above Average", Remark: ""}
-// Image:"blob:http://localhost:3000/038f5dce-6f2a-4748-90df-5116f4fdcf87,blob:http://localhost:3000/0cf1b0fc-7f13-495c-a616-efbee2df4996,blob:http://localhost:3000/4dd64b82-f66e-4729-9973-3332be8c35ae,blob:http://localhost:3000/ecfe2931-a853-4680-9e39-1f4430c889ad"
-// QCdeptId:"1"
-// empid:"empp0054"
-// jobid:"1/107643"
+
+// in this code if allQuestions.length == 1 then there will be no question selection question selection will be only when more than 1 questions 
