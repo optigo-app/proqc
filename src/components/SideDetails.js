@@ -1,85 +1,23 @@
-// import React from 'react';
-// import img from "../Assets/Ring.png";
-
-// const SideDetails = () => {
-//   const productDetails = {
-//     jobId: '1/265009 [1H572] for EG302',
-//     goldType: 'GOLD 22K(Yellow)',
-//     grossWt: '5.000',
-//     metalWt: '5.000',
-//     productType: '2',
-//     category: 'Necklace',
-//     hallmark: 'With HallMark',
-//     imageUrl: img,
-//   };
-
-//   return (
-//     <div className="w-full p-2  px-6 border bg-[#f4f4f4] justify-between shadow-lg flex  md:flex-row items-center transform transition-transform duration-300 " style={{alignItems:'center'}}>
-//      <div className='flex flex-col gap-2'>
-//      <div className='flex flex-row h-full items-center'>
-//      <div className="text-center mb-4 md:mb-0 md:mr-6 h-full flex items-center  ">
-//         <p className="text-xl font-semibold  text-[#266731]">   
-//           {productDetails.jobId}
-//         </p>
-//       </div>
-//       <div className=" text-center  mb-4 md:mb-0 md:mr-6 ">
-//         <p className="text-black font-semibold">{productDetails.goldType}</p>
-//       </div>
-//      </div>
-//      <ul className="space-y-2 text-sm text-[#444] flex flex-col md:flex-row md:space-x-6 md:space-y-0">
-//   <div className="flex flex-wrap gap-4 md:gap-6">
-//     <li className="text-gray-600 flex items-center gap-2">
-//       Gross Wt: <span className="font-semibold text-lg">{productDetails.grossWt}</span>
-//     </li>
-//     <li className="text-gray-600 flex items-center gap-2">
-//       Metal Wt: <span className="font-semibold text-lg">{productDetails.metalWt}</span>
-//     </li>
-//     <li className="text-gray-600 flex items-center gap-2">
-//       Product Type: <span className="font-semibold text-lg">{productDetails.productType}</span>
-//     </li>
-//     <li className="text-gray-600 flex items-center gap-2">
-//       Category: <span className="font-semibold text-lg">{productDetails.category}</span>
-//     </li>
-//     <li className="text-gray-600 flex items-center gap-2">
-//       HallMark: <span className="font-semibold text-lg">{productDetails.hallmark}</span>
-//     </li>
-//   </div>
-// </ul>
-
-//      </div>
-//       <div className="mt-4 md:mt-0 md:ml-6 text-center">
-//         <img
-//           src={productDetails.imageUrl}
-//           alt="Product"
-//           className="w-20 h-20 object-contain mx-auto rounded-lg shadow-md"
-//         />
-//       </div>
-//     </div>
-//   );
-// };
-
-// export default SideDetails;
-
-
-
 import React, { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import axios from 'axios';
-import { faBarcode, faArrowRight } from '@fortawesome/free-solid-svg-icons';
+import { faArrowRight } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-
+import { useRecoilValue } from 'recoil';
+import { UploadLogicalPathState, ukeyState } from '../Recoil/FetchDataComponent';
 
 const useQueryParams = () => {
   const location = useLocation();
   return new URLSearchParams(location.search);
 };
 
-const SideDetails = ({togglepanel}) => {
+const SideDetails = ({ togglepanel }) => {
   const [data, setData] = useState([]);
   const queryParams = useQueryParams();
-  const qcID = queryParams.get('QCID');
   const empcode = queryParams.get('empbarcode');
   const jobid = queryParams.get('jobid');
+  const imglink = useRecoilValue(UploadLogicalPathState) || localStorage.getItem('UploadLogicalPath');
+  const ukeylink = useRecoilValue(ukeyState) || localStorage.getItem('ukey');
 
   useEffect(() => {
     const localStorageData = localStorage.getItem('JobData');
@@ -105,7 +43,8 @@ const SideDetails = ({togglepanel}) => {
         dp: JSON.stringify({
           empbarcode: empcode,
           Jobno: jobid,
-          Customerid: "10"
+          Customerid: "10",
+          eventid: "1"
         })
       }, {
         headers: {
@@ -131,93 +70,83 @@ const SideDetails = ({togglepanel}) => {
   };
 
   const productData = data[0];
+  const fulllink = productData && imglink && ukeylink ? `${imglink}/${ukeylink}${productData.imgpath}` : '';
+  const metaltype = productData?.MetalType1?.split(' ')[0] ?? "";
 
   return (
-    <>
-      <div className='flex flex-col'>
-      <div className='w-full pb-0 p-3'>
-       <button
-          className="p-2 bg-gray-800 text-white rounded"
+    <div className="flex flex-col w-full p-4  transform transition-all duration-300 ease-in-out">
+      <div className="flex justify-between items-center mb-4">
+        <h3 className="text-lg font-bold text-gray-700">Job Details</h3>
+        <button
+          className="p-2 bg-gray-500 text-white rounded"
           onClick={togglepanel}
         >
           <FontAwesomeIcon icon={faArrowRight} />
         </button>
-       </div>
-        {productData ? (
-          <div className="md:p-6 pt-0 flex flex-col justify-center">
-            <div className="text-center mb-4">
-              <p className="text-gray-800 font-bold text-xl">
-                <span className="text-[#56a4ff]">{productData.jobserialno} ({productData.designno})</span> For {productData.CustomerCode}
-              </p>
-            </div>
+      </div>
 
-            <div className="grid w-screen md:w-auto px-2 md:mt-auto grid-cols-2 gap-4">
-              <div className="bg-[rgba(227,227,227,0.5)] shadow-xl border-gray-100 p-4 rounded-lg">
-                <div className="flex items-center">
-                  <span className="text-sm text-gray-400">Gross Wt:</span>
-                </div>
-                <div className="mt-0">
-                  <span className="text-xl text-[#56a4ff] font-semibold">{productData.GrossWeightgm}</span>
-                  <div className="text-xs text-gray-500">{productData.estmatedGrossWt || '0'}</div>
-                </div>
-              </div>
-              <div className="bg-[rgba(227,227,227,0.5)] shadow-xl border-gray-100 p-4 rounded-lg">
-                <div className="flex items-center">
-                  <span className="text-sm text-gray-400">Net Weight:</span>
-                </div>
-                <div className="mt-0">
-                  <span className="text-xl text-[#56a4ff] font-semibold">{productData.NetWtgm}</span>
-                  <div className="text-xs text-gray-500">{productData.estmatedNetWt || '0'}</div>
-                </div>
-              </div>
-              <div className="bg-[rgba(227,227,227,0.5)] shadow-xl border-gray-100 p-4 rounded-lg">
-                <span className="text-sm text-gray-400">Diamond:</span>
-                <div className="mt-0">
-                  <span className="text-xl text-[#56a4ff] font-semibold">{productData.Diamond_actualctw} | {productData.Diamond_actualpcsused}</span>
-                  <div className="text-xs text-gray-500">{productData.estmatedDiamondctw || '0'} | {productData.estmatedDiamondpcs || '0'}</div>
-                </div>
-              </div>
-              <div className="bg-[rgba(227,227,227,0.5)] shadow-xl border-gray-100 p-4 rounded-lg">
-                <span className="text-sm text-gray-400">Colorstone:</span>
-                <div className="mt-0">
-                  <span className="text-xl text-[#56a4ff] font-semibold">{productData.ColorStone_actualctw} | {productData.ColorStone_actualpcsused}</span>
-                  <div className="text-xs text-gray-500">{productData.estmatedColorstonectw || '0'} | {productData.estmatedcolorstonepcs || '0'}</div>
-                </div>
-              </div>
-              <div className="bg-[rgba(227,227,227,0.5)] shadow-xl border-gray-100 p-4 rounded-lg">
-                <span className="text-sm text-gray-400">Misc:</span>
-                <div className="mt-0">
-                  <span className="text-xl text-[#56a4ff] font-semibold">{productData.Misc_actualctw} | {productData.Misc_actualpcsused}</span>
-                  <div className="text-xs text-gray-500">{productData.estmatedMiscctw || '0'} | {productData.estmatedMiscPcs || '0'}</div>
-                </div>
-              </div>
+      {productData ? (
+        <div className="space-y-6">
+          <div className="text-center">
+            <p className="text-xl font-semibold text-gray-800">
+              {productData.jobserialno} ({productData.designno}) for <span className="text-blue-500">{productData.CustomerCode}</span>
+            </p>
+          </div>
+          <div className="w-full flex justify-center mb-4">
+            <img
+              src={fulllink}
+              alt="Product"
+              className="w-40 h-40 object-cover rounded-lg shadow-lg"
+            />
+          </div>
+          <div className="text-center">
+            <p className="text-lg font-semibold text-gray-600">
+              {productData.MetalType} {productData.MetalColor} <span className="text-blue-500">{metaltype}</span>
+            </p>
+          </div>
 
-              <div className="col-span-2">
-                <div className="w-full h-fit flex justify-between">
-                  <div>
-                    <div className="flex items-center">
-                      <span className="text-sm text-gray-400">Status:</span>
-                    </div>
-                    <div className="mt-1 bg-green-600 rounded-md w-fit p-3 py-2">
-                      <span className="text-lg text-white font-semibold">{productData.qccurrentstatus}</span>
-                    </div>
-                  </div>
-                  <div>
-                    <div className="flex items-center">
-                      <span className="h-[1.25rem] text-white"></span>
-                    </div>
-                  </div>
-                </div>
+          <div className="grid grid-cols-2 gap-4">
+            {[
+              { label: "Gross Wt", value: productData.GrossWeightgm, subValue: productData.estmatedGrossWt || '0' },
+              { label: "Net Wt", value: productData.NetWtgm, subValue: productData.estmatedNetWt || '0' },
+              { label: "Diamond", value: `${productData.Diamond_actualctw} | ${productData.Diamond_actualpcsused}`, subValue: `${productData.estmatedDiamondctw || '0'} | ${productData.estmatedDiamondpcs || '0'}` },
+              { label: "Colorstone", value: `${productData.ColorStone_actualctw} | ${productData.ColorStone_actualpcsused}`, subValue: `${productData.estmatedColorstonectw || '0'} | ${productData.estmatedcolorstonepcs || '0'}` },
+              { label: "Misc", value: `${productData.Misc_actualctw} | ${productData.Misc_actualpcsused}`, subValue: `${productData.estmatedMiscctw || '0'} | ${productData.estmatedMiscPcs || '0'}` },
+            ].map((item, idx) => (
+              <div key={idx} className="p-4 bg-gray-50 border rounded-lg shadow-sm">
+                <span className="block text-sm text-gray-400">{item.label}:</span>
+                <span className="block text-lg font-semibold text-blue-500">{item.value}</span>
+                <span className="block text-xs text-gray-500">{item.subValue}</span>
               </div>
+            ))}
+          </div>
+
+          <div className="mt-6">
+            <div className="flex justify-between items-center">
+              <span className="text-sm text-gray-400">Status:</span>
+              <span
+                className={`px-4 py-2 rounded-md text-white font-semibold ${
+                  productData.qccurrentstatus.toLowerCase() === 'approved'
+                    ? 'bg-green-600'
+                    : productData.qccurrentstatus.toLowerCase() === 'rejected'
+                    ? 'bg-red-600'
+                    : productData.qccurrentstatus.toLowerCase() === 'pending'
+                    ? 'bg-yellow-500'
+                    : 'bg-gray-300'
+                }`}
+              >
+                {productData.qccurrentstatus}
+              </span>
             </div>
           </div>
-        ) : (
-          <p>Loading...</p>
-        )}
-      </div>
-    </>
+        </div>
+      ) : (
+        <div className='w-96 h-full flex justify-center'>
+          <p>No Data Available</p>
+        </div>
+      )}
+    </div>
   );
 };
 
 export default SideDetails;
-

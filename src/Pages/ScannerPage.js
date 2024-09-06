@@ -32,7 +32,9 @@ const ScannerPage = () => {
           dp: JSON.stringify({
             empbarcode: empcode,
             Jobno: barcode,
-            Customerid: "10"
+            Customerid: "10",
+          eventid:"1"
+
           })
         }, {
           headers: {

@@ -1,22 +1,23 @@
-
-
 import React, { useState, useEffect } from 'react';
 import { FaRegQuestionCircle, FaChevronLeft, FaChevronRight, FaCheck, FaRegThumbsUp, FaRegThumbsDown, FaPause, FaEllipsisH, FaQuestionCircle, FaCheckCircle, FaRegEdit } from 'react-icons/fa';
 import { BiSolidImageAdd } from "react-icons/bi";
 import { IoCloseOutline } from "react-icons/io5";
 import { useRecoilValue } from 'recoil';
 import { rdState, rd1State, rd2State,rd5State } from '../Recoil/FetchDataComponent';
-import Question from './Question';
 import { TbMoodEmpty } from "react-icons/tb";
-
-import { useLocation, useNavigate } from "react-router-dom";
+import { Link } from 'react-router-dom';
+import { faBarcode, faArrowRight } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { useLocation,useNavigate } from "react-router-dom";
 
 const useQueryParams = () => {
 const location = useLocation();
 return new URLSearchParams(location.search);
 };
 
+
 function Survey() {
+  const navigate = useNavigate();
 const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
 const [answers, setAnswers] = useState({});
 const [selectedQuestions, setSelectedQuestions] = useState([]);
@@ -29,6 +30,7 @@ const [images, setImages] = useState([]);
 
 const queryParams = useQueryParams();
 const qcID = queryParams.get('QCID');
+const empbarcode = queryParams.get('empbarcode');
 console.log('qcID',qcID);
 const questionsData = useRecoilValue(rdState);
 const optionsData = useRecoilValue(rd1State);
@@ -70,6 +72,28 @@ const conclusionQuestion = {
   question: 'Conclusion',
   options: 'Approved,Rejected,On Hold',
 };
+const [selectedConclusion, setSelectedConclusion] = useState(null);
+
+const Conclusion =
+[{id:'1',status:'Approved',icon:'FaRegThumbsUp',iconcolor:'#4CAF50',bgcolor:'#4CAF5030 '},
+{id:'2',status:'Rejected',icon:'FaRegThumbsDown',iconcolor:'#F44336',bgcolor:'#F4433630'},  
+{id:'3',status:'On Hold',icon:'FaPause',iconcolor:'#FF9800',bgcolor:'#FF980030 '},]
+const getIconComponent = (iconName) => {
+  switch (iconName) {
+    case 'FaRegThumbsUp':
+      return <FaRegThumbsUp size={24} color="#4CAF50" />;
+    case 'FaRegThumbsDown':
+      return <FaRegThumbsDown size={24} color="#F44336" />;
+    case 'FaPause':
+      return <FaPause size={24} color="#FF9800" />;
+    default:
+      return null;
+  }
+};
+const handleConclusionClick = (status, bgcolor) => {
+  setSelectedConclusion(status);
+};
+
 
 const currentQuestion = questionsToDisplay[currentQuestionIndex];
 const isLastQuestion = currentQuestionIndex === questionsToDisplay.length - 1;
@@ -99,7 +123,7 @@ useEffect(() => {
       setCurrentQuestionIndex(0);
       setPageStartIndex(0);
       setShowSelection(true);
-    }, 3000);
+    }, 10000);
   }
 }, [showSuccessMessage]);
 
@@ -244,14 +268,28 @@ const totalQuestions = selectedQuestions.length;
 console.log("allQuestions",allQuestions);
 return (
   <div className="flex flex-col lg:flex-row max-w-screen w-full  lg:w-[60vw]  mb-5 md:mb-5 h-fit  overflow-auto mx-auto p-6 bg-white shadow-md rounded-lg">
-    {showSuccessMessage ? (<div className="flex-1  flex flex-col items-center justify-center p-6 bg-green-100 rounded-lg shadow-md">
+    {showSuccessMessage ? (
+    <>
+      <div className="flex-1  flex flex-col items-center justify-center p-6 bg-green-100 rounded-lg shadow-md">
       <div className='h-64'></div>
         <FaCheck className="text-green-500 mb-4" size={40} />
       
         <h2 className="text-2xl font-semibold mb-2">Answers Submitted Successfully!</h2>
-        <p className="text-gray-700">Thank you.</p>
+        <p className="text-gray-700 text-center mb-6">Thank you.</p>
+        <button
+     className="flex items-center justify-center px-6 py-3 bg-green-600 text-white text-lg font-semibold rounded-full shadow-md hover:bg-green-700 transition-colors duration-300"
+     onClick={() => navigate(`/Scannerpage?QCID=${qcID}&empbarcode=${empbarcode}`)}
+   >
+     <FontAwesomeIcon icon={faArrowRight} className="mr-2" />
+     Continue
+   </button>
         <div className='h-64'></div>
         </div>
+
+
+
+    </>
+ 
     ) : hasQuestions  && allQuestions.length === 1 ? ( 
       
       <div className="flex w-full flex-col lg:flex-row lg:pr-4">
@@ -283,10 +321,6 @@ return (
                   <span className="text-lg">{q.question}</span>
                 </div>
               ))}
-
-
-
-
 
               <button
                 onClick={() => setShowSelection(false)}
@@ -367,7 +401,7 @@ return (
                   >
                     {option}
                   </button>
-                ))}
+                ))}       
               </div>
 
               <div className='h-96'>
@@ -377,30 +411,32 @@ return (
                       <h2 className="text-3xl font-bold mb-6 text-gray-800">{conclusionQuestion.question}</h2>
                    <div className='flex flex-col '>
                    <div className='flex flex-wrap gap-4 mb-2'>
-                        <div className="flex flex-wrap gap-4 mb-8">
-                          {conclusionQuestion.options.split(',').map((option) => {
-                            const icons = {
-                              Approved: <FaRegThumbsUp size={24} color="#4CAF50" />,
-                              Rejected: <FaRegThumbsDown size={24} color="#F44336" />,
-                              "On Hold": <FaPause size={24} color="#FF9800" />,
-                            };
-                            return (
-                              <button
-                                key={option}
-                                onClick={() => handleOptionClick(option)}
-                                className={`flex flex-col items-center py-4 px-6 rounded-lg shadow-lg border border-gray-300 focus:outline-none transition-transform transform 'bg-white text-gray-700 hover:bg-teal-100`}
-                              >
-                                {icons[option]}
-                                <span className="mt-2 text-lg font-medium">{option}</span>
-                              </button>
-                            );
-                          })}
-                        </div>
+                   <div className="flex flex-wrap gap-4 mb-5">
+                   {Conclusion.map((item) => (
+        <button
+          key={item.id}
+          onClick={() => handleConclusionClick(item.status, item.bgcolor)}
+          style={{
+            backgroundColor: selectedConclusion === item.status ? item.bgcolor : 'white',
+            color: item.iconcolor,
+            border: `1px solid ${item.iconcolor}`, 
+          }}
+          className={`flex flex-col items-center py-4 px-6 rounded-lg shadow-lg border border-gray-300 focus:outline-none transition-transform transform ${
+            selectedConclusion === item.status ? 'bg-opacity-80' : 'bg-opacity-100'
+          } `}
+         
+        >
+          {getIconComponent(item.icon)}
+          <span className="mt-2 text-lg font-medium">{item.status}</span>
+        </button>
+      ))}
+    </div>
+                        
 
-                        <div className="flex flex-wrap gap-4 mb-8">
+                        <div className="flex flex-wrap gap-4 mb-5">
                           <label
                             htmlFor="file-input"
-                            className={`flex flex-col items-center py-4 px-6 rounded-lg shadow-lg border border-gray-300 cursor-pointer ${images.length >= 4 ? 'bg-gray-300 text-gray-700 cursor-not-allowed' : 'bg-white text-gray-700 hover:bg-teal-100'}`}
+                            className={`flex flex-col items-center py-4 px-6 rounded-lg shadow-lg border border-gray-300 cursor-pointer ${images.length >= 4 ? 'bg-gray-300 text-gray-700 cursor-not-allowed' : 'bg-white text-gray-700 hover:bg-gray-100'}`}
                           >
                             <BiSolidImageAdd size={30} color="#a9a9a9" />
                             <span className="mt-2 text-base font-medium">Add Photo</span>
@@ -512,4 +548,4 @@ return (
 export default Survey;
 
 
-// in this code if allQuestions.length == 1 then there will be no question selection question selection will be only when more than 1 questions 
+//  in this code 

@@ -2,7 +2,6 @@ import axios from 'axios';
 import { atom, useRecoilState } from 'recoil';
 import { useEffect } from 'react';
 
-// Recoil atoms
 export const rdState = atom({
   key: 'rdState',
   default: [],
@@ -34,7 +33,16 @@ export const rd5State = atom({
 
 export const YearCodeState = atom({
   key: 'YearCodeState',
-  default: '', // Initial state as a string for Yearcode
+  default: '', 
+});
+
+export const UploadLogicalPathState = atom({
+  key: 'UploadLogicalPathState',
+  default: '', 
+});
+export const ukeyState = atom({
+  key: 'ukeyState',
+  default: '', 
 });
 
 function FetchDataComponent() {
@@ -45,6 +53,8 @@ function FetchDataComponent() {
   const [rd4, setRd4] = useRecoilState(rd4State);
   const [rd5, setRd5] = useRecoilState(rd5State);
   const [yearCode, setYearCode] = useRecoilState(YearCodeState);
+  const [uploadLogicalPath, setUploadLogicalPath] = useRecoilState(UploadLogicalPathState);
+  const [ukey, setUkey] = useRecoilState(ukeyState);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -69,15 +79,21 @@ function FetchDataComponent() {
 
         const response = await axios.post('http://zen/api/ReactStore.aspx', data, config);
         const responseData = response.data.Data.rd[0].yearcode;
+        const UploadLogicalPathData = response.data.Data.rd[0].UploadLogicalPath;
+        const ukeyData = response.data.Data.rd[0].ukey;
         setYearCode(responseData);
+        setUploadLogicalPath(UploadLogicalPathData);
+        setUkey(ukeyData);
         localStorage.setItem('yearCode', responseData);
+        localStorage.setItem('UploadLogicalPath', UploadLogicalPathData);
+        localStorage.setItem('ukey', ukeyData);
       } catch (error) {
         console.error('Error fetching data:', error);
       }
     };
 
     fetchData();
-  }, [setYearCode]);
+  }, [setYearCode,setUploadLogicalPath,setUkey]);
 
   useEffect(() => {
     if (!yearCode) return; 
