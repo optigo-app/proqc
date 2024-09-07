@@ -5,6 +5,7 @@ import QrReader from 'react-qr-barcode-scanner';
 import { FaQrcode } from 'react-icons/fa';
 import Scannericon from '../Assets/Qrcode.png';
 import { useRecoilValue } from 'recoil';
+import { MdOutlineArrowBackIos } from "react-icons/md";
 import { rd3State, rd4State,YearCodeState } from '../Recoil/FetchDataComponent';
 import { FaTimes } from 'react-icons/fa';
 
@@ -14,6 +15,7 @@ const Scanemp = () => {
   const [scannedCode, setScannedCode] = useState('');
   const [hasCamera, setHasCamera] = useState(true);
   const[qcdept,setQcdept]=useState();
+  const[employeeid,setEmployeeid]=useState();
   const [isModalOpen, setIsModalOpen] = useState(false);
 const [modalButtons, setModalButtons] = useState([]);
 
@@ -67,7 +69,8 @@ console.log("YearCodeState",yc);
     axios.post("http://zen/api/ReactStore.aspx", raw, { headers: myHeaders })
       .then((response) => {
         const qcdepartment = response.data.Data.rd[0].qcdept.split(',');
-        
+        const empid = response.data.Data.rd[0].emp_id;
+        setEmployeeid(empid);
         const filteredQcdeptNames = rd4
           .filter(item => qcdepartment.includes(item.id.toString()))
           .map(item => item.qcdeptname);
@@ -83,7 +86,7 @@ console.log("YearCodeState",yc);
           setIsModalOpen(true);
         } else if (filteredQcdeptNames.length === 1) {
           const qcdeptId = filteredQcdeptIds[0];
-          navigate(`/ScannerPage?QCID=${qcdeptId}&empbarcode=${barcode}`);
+          navigate(`/ScannerPage?QCID=${btoa(qcdeptId)}&empbarcode=${btoa(barcode)}&employeeid=${btoa(employeeid)} `);
         }
       })
       .catch((error) => {
@@ -93,11 +96,9 @@ console.log("YearCodeState",yc);
   
   
   const handlebuttonclick = (qcdeptId) => {
-    navigate(`/ScannerPage?QCID=${qcdeptId}&empbarcode=${barcode}`);
+    navigate(`/ScannerPage?QCID=${btoa(qcdeptId)}&empbarcode=${btoa(barcode)}&employeeid=${btoa(employeeid)} `);
   }
-  
-
-
+    
   const Modal = ({ buttons, onClose }) => (
     <div className="fixed inset-0 flex items-center justify-center bg-gray-800 p-4 md:p-20 bg-opacity-30 z-50">
       <div className="bg-white  p-6 rounded-lg shadow-lg w-full h-full  flex flex-col justify-center items-center relative">
@@ -129,8 +130,9 @@ console.log("YearCodeState",yc);
 
   return (
     <div className="w-screen h-screen flex flex-col items-center justify-center bg-gradient-to-r from-blue-100 via-indigo-50  to-green-100 p-4">
+    
       <div className="w-full max-w-lg flex flex-col justify-center bg-white rounded-lg shadow-2xl p-8">
-        <h2 className="text-2xl font-bold text-center mb-6 text-gray-700">Scan  here</h2>
+        <h2 className="text-2xl font-bold text-center mb-6 text-gray-700">Scan Employee here</h2>
         {hasCamera ? (
           <div className="h-64 w-64 flex items-center justify-center bg-gray-100 rounded-lg shadow-lg mx-auto">
             <QrReader

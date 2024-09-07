@@ -14,8 +14,9 @@ const useQueryParams = () => {
 const SideDetails = ({ togglepanel }) => {
   const [data, setData] = useState([]);
   const queryParams = useQueryParams();
-  const empcode = queryParams.get('empbarcode');
-  const jobid = queryParams.get('jobid');
+  
+  const empcode = atob(queryParams.get('empbarcode'));
+  const jobid = atob(queryParams.get('jobid'));
   const imglink = useRecoilValue(UploadLogicalPathState) || localStorage.getItem('UploadLogicalPath');
   const ukeylink = useRecoilValue(ukeyState) || localStorage.getItem('ukey');
 

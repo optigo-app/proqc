@@ -4,12 +4,12 @@ import QrReader from 'react-qr-barcode-scanner';
 import axios from 'axios';
 import Scannericon from '../Assets/Qrcode.png';
 import '../components/Sacnner.css';
+import { MdOutlineArrowBackIos } from "react-icons/md";
 
 const useQueryParams = () => {
   const location = useLocation();
   return new URLSearchParams(location.search);
 };
-
 const ScannerPage = () => {
   const navigate = useNavigate();
   const [hasCamera, setHasCamera] = useState(true);
@@ -18,8 +18,11 @@ const ScannerPage = () => {
   const [errorMessage, setErrorMessage] = useState('');
 
   const queryParams = useQueryParams();
-  const qcID = queryParams.get('QCID');
-  const empcode = queryParams.get('empbarcode');
+  const qcID = atob(queryParams.get('QCID'));
+  const empcode = atob(queryParams.get('empbarcode'));
+  const empid = atob(queryParams.get('employeeid'));
+const eid = queryParams.get('eventid');
+
   console.log('qcID', qcID);
 
   const handleCodeSubmit = async (e) => {
@@ -39,7 +42,7 @@ const ScannerPage = () => {
         }, {
           headers: {
             Authorization: "Bearer 9065471700535651",
-            Yearcode: "e3t6ZW59fXt7MjB9fXt7b3JhaWwyNX19e3tvcmFpbDI1fX0=",
+             Yearcode: "e3t6ZW59fXt7MjB9fXt7b3JhaWwyNX19e3tvcmFpbDI1fX0=",
             Version: "v1",
             sp: "4",
             domain: "",
@@ -51,7 +54,9 @@ const ScannerPage = () => {
         if (response.data.Status == 200 ) { 
           localStorage.setItem('JobData', JSON.stringify(response.data.Data.rd));
           // console.log("response.data.Data.rd",response.data.Data.rd);
-          navigate(`/job-questions?QCID=${qcID}&empbarcode=${empcode}&jobid=${barcode}`);
+          navigate(`/job-questions?QCID=${btoa(qcID)}&empbarcode=${btoa(empcode)}&jobid=${btoa(barcode)}&employeeid=${btoa(empid)}`);
+          // navigate(`/job-questions?QCID=${btoa(qcID)}&empbarcode=${btoa(empcode)}&employeeid=${btoa(empid)}`);
+          
         } else {
           setErrorMessage('Error: ' + response.data.Message); 
         }
@@ -82,8 +87,20 @@ const ScannerPage = () => {
 
   return (
     <div className="w-screen h-screen flex flex-col items-center justify-center bg-gradient-to-r from-blue-100 via-indigo-50 to-green-100 p-4">
-      <div className="w-full max-w-lg flex flex-col items-center justify-center bg-white rounded-lg shadow-2xl p-8">
-        <h2 className="text-2xl font-bold text-center mb-6 text-gray-700">Scan here</h2>
+      <div className="absolute top-4 left-4">
+        <button
+          className="text-gray-700 hover:text-gray-900 focus:outline-none"
+          onClick={() => navigate('/')} 
+        >
+          <MdOutlineArrowBackIos size={32} />
+        </button>
+      </div>
+      <div className="w-full max-w-lg flex flex-col items-center justify-center bg-white rounded-lg shadow-2xl p-8 pt-2">
+
+        <h2 className="text-2xl font-bold text-center gap-5 mb-6 text-gray-700">Scan Job for  
+        <span className="text-xl font-semibold text-[#56a4ff]  text-left w-full">   {empcode}</span>
+        
+         </h2>
         {hasCamera ? (
           <div className="h-64 w-64 flex items-center justify-center bg-gray-100 rounded-lg shadow-lg mx-auto">
             <QrReader

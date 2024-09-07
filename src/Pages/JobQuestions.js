@@ -75,7 +75,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { MdOutlineReadMore } from "react-icons/md";
 
 const JobQuestions = () => {
-  const [isPanelOpen, setIsPanelOpen] = useState(false);
+  const [isPanelOpen, setIsPanelOpen] = useState(true);
 
   const togglePanelOpen = () => {
     setIsPanelOpen(!isPanelOpen);
@@ -83,7 +83,8 @@ const JobQuestions = () => {
 
   return (
     <div className="flex flex-col  md:flex-row  w-screen h-screen bg-gray-50 from-blue-100 via-indigo-50 to-green-100 relative">
-      <div  className='md:h-screen mb-5 md:mb-0 shadow-2xl bg-[#f4f4f4] h-fit w-screen md:w-fit p-5'
+      <div  className='md:h-screen mb-2 md:mb-0  h-fit w-fit p-5'
+      // <div  className='md:h-screen mb-5 md:mb-0 shadow-2xl bg-[#f4f4f4] h-fit w-screen md:w-fit p-5'
       >
         {!isPanelOpen && (
           <button

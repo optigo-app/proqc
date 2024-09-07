@@ -35,6 +35,10 @@ export const YearCodeState = atom({
   key: 'YearCodeState',
   default: '', 
 });
+export const tokenState = atom({
+  key: 'tokenState',
+  default: '', 
+});
 
 export const UploadLogicalPathState = atom({
   key: 'UploadLogicalPathState',
@@ -44,8 +48,13 @@ export const ukeyState = atom({
   key: 'ukeyState',
   default: '', 
 });
+export const salesrdState = atom({
+  key: 'salesrdState',
+  default: '', 
+});
 
 function FetchDataComponent() {
+  const [token, settoken] = useRecoilState(tokenState);
   const [rd, setRd] = useRecoilState(rdState);
   const [rd1, setRd1] = useRecoilState(rd1State);
   const [rd2, setRd2] = useRecoilState(rd2State);
@@ -55,13 +64,15 @@ function FetchDataComponent() {
   const [yearCode, setYearCode] = useRecoilState(YearCodeState);
   const [uploadLogicalPath, setUploadLogicalPath] = useRecoilState(UploadLogicalPathState);
   const [ukey, setUkey] = useRecoilState(ukeyState);
+  const [salesrd, setSalesrd] = useRecoilState(salesrdState);
+
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         const config = {
           headers: {
-            Authorization: 'Bearer 9065471700535651',
+            Authorization: `Bearer 9065471700535651` ,
             Yearcode: '',
             Version: 'v1',
             sp: '4',
@@ -81,9 +92,15 @@ function FetchDataComponent() {
         const responseData = response.data.Data.rd[0].yearcode;
         const UploadLogicalPathData = response.data.Data.rd[0].UploadLogicalPath;
         const ukeyData = response.data.Data.rd[0].ukey;
+        const salesrdData = response.data.Data.rd1;
+        
+        setSalesrd(salesrdData);
         setYearCode(responseData);
         setUploadLogicalPath(UploadLogicalPathData);
         setUkey(ukeyData);
+        console.log("salesrdData",salesrdData);
+        localStorage.setItem('salesrd', JSON.stringify(salesrdData));
+        // localStorage.removeItem("salesrd"); 
         localStorage.setItem('yearCode', responseData);
         localStorage.setItem('UploadLogicalPath', UploadLogicalPathData);
         localStorage.setItem('ukey', ukeyData);
@@ -91,9 +108,10 @@ function FetchDataComponent() {
         console.error('Error fetching data:', error);
       }
     };
+    console.log("salesrd",salesrd);
 
     fetchData();
-  }, [setYearCode,setUploadLogicalPath,setUkey]);
+  }, [setYearCode,setUploadLogicalPath,setUkey,setSalesrd]);
 
   useEffect(() => {
     if (!yearCode) return; 
