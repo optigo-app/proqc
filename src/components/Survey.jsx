@@ -3,12 +3,13 @@ import { FaRegQuestionCircle, FaChevronLeft, FaChevronRight, FaCheck, FaRegThumb
 import { BiSolidImageAdd } from "react-icons/bi";
 import { IoCloseOutline } from "react-icons/io5";
 import { useRecoilValue } from 'recoil';
-import { rdState, rd1State, rd2State,rd5State } from '../Recoil/FetchDataComponent';
+import { rdState, rd1State, rd2State,rd5State,YearCodeState,salesrdState } from '../Recoil/FetchDataComponent';
 import { TbMoodEmpty } from "react-icons/tb";
 import { Link } from 'react-router-dom';
 import { faBarcode, faArrowRight } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useLocation,useNavigate } from "react-router-dom";
+import axios from 'axios';
 
 const useQueryParams = () => {
 const location = useLocation();
@@ -27,27 +28,30 @@ const [showSuccessMessage, setShowSuccessMessage] = useState(false);
 const [remarks, setRemarks] = useState({});
 const [editingRemark, setEditingRemark] = useState(null);
 const [images, setImages] = useState([]); 
-
 const queryParams = useQueryParams();
-const qcID = queryParams.get('QCID');
-const empbarcode = queryParams.get('empbarcode');
+const [imageUrls, setImageUrls] = useState([]); 
+
+const qcID = atob(queryParams.get('QCID'));
+const empbarcode = atob(queryParams.get('empbarcode'));
+const jobid = atob(queryParams.get('jobid'));
+const empid = atob(queryParams.get('employeeid'));
+
 console.log('qcID',qcID);
+const yc = useRecoilValue(YearCodeState) || JSON.parse(localStorage.getItem('yearcode'));
 const questionsData = useRecoilValue(rdState);
 const optionsData = useRecoilValue(rd1State);
 const bindedData = useRecoilValue(rd2State);
 const bindedQuestionsData = useRecoilValue(rd5State);
+const eid = queryParams.get('eventid');
 
-
+const salesrd = useRecoilValue(salesrdState) || JSON.parse(localStorage.getItem('salesrd')) || [];
 const Questions = questionsData.length ? questionsData : JSON.parse(localStorage.getItem('rd')) || [];
 const Options = optionsData.length ? optionsData : JSON.parse(localStorage.getItem('rd1')) || [];
 const Binded = bindedData.length ? bindedData : JSON.parse(localStorage.getItem('rd2')) || [];
 const BindedQuestions = bindedQuestionsData.length ? bindedQuestionsData : JSON.parse(localStorage.getItem('rd5')) || [];
-
 const filteredBindedQuestions = BindedQuestions.filter(bq => bq.qcdeptid === Number(qcID));
 const bindedQuestionIds = filteredBindedQuestions.flatMap(bq => bq.que.split(',').map(Number));
-
 const filteredQuestions = Questions.filter(q => bindedQuestionIds.includes(q.id));
-
 const QuestionOptBinded = Binded.map((bind) => {
   const question = filteredQuestions.find(q => q.id === bind.queid);
   if (question) {
@@ -61,12 +65,10 @@ const QuestionOptBinded = Binded.map((bind) => {
   }
   return null;
 }).filter(item => item !== null);
-
 const hasQuestions = QuestionOptBinded.length >= 1;
 const allQuestions = hasQuestions ? QuestionOptBinded : [];
 const filteredQuestionsList = hasQuestions ? allQuestions.filter(q => selectedQuestions.includes(q.id)) : [];
 const questionsToDisplay = hasQuestions ? (showSelection ? allQuestions : filteredQuestionsList) : [];
-
 const conclusionQuestion = {
   id: 'conclusion',
   question: 'Conclusion',
@@ -90,7 +92,7 @@ const getIconComponent = (iconName) => {
       return null;
   }
 };
-const handleConclusionClick = (status, bgcolor) => {
+const handleConclusionClick = (status) => {
   setSelectedConclusion(status);
 };
 
@@ -116,6 +118,7 @@ useEffect(() => {
   }
 }, []);
 
+
 useEffect(() => {
   if (showSuccessMessage) {
     setTimeout(() => {
@@ -123,9 +126,11 @@ useEffect(() => {
       setCurrentQuestionIndex(0);
       setPageStartIndex(0);
       setShowSelection(true);
+      navigate(`/Scannerpage?QCID=${btoa(qcID)}&empbarcode=${btoa(empbarcode)}&employeeid=${btoa(empid)}}`);
     }, 10000);
   }
-}, [showSuccessMessage]);
+}, [showSuccessMessage, navigate, qcID, empbarcode]);
+
 
 const handleOptionClick = (option) => {
   const selectedOptions = answers[currentQuestion.id] || [];
@@ -175,36 +180,59 @@ const handleScrollLeft = () => {
     setPageStartIndex(pageStartIndex - 5);
   }
 };
-
-const handleSubmit = () => {
-  const dataToSave = {
-    empid: "empp0054", 
-    QCdeptId: qcID,   
-    jobid: "1/107643", 
+const handleSubmit = async () => {
+  const payload = {
+    con: JSON.stringify({
+      id: "",
+      mode: "SAVEQC",
+      appuserid: "kp23@gmail.com",
+    }),
+    p: "eyJQYWNrYWdlSWQxIjoiMSIsIkZyb250RW5kX1JlZ05vMSI6Ijgwa2dpemJpZHV3NWU3Z2ciLCJDdXN0b21lcmlkMSI6IjEwIn0=",
+    dp: JSON.stringify({
+      empid: `${empid}`,
+      qcdeptid: "1",
+      Jobno: `${jobid}`,
+      conclusion: selectedConclusion === "Approved" ? "1" : selectedConclusion === "Rejected" ? "2" : "3",
+      que: btoa(JSON.stringify(
+        Object.keys(answers).map(questionId => ({
+          queid: questionId,
+          optid: answers[questionId].join(','), 
+          rem: remarks[questionId] || ""        
+        }))
+      )),
+      image: images.join(','),                   
+    }),
   };
+  try {
+    const response = await axios.post("http://zen/api/ReactStore.aspx", payload, {
+      headers: {
+        Authorization: "Bearer 9065471700535651",
+        Yearcode: `${yc}`,
+        Version: "v1",
+        sp: "4",
+        domain: "",
+        "Content-Type": "application/json",
+      }
+    });
+    console.log("response.data", response.data);
 
-  selectedQuestions.forEach((questionId) => {
-    const question = allQuestions.find(q => q.id === questionId);
-    const selectedOptions = answers[questionId] ? answers[questionId].join(', ') : '';
-    const remark = remarks[questionId] || '';
-
-    dataToSave[question.question] = {
-      options: selectedOptions,
-      Remark: remark,
-    };
-  });
-
-  dataToSave.Conclusion = answers[conclusionQuestion.id] ? answers[conclusionQuestion.id][0] : ''; 
-  dataToSave.Image = images.join(',');
-
-  localStorage.setItem('surveyData', JSON.stringify(dataToSave));
-
-  localStorage.removeItem('answers');
-  localStorage.removeItem('selectedQuestions');
-  localStorage.removeItem('remarks');
-  setAnswers({});
-  setRemarks({});
-  setShowSuccessMessage(true);
+    if (response.data.Status == 200) {
+      setShowSuccessMessage(true);
+      setAnswers({});
+      setSelectedQuestions([]);
+      setRemarks({});
+      setImages([]);
+      setImageUrls([]);
+      localStorage.removeItem('answers');
+      localStorage.removeItem('selectedQuestions');
+      localStorage.removeItem('remarks');
+      localStorage.removeItem('images'); 
+    } else {
+      alert("Error saving your answer. Try again.");
+    }
+  } catch (error) {
+    alert("Error saving your answer. Try again.");
+  }
 };
 
 
@@ -250,16 +278,22 @@ const toggleSelectAll = () => {
 
 const handleImageUpload = (event) => {
   const files = Array.from(event.target.files);
-  const newImages = files.map(file => file.name);
+  const newImageUrls = files.map(file => URL.createObjectURL(file));
   setImages(prevImages => [
     ...prevImages,
-    ...newImages
+    ...files.map(file => file.name)
+  ].slice(0, 4)); 
+   setImageUrls(prevImageUrls => [
+    ...prevImageUrls,
+    ...newImageUrls
   ].slice(0, 4)); 
 };
 
 const handleRemoveImage = (index) => {
   setImages(prevImages => prevImages.filter((_, i) => i !== index));
+  setImageUrls(prevImageUrls => prevImageUrls.filter((_, i) => i !== index));
 };
+
 
 const currentQuestionNumber = currentQuestionIndex + 1;
 const totalQuestions = selectedQuestions.length;
@@ -278,7 +312,7 @@ return (
         <p className="text-gray-700 text-center mb-6">Thank you.</p>
         <button
      className="flex items-center justify-center px-6 py-3 bg-green-600 text-white text-lg font-semibold rounded-full shadow-md hover:bg-green-700 transition-colors duration-300"
-     onClick={() => navigate(`/Scannerpage?QCID=${qcID}&empbarcode=${empbarcode}`)}
+     onClick={() => navigate(`/Scannerpage?QCID=${btoa(qcID)}&empbarcode=${btoa(empbarcode)}&employeeid=${btoa(empid)}`)}
    >
      <FontAwesomeIcon icon={faArrowRight} className="mr-2" />
      Continue
@@ -455,9 +489,9 @@ return (
                        
                       </div>
                       <div className="flex  h-32 flex-wrap gap-4 mb-8">
-                        {images.length > 0 && (
+                        {imageUrls.length > 0 && (
                             <div className="flex flex-wrap gap-4">
-                              {images.map((img, index) => (
+                              {imageUrls.map((img, index) => (
                                 <div key={index} className="relative rounded-lg shadow-lg border border-gray-300">
                                   <img src={img} alt={`Uploaded ${index}`} className="w-32 h-32 object-cover rounded-md" />
                                   <button
@@ -548,4 +582,3 @@ return (
 export default Survey;
 
 
-//  in this code 
