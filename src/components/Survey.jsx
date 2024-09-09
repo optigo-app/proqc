@@ -35,6 +35,7 @@ const qcID = atob(queryParams.get('QCID'));
 const empbarcode = atob(queryParams.get('empbarcode'));
 const jobid = atob(queryParams.get('jobid'));
 const empid = atob(queryParams.get('employeeid'));
+const eveid = atob(queryParams.get('eventid'));
 
 console.log('qcID',qcID);
 const yc = useRecoilValue(YearCodeState) || JSON.parse(localStorage.getItem('yearcode'));
@@ -47,6 +48,9 @@ const eid = queryParams.get('eventid');
 const salesrd = useRecoilValue(salesrdState) || JSON.parse(localStorage.getItem('salesrd')) || [];
 const Questions = questionsData.length ? questionsData : JSON.parse(localStorage.getItem('rd')) || [];
 const Options = optionsData.length ? optionsData : JSON.parse(localStorage.getItem('rd1')) || [];
+
+console.log("Questions",Questions);
+console.log("Options",Options);
 const Binded = bindedData.length ? bindedData : JSON.parse(localStorage.getItem('rd2')) || [];
 const BindedQuestions = bindedQuestionsData.length ? bindedQuestionsData : JSON.parse(localStorage.getItem('rd5')) || [];
 const filteredBindedQuestions = BindedQuestions.filter(bq => bq.qcdeptid === Number(qcID));
@@ -92,7 +96,7 @@ const getIconComponent = (iconName) => {
       return null;
   }
 };
-const handleConclusionClick = (status) => {
+const handleConclusionClick = (status, bgcolor) => {
   setSelectedConclusion(status);
 };
 
@@ -126,7 +130,7 @@ useEffect(() => {
       setCurrentQuestionIndex(0);
       setPageStartIndex(0);
       setShowSelection(true);
-      navigate(`/Scannerpage?QCID=${btoa(qcID)}&empbarcode=${btoa(empbarcode)}&employeeid=${btoa(empid)}}`);
+      navigate(`/Scannerpage?QCID=${btoa(qcID)}&empbarcode=${btoa(empbarcode)}&employeeid=${btoa(empid)}&eventid=${btoa(eveid)} `);
     }, 10000);
   }
 }, [showSuccessMessage, navigate, qcID, empbarcode]);
@@ -180,6 +184,12 @@ const handleScrollLeft = () => {
     setPageStartIndex(pageStartIndex - 5);
   }
 };
+
+const optionMap = Options.reduce((acc, option) => {
+  acc[option.opt] = option.id;
+  return acc;
+}, {});
+
 const handleSubmit = async () => {
   const payload = {
     con: JSON.stringify({
@@ -204,11 +214,11 @@ const handleSubmit = async () => {
     }),
   };
   try {
-    const response = await axios.post("http://zen/api/ReactStore.aspx", payload, {
+    const response = await axios.post('https://api.optigoapps.com/ReactStore/ReactStore.aspx',  payload, {
       headers: {
-        Authorization: "Bearer 9065471700535651",
+        Authorization: "9726350724901930",
         Yearcode: `${yc}`,
-        Version: "v1",
+        Version: "qcv1",
         sp: "4",
         domain: "",
         "Content-Type": "application/json",
@@ -236,18 +246,98 @@ const handleSubmit = async () => {
 };
 
 
+console.log("optionmap",optionMap['Quality/Color']);
+
+// const handleSubmit = async () => {
+//   let arr = [];
+//   console.log('optionmap answers', answers);
+
+//   const transformedAnswers = Object.keys(answers)?.map(questionId => {
+//     console.log('optionmap ..', answers[questionId]);
+//     arr.push(answers[questionId]);
+//     const selectedOptions = answers[questionId]?.map(optionName => {
+//       console.log(optionMap[optionName], optionMap, optionName);
+//     });
+//     return {
+//       queid: questionId,
+//       optid: selectedOptions.join(','), 
+//       rem: remarks[questionId] || ""
+//     };
+//   });
+
+//   console.log('optionmap transformedAnswers..', transformedAnswers);
+
+
+// arr?.forEach((a) => {
+//     a?.forEach((e) => {
+//       console.log(e, optionMap);
+//     })
+// })
+// console.log(optionMap,"optionMap");
+// arr?.forEach((a) => {
+//   if (optionMap.hasOwnProperty(a)) {
+//     console.log(`Key: ${a}, ID: ${optionMap[a]}`);
+//   } else {
+//     console.log(`Key: ${a} not found in optionMap`);
+//   }
+// });
+//   const payload = {
+//     con: JSON.stringify({
+//       id: "",
+//       mode: "SAVEQC",
+//       appuserid: "kp23@gmail.com",
+//     }),
+//     p: "eyJQYWNrYWdlSWQxIjoiMSIsIkZyb250RW5kX1JlZ05vMSI6Ijgwa2dpemJpZHV3NWU3Z2ciLCJDdXN0b21lcmlkMSI6IjEwIn0=",
+//     dp: JSON.stringify({
+//       empid: `${empid}`,
+//       qcdeptid: "1",
+//       Jobno: `${jobid}`,
+//       conclusion: selectedConclusion === "Approved" ? "1" : selectedConclusion === "Rejected" ? "2" : "3",
+//       que: btoa(JSON.stringify(transformedAnswers)), 
+//       image: images.join(','),                   
+//     }),
+//   };
+
+//   try {
+//     const response = await axios.post("http://api.optigoapps.com/ReactStore/ReactStore.aspx", payload, {
+//       headers: {
+//         Authorization: "9726350724901930",
+//         Yearcode: `${yc}`,
+//         Version: "qcv1",
+//         sp: "4",
+//         sv:"0",
+//         domain: "",
+//         "Content-Type": "application/json",
+//       }
+//     });
+//     console.log("response.data", response.data);
+
+//     if (response.data.Status == 200) {
+//       setShowSuccessMessage(true);
+//       setAnswers({});
+//       setSelectedQuestions([]);
+//       setRemarks({});
+//       setImages([]);
+//       setImageUrls([]);
+//       localStorage.removeItem('answers');
+//       localStorage.removeItem('selectedQuestions');
+//       localStorage.removeItem('remarks');
+//       localStorage.removeItem('images'); 
+//     } else {
+//       alert("Error saving your answer. Try again.");
+//     }
+//   } catch (error) {
+//     alert("Error saving your answer. Try again.");
+//   }
+// };
+
+
+
 
 const getSelectedCount = () => {
   return (answers[currentQuestion.id] || []).length;
 };
 
-const handleQuestionSelectionChange = (questionId) => {
-  const updatedSelectedQuestions = selectedQuestions.includes(questionId)
-    ? selectedQuestions.filter(id => id !== questionId)
-    : [...selectedQuestions, questionId];
-  setSelectedQuestions(updatedSelectedQuestions);
-  localStorage.setItem('selectedQuestions', JSON.stringify(updatedSelectedQuestions));
-};
 
 const handleRemarkChange = (questionId, newRemark) => {
   const updatedRemarks = { ...remarks, [questionId]: newRemark };
@@ -268,13 +358,6 @@ const handleRemarkSave = (questionId) => {
   handleRemarkChange(questionId, remarks[questionId] || '');
 };
 
-const toggleSelectAll = () => {
-  if (selectedQuestions.length === allQuestions.length) {
-    setSelectedQuestions([]);
-  } else {
-    setSelectedQuestions(allQuestions.map(q => q.id));
-  }
-};
 
 const handleImageUpload = (event) => {
   const files = Array.from(event.target.files);
@@ -296,10 +379,10 @@ const handleRemoveImage = (index) => {
 
 
 const currentQuestionNumber = currentQuestionIndex + 1;
-const totalQuestions = selectedQuestions.length;
+const totalQuestions = allQuestions.length;
 
 
-console.log("allQuestions",allQuestions);
+console.log("allQuestions",allQuestions); 
 return (
   <div className="flex flex-col lg:flex-row max-w-screen w-full  lg:w-[60vw]  mb-5 md:mb-5 h-fit  overflow-auto mx-auto p-6 bg-white shadow-md rounded-lg">
     {showSuccessMessage ? (
@@ -312,7 +395,7 @@ return (
         <p className="text-gray-700 text-center mb-6">Thank you.</p>
         <button
      className="flex items-center justify-center px-6 py-3 bg-green-600 text-white text-lg font-semibold rounded-full shadow-md hover:bg-green-700 transition-colors duration-300"
-     onClick={() => navigate(`/Scannerpage?QCID=${btoa(qcID)}&empbarcode=${btoa(empbarcode)}&employeeid=${btoa(empid)}`)}
+     onClick={() => navigate(`/Scannerpage?QCID=${btoa(qcID)}&empbarcode=${btoa(empbarcode)}&employeeid=${btoa(empid)}&eventid=${btoa(eveid)}   `)}
    >
      <FontAwesomeIcon icon={faArrowRight} className="mr-2" />
      Continue
@@ -324,51 +407,11 @@ return (
 
     </>
  
-    ) : hasQuestions  && allQuestions.length === 1 ? ( 
+    ) : hasQuestions  && allQuestions ? ( 
       
       <div className="flex w-full flex-col lg:flex-row lg:pr-4">
         <div className="flex-1">
-          {showSelection && allQuestions.length > 1? (
-            <div className="flex flex-col mb-2  p-4 pt-0">
-              <div className='flex flex-row w-full justify-between'>
-                <h2 className="text-3xl font-semibold mb-6 text-[#56a4ff] flex items-center">
-                  <FaQuestionCircle className="mr-2" />
-                  Select Your Questions
-                </h2>
-
-                <div
-                  onClick={toggleSelectAll}
-                  className="text-[#56a4ff] cursor-pointer underline"
-                >
-                  {selectedQuestions.length === allQuestions.length ? 'Deselect All' : 'Select All'}
-                </div>
-              </div>
-
-              {allQuestions.map((q) => (
-                <div key={q.id} className="flex items-center mb-3 p-2 hover:bg-gray-100 rounded transition-colors">
-                  <input
-                    type="checkbox"
-                    checked={selectedQuestions.includes(q.id)}
-                    onChange={() => handleQuestionSelectionChange(q.id)}
-                    className="mr-2 h-5 w-5"
-                  />
-                  <span className="text-lg">{q.question}</span>
-                </div>
-              ))}
-
-              <button
-                onClick={() => setShowSelection(false)}
-                disabled={selectedQuestions.length === 0}
-                className={`flex items-center justify-center py-3 px-5 mt-4 rounded-full shadow-md transition-all ${
-                  selectedQuestions.length === 0 ? 'bg-gray-300 text-xl text-gray-700 cursor-not-allowed' : 'bg-[#56a4ff] text-white hover:bg-[#4b93e2]'
-                }`}
-              >
-                <FaCheckCircle className="mr-2 text-xl" />
-                Start
-              </button>
-            </div>
-
-          ) : (
+       
             <>
               <div className="flex w-full justify-between items-center mb-4">
                 <div className="flex space-x-2 my-5 w-fit justify-between flex-row items-center">
@@ -538,9 +581,8 @@ return (
                 )}
               </div>
             </>
-          )}
+          
         </div>
-
         {editingRemark === currentQuestion.id && (
           <div className="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50 z-50">
             <div className="bg-white p-6 rounded-lg shadow-lg w-1/2">
