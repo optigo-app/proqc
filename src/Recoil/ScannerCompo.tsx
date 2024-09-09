@@ -6,7 +6,7 @@ import axios from 'axios';
 import Scannericon from '../Assets/Qrcode.png';
 import '../components/Sacnner.css';
 
-// Recoil atoms
+
 export const rdState = atom({ key: 'rdState', default: [] });
 export const rd1State = atom({ key: 'rd1State', default: [] });
 export const rd2State = atom({ key: 'rd2State', default: [] });
@@ -70,9 +70,9 @@ const ScannerCompo = () => {
       try {
         const config = {
           headers: {
-            Authorization: `Bearer 9065471700535651`,
+            Authorization: `9726350724901930`,
             Yearcode: '',
-            Version: 'v1',
+            Version: 'qcv1',
             sp: '4',
             domain: '',
             'Content-Type': 'application/json',
@@ -86,7 +86,7 @@ const ScannerCompo = () => {
           dp: '{"empbarcode":"","deviceid":"DeviceID_SMIT1","deviceName":"DeviceName_SMIT1","brand":"mybrand","model":"mymodel","manufacturer":"mymanufacturer","appver":"appver1", "appvercode":"22","device_type":"android/ios","onesignal_uid":"abc123_onesignal_uid"}',
         };
 
-        const response = await axios.post('http://zen/api/ReactStore.aspx', data, config);
+        const response = await axios.post('https://api.optigoapps.com/ReactStore/ReactStore.aspx', data, config);
         const responseData = response.data.Data.rd[0].yearcode;
         const UploadLogicalPathData = response.data.Data.rd[0].UploadLogicalPath;
         const ukeyData = response.data.Data.rd[0].ukey;
@@ -108,9 +108,9 @@ const ScannerCompo = () => {
     if (!yearCode) return;
 
     const headers = {
-      Authorization: 'Bearer 9065471700535651',
+      Authorization: '9726350724901930',
       Yearcode: yearCode,
-      Version: 'v1',
+      Version: 'qcv1',
       sp: '4',
       domain: '',
       'Content-Type': 'application/json',
@@ -124,7 +124,7 @@ const ScannerCompo = () => {
     };
 
     axios
-      .post('http://zen/api/ReactStore.aspx', data, { headers })
+      .post('https://api.optigoapps.com/ReactStore/ReactStore.aspx', data, { headers })
       .then((response) => {
         const responseData = response.data.Data;
 
@@ -134,7 +134,6 @@ const ScannerCompo = () => {
         setRd3(responseData.rd3);
         setRd4(responseData.rd4);
         setRd5(responseData.rd5);
-
         localStorage.setItem('rd', JSON.stringify(responseData.rd));
         localStorage.setItem('rd1', JSON.stringify(responseData.rd1));
         localStorage.setItem('rd2', JSON.stringify(responseData.rd2));

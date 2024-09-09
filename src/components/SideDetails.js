@@ -5,6 +5,7 @@ import { faArrowRight } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useRecoilValue } from 'recoil';
 import { UploadLogicalPathState, ukeyState } from '../Recoil/FetchDataComponent';
+import { rd3State, rd4State,YearCodeState } from '../Recoil/FetchDataComponent';
 
 const useQueryParams = () => {
   const location = useLocation();
@@ -19,6 +20,8 @@ const SideDetails = ({ togglepanel }) => {
   const jobid = atob(queryParams.get('jobid'));
   const imglink = useRecoilValue(UploadLogicalPathState) || localStorage.getItem('UploadLogicalPath');
   const ukeylink = useRecoilValue(ukeyState) || localStorage.getItem('ukey');
+  const yc = useRecoilValue(YearCodeState) || JSON.parse(localStorage.getItem('yearcode'));
+  console.log(yc,"yc");
 
   useEffect(() => {
     const localStorageData = localStorage.getItem('JobData');
@@ -38,7 +41,7 @@ const SideDetails = ({ togglepanel }) => {
 
   const fetchDataFromApi = async () => {
     try {
-      const response = await axios.post('http://zen/api/ReactStore.aspx', {
+      const response = await axios.post('https://api.optigoapps.com/ReactStore/ReactStore.aspx', {
         con: "{\"id\":\"\",\"mode\":\"SCANJOB\",\"appuserid\":\"kp23@gmail.com\"}",
         p: "eyJQYWNrYWdlSWQxIjoiMSIsIkZyb250RW5kX1JlZ05vMSI6Ijgwa2dpemJpZHV3NWU3Z2ciLCJDdXN0b21lcmlkMSI6IjEwIn0=",
         dp: JSON.stringify({
@@ -49,17 +52,18 @@ const SideDetails = ({ togglepanel }) => {
         })
       }, {
         headers: {
-          Authorization: "Bearer 9065471700535651",
-          Yearcode: "e3t6ZW59fXt7MjB9fXt7b3JhaWwyNX19e3tvcmFpbDI1fX0=",
-          Version: "v1",
+          Authorization: "972635 0724901930",
+          // Yearcode: yc,
+          Yearcode: yc,
+          Version: "qcv1",
           sp: "4",
+          sv:'0',
           domain: "",
           "Content-Type": "application/json",
-          "Cookie": "ASP.NET_SessionId=f0w3jjmd1vryhwsww0dfds1z"
         }
       });
 
-      if (response.data.Status === 200) {
+      if (response.data.Data.rd.stat == 1) {
         setData(response.data.Data.rd);
         localStorage.setItem('JobData', JSON.stringify(response.data.Data.rd));
       } else {
@@ -127,11 +131,11 @@ const SideDetails = ({ togglepanel }) => {
               <span className="text-sm text-gray-400">Status:</span>
               <span
                 className={`px-4 py-2 rounded-md text-white font-semibold ${
-                  productData.qccurrentstatus.toLowerCase() === 'approved'
+                  productData.qccurrentstatus=== 'approved'
                     ? 'bg-green-600'
-                    : productData.qccurrentstatus.toLowerCase() === 'rejected'
+                    : productData.qccurrentstatus === 'rejected'
                     ? 'bg-red-600'
-                    : productData.qccurrentstatus.toLowerCase() === 'pending'
+                    : productData.qccurrentstatus === 'pending'
                     ? 'bg-yellow-500'
                     : 'bg-gray-300'
                 }`}

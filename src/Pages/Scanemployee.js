@@ -16,6 +16,7 @@ const Scanemp = () => {
   const [hasCamera, setHasCamera] = useState(true);
   const[qcdept,setQcdept]=useState();
   const[employeeid,setEmployeeid]=useState();
+  const[eventid,setEventid]=useState();
   const [isModalOpen, setIsModalOpen] = useState(false);
 const [modalButtons, setModalButtons] = useState([]);
 
@@ -51,9 +52,9 @@ console.log("YearCodeState",yc);
   
   const sendBarcodeToAPI = (barcode) => {
     const myHeaders = {
-      Authorization: "Bearer 9065471700535651",
+      Authorization: "9726350724901930",
       Yearcode: yc,
-      Version: "v1",
+      Version: "qcv1",
       sp: "4",
       domain: "",
       "Content-Type": "application/json",
@@ -66,11 +67,16 @@ console.log("YearCodeState",yc);
       dp: `{\"empbarcode\":\"${barcode}\",\"FrontEnd_RegNo\":\"\",\"Customerid\":\"\"}`,
     });
   
-    axios.post("http://zen/api/ReactStore.aspx", raw, { headers: myHeaders })
+    axios.post('https://api.optigoapps.com/ReactStore/ReactStore.aspx', raw, { headers: myHeaders })
       .then((response) => {
         const qcdepartment = response.data.Data.rd[0].qcdept.split(',');
         const empid = response.data.Data.rd[0].emp_id;
         setEmployeeid(empid);
+        const eveid = response.data.Data.rd[0].eventid;
+        setEventid(eveid);
+        setTimeout(() => {
+            setEventid(eveid);
+        }, 10);
         const filteredQcdeptNames = rd4
           .filter(item => qcdepartment.includes(item.id.toString()))
           .map(item => item.qcdeptname);
@@ -86,7 +92,7 @@ console.log("YearCodeState",yc);
           setIsModalOpen(true);
         } else if (filteredQcdeptNames.length === 1) {
           const qcdeptId = filteredQcdeptIds[0];
-          navigate(`/ScannerPage?QCID=${btoa(qcdeptId)}&empbarcode=${btoa(barcode)}&employeeid=${btoa(employeeid)} `);
+          navigate(`/ScannerPage?QCID=${btoa(qcdeptId)}&empbarcode=${btoa(barcode)}&employeeid=${btoa(employeeid)}&eventid=${btoa(eveid)} `);
         }
       })
       .catch((error) => {
@@ -96,7 +102,8 @@ console.log("YearCodeState",yc);
   
   
   const handlebuttonclick = (qcdeptId) => {
-    navigate(`/ScannerPage?QCID=${btoa(qcdeptId)}&empbarcode=${btoa(barcode)}&employeeid=${btoa(employeeid)} `);
+    // navigate(`/ScannerPage?QCID=${btoa(qcdeptId)}&empbarcode=${btoa(barcode)}&employeeid=${btoa(employeeid)}&eventid=${btoa(eventid)}  `);
+    navigate(`/ScannerPage?QCID=${btoa(qcdeptId)}&empbarcode=${btoa(barcode)}&employeeid=${btoa(employeeid)}&eventid=${btoa(0)}  `);
   }
     
   const Modal = ({ buttons, onClose }) => (
@@ -154,7 +161,7 @@ console.log("YearCodeState",yc);
               <input
                 type="text"
                 className="p-3 w-full text-gray-700 placeholder-gray-400 focus:outline-none"
-                placeholder="Enter code manually"
+                placeholder="Enter Employee Code"
                 value={barcode}
                 onChange={handleChange}
               />
@@ -181,3 +188,14 @@ console.log("YearCodeState",yc);
 
 export default Scanemp;
 
+// import React from 'react'
+
+// const Scanemp = () => {
+//   return (
+//     <div>
+      
+//     </div>
+//   )
+// }
+
+// export default Scanemp

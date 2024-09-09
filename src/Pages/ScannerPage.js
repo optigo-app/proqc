@@ -5,7 +5,8 @@ import axios from 'axios';
 import Scannericon from '../Assets/Qrcode.png';
 import '../components/Sacnner.css';
 import { MdOutlineArrowBackIos } from "react-icons/md";
-
+import { useRecoilValue } from 'recoil';
+import { rd3State, rd4State,YearCodeState } from '../Recoil/FetchDataComponent';
 const useQueryParams = () => {
   const location = useLocation();
   return new URLSearchParams(location.search);
@@ -21,7 +22,9 @@ const ScannerPage = () => {
   const qcID = atob(queryParams.get('QCID'));
   const empcode = atob(queryParams.get('empbarcode'));
   const empid = atob(queryParams.get('employeeid'));
-const eid = queryParams.get('eventid');
+  const eveid = atob(queryParams.get('eventid'));
+  const yc = useRecoilValue(YearCodeState) || JSON.parse(localStorage.getItem('yearcode'));
+  console.log(yc,"yc");
 
   console.log('qcID', qcID);
 
@@ -29,21 +32,21 @@ const eid = queryParams.get('eventid');
     e.preventDefault();
     if (barcode) {
       try {
-        const response = await axios.post('http://zen/api/ReactStore.aspx', {
+        const response = await axios.post('https://api.optigoapps.com/ReactStore/ReactStore.aspx', {
           con: "{\"id\":\"\",\"mode\":\"SCANJOB\",\"appuserid\":\"kp23@gmail.com\"}",
           p: "eyJQYWNrYWdlSWQxIjoiMSIsIkZyb250RW5kX1JlZ05vMSI6Ijgwa2dpemJpZHV3NWU3Z2ciLCJDdXN0b21lcmlkMSI6IjEwIn0=",
           dp: JSON.stringify({
             empbarcode: empcode,
             Jobno: barcode,
             Customerid: "10",
-          eventid:"1"
+          eventid:eveid
 
           })
         }, {
           headers: {
-            Authorization: "Bearer 9065471700535651",
-             Yearcode: "e3t6ZW59fXt7MjB9fXt7b3JhaWwyNX19e3tvcmFpbDI1fX0=",
-            Version: "v1",
+            Authorization: "9726350724901930",
+            Yearcode: yc,
+            Version: "qcv1",
             sp: "4",
             domain: "",
             "Content-Type": "application/json",
@@ -51,10 +54,10 @@ const eid = queryParams.get('eventid');
           }
         });
 
-        if (response.data.Status == 200 ) { 
+        if (response.data.Data.rd[0].stat == 1) {
           localStorage.setItem('JobData', JSON.stringify(response.data.Data.rd));
           // console.log("response.data.Data.rd",response.data.Data.rd);
-          navigate(`/job-questions?QCID=${btoa(qcID)}&empbarcode=${btoa(empcode)}&jobid=${btoa(barcode)}&employeeid=${btoa(empid)}`);
+          navigate(`/job-questions?QCID=${btoa(qcID)}&empbarcode=${btoa(empcode)}&jobid=${btoa(barcode)}&employeeid=${btoa(empid)}&eventid=${btoa(eveid)}`);
           // navigate(`/job-questions?QCID=${btoa(qcID)}&empbarcode=${btoa(empcode)}&employeeid=${btoa(empid)}`);
           
         } else {
@@ -129,7 +132,7 @@ const eid = queryParams.get('eventid');
               <input
                 type="text"
                 className="p-3 w-full text-gray-700 placeholder-gray-400 focus:outline-none"
-                placeholder="Enter code manually"
+                placeholder="Enter job#"
                 value={barcode}
                 onChange={handleChange}
               />

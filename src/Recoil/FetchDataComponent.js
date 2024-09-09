@@ -72,13 +72,12 @@ function FetchDataComponent() {
       try {
         const config = {
           headers: {
-            Authorization: `Bearer 9065471700535651` ,
-            Yearcode: '',
-            Version: 'v1',
-            sp: '4',
+            Authorization: '9726350724901930' ,
+            Yearcode: 'e3tsaXZlLm9wdGlnb2FwcHMuY29tfX17ezIwfX17e3Rlc3Q2OH19e3t0ZXN0Njh9fQ==',
+            Version: "qcv1",
+                        sp: '4',
             domain: '',
             'Content-Type': 'application/json',
-            Cookie: 'ASP.NET_SessionId=ro1minpbubgu5dw0tejcii4a',
           },
         };
 
@@ -88,7 +87,7 @@ function FetchDataComponent() {
           dp: '{"empbarcode":"","deviceid":"DeviceID_SMIT1","deviceName":"DeviceName_SMIT1","brand":"mybrand","model":"mymodel","manufacturer":"mymanufacturer","appver":"appver1", "appvercode":"22","device_type":"android/ios","onesignal_uid":"abc123_onesignal_uid"}',
         };
 
-        const response = await axios.post('http://zen/api/ReactStore.aspx', data, config);
+        const response = await axios.post('https://api.optigoapps.com/ReactStore/ReactStore.aspx', data, config);
         const responseData = response.data.Data.rd[0].yearcode;
         const UploadLogicalPathData = response.data.Data.rd[0].UploadLogicalPath;
         const ukeyData = response.data.Data.rd[0].ukey;
@@ -117,9 +116,9 @@ function FetchDataComponent() {
     if (!yearCode) return; 
 
     const headers = {
-      Authorization: 'Bearer 9065471700535651',
+      Authorization: '9726350724901930',
       Yearcode: yearCode,
-      Version: 'v1',
+      Version: 'qcv1',
       sp: '4',
       domain: '',
       'Content-Type': 'application/json',
@@ -133,7 +132,7 @@ function FetchDataComponent() {
     };
 
     axios
-      .post('http://zen/api/ReactStore.aspx', data, { headers })
+      .post('https://api.optigoapps.com/ReactStore/ReactStore.aspx', data, { headers })
       .then((response) => {
         const responseData = response.data.Data;
 
