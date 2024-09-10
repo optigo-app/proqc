@@ -67,59 +67,61 @@ function FetchDataComponent() {
   const [salesrd, setSalesrd] = useRecoilState(salesrdState);
 
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const config = {
-          headers: {
-            Authorization: '9726350724901930' ,
-            Yearcode: 'e3tsaXZlLm9wdGlnb2FwcHMuY29tfX17ezIwfX17e3Rlc3Q2OH19e3t0ZXN0Njh9fQ==',
-            Version: "qcv1",
-                        sp: '4',
-            domain: '',
-            'Content-Type': 'application/json',
-          },
-        };
+  const yc = localStorage.getItem('yearcode');
+  const proqctoken = localStorage.getItem('proqctoken');
+  // useEffect(() => {
+  //   const fetchData = async () => {
+  //     try {
+  //       const config = {
+  //         headers: {
+  //           Authorization: '9726350724901930' ,
+  //           Yearcode: 'e3tsaXZlLm9wdGlnb2FwcHMuY29tfX17ezIwfX17e3Rlc3Q2OH19e3t0ZXN0Njh9fQ==',
+  //           Version: "qcv1",
+  //                       sp: '4',
+  //           domain: '',
+  //           'Content-Type': 'application/json',
+  //         },
+  //       };
 
-        const data = {
-          con: '{"id":"","mode":"INITQC","appuserid":"kp23@gmail.com"}',
-          p: 'eyJQYWNrYWdlSWQxIjoiMSIsIkZyb250RW5kX1JlZ05vMSI6Ijgwa2dpemJpZHV3NWU3Z2ciLCJDdXN0b21lcmlkMSI6IjEwIn0=',
-          dp: '{"empbarcode":"","deviceid":"DeviceID_SMIT1","deviceName":"DeviceName_SMIT1","brand":"mybrand","model":"mymodel","manufacturer":"mymanufacturer","appver":"appver1", "appvercode":"22","device_type":"android/ios","onesignal_uid":"abc123_onesignal_uid"}',
-        };
+  //       const data = {
+  //         con: '{"id":"","mode":"INITQC","appuserid":"kp23@gmail.com"}',
+  //         p: 'eyJQYWNrYWdlSWQxIjoiMSIsIkZyb250RW5kX1JlZ05vMSI6Ijgwa2dpemJpZHV3NWU3Z2ciLCJDdXN0b21lcmlkMSI6IjEwIn0=',
+  //         dp: '{"empbarcode":"","deviceid":"DeviceID_SMIT1","deviceName":"DeviceName_SMIT1","brand":"mybrand","model":"mymodel","manufacturer":"mymanufacturer","appver":"appver1", "appvercode":"22","device_type":"android/ios","onesignal_uid":"abc123_onesignal_uid"}',
+  //       };
 
-        const response = await axios.post('https://api.optigoapps.com/ReactStore/ReactStore.aspx', data, config);
-        const responseData = response.data.Data.rd[0].yearcode;
-        const UploadLogicalPathData = response.data.Data.rd[0].UploadLogicalPath;
-        const ukeyData = response.data.Data.rd[0].ukey;
-        const salesrdData = response.data.Data.rd1;
+  //       const response = await axios.post('https://api.optigoapps.com/ReactStore/ReactStore.aspx', data, config);
+  //       const responseData = response.data.Data.rd[0].yearcode;
+  //       const UploadLogicalPathData = response.data.Data.rd[0].UploadLogicalPath;
+  //       const ukeyData = response.data.Data.rd[0].ukey;
+  //       const salesrdData = response.data.Data.rd1;
         
-        setSalesrd(salesrdData);
-        setYearCode(responseData);
-        setUploadLogicalPath(UploadLogicalPathData);
-        setUkey(ukeyData);
-        console.log("salesrdData",salesrdData);
-        localStorage.setItem('salesrd', JSON.stringify(salesrdData));
-        // localStorage.removeItem("salesrd"); 
-        localStorage.setItem('yearCode', responseData);
-        localStorage.setItem('UploadLogicalPath', UploadLogicalPathData);
-        localStorage.setItem('ukey', ukeyData);
-      } catch (error) {
-        console.error('Error fetching data:', error);
-      }
-    };
-    console.log("salesrd",salesrd);
+  //       setSalesrd(salesrdData);
+  //       setYearCode(responseData);
+  //       setUploadLogicalPath(UploadLogicalPathData);
+  //       setUkey(ukeyData);
+  //       console.log("salesrdData",salesrdData);
+  //       localStorage.setItem('salesrd', JSON.stringify(salesrdData));
+  //       // localStorage.removeItem("salesrd"); 
+  //       localStorage.setItem('yearCode', responseData);
+  //       localStorage.setItem('UploadLogicalPath', UploadLogicalPathData);
+  //       localStorage.setItem('ukey', ukeyData);
+  //     } catch (error) {
+  //       console.error('Error fetching data:', error);
+  //     }
+  //   };
+  //   console.log("salesrd",salesrd);
 
-    fetchData();
-  }, [setYearCode,setUploadLogicalPath,setUkey,setSalesrd]);
+  //   fetchData();
+  // }, [setYearCode,setUploadLogicalPath,setUkey,setSalesrd]);
 
   useEffect(() => {
-    if (!yearCode) return; 
 
     const headers = {
-      Authorization: '9726350724901930',
-      Yearcode: yearCode,
+      Authorization: proqctoken,
+      Yearcode: yc,
       Version: 'qcv1',
       sp: '4',
+      sv:'2',
       domain: '',
       'Content-Type': 'application/json',
       Cookie: 'ASP.NET_SessionId=i4btgm10k555buulfvmqyeyc',
@@ -157,3 +159,6 @@ function FetchDataComponent() {
 }
 
 export default FetchDataComponent;
+
+
+ 

@@ -137,4 +137,3 @@ const AdminScan = () => {
 };
 
 export default AdminScan;
-//  in this code do one thing if there is some error while scanning show a text field at screen in that user can type and add the code 

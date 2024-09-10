@@ -5,12 +5,16 @@ import axios from 'axios';
 import Scannericon from '../Assets/Qrcode.png';
 import '../components/Sacnner.css';
 import { MdOutlineArrowBackIos } from "react-icons/md";
+import { FaArrowRight } from 'react-icons/fa'; // Import the exit icon from react-icons
 import { useRecoilValue } from 'recoil';
-import { rd3State, rd4State,YearCodeState } from '../Recoil/FetchDataComponent';
+import { rd3State, rd4State, YearCodeState } from '../Recoil/FetchDataComponent';
+import { IoMdExit } from "react-icons/io";
+
 const useQueryParams = () => {
   const location = useLocation();
   return new URLSearchParams(location.search);
 };
+
 const ScannerPage = () => {
   const navigate = useNavigate();
   const [hasCamera, setHasCamera] = useState(true);
@@ -23,10 +27,10 @@ const ScannerPage = () => {
   const empcode = atob(queryParams.get('empbarcode'));
   const empid = atob(queryParams.get('employeeid'));
   const eveid = atob(queryParams.get('eventid'));
-  const yc = useRecoilValue(YearCodeState) || JSON.parse(localStorage.getItem('yearcode'));
-  console.log(yc,"yc");
-
-  console.log('qcID', qcID);
+  const yc = localStorage.getItem('yearcode');
+  const empfname = localStorage.getItem('empfname');
+  const emplname = localStorage.getItem('emplname');
+  const token = localStorage.getItem('proqctoken');
 
   const handleCodeSubmit = async (e) => {
     e.preventDefault();
@@ -39,29 +43,26 @@ const ScannerPage = () => {
             empbarcode: empcode,
             Jobno: barcode,
             Customerid: "10",
-          eventid:eveid
-
+            eventid: eveid
           })
         }, {
           headers: {
-            Authorization: "9726350724901930",
+            Authorization: token,
             Yearcode: yc,
             Version: "qcv1",
             sp: "4",
+            sv:'2',
             domain: "",
             "Content-Type": "application/json",
             "Cookie": "ASP.NET_SessionId=f0w3jjmd1vryhwsww0dfds1z"
           }
         });
 
-        if (response.data.Data.rd[0].stat == 1) {
+        if (response.data.Data.rd[0].stat === 1) {
           localStorage.setItem('JobData', JSON.stringify(response.data.Data.rd));
-          // console.log("response.data.Data.rd",response.data.Data.rd);
           navigate(`/job-questions?QCID=${btoa(qcID)}&empbarcode=${btoa(empcode)}&jobid=${btoa(barcode)}&employeeid=${btoa(empid)}&eventid=${btoa(eveid)}`);
-          // navigate(`/job-questions?QCID=${btoa(qcID)}&empbarcode=${btoa(empcode)}&employeeid=${btoa(empid)}`);
-          
         } else {
-          setErrorMessage('Error: ' + response.data.Message); 
+          setErrorMessage('Job scan failed. Please check the code and try again.');
         }
       } catch (error) {
         setErrorMessage('API call failed. Please try again.');
@@ -80,7 +81,6 @@ const ScannerPage = () => {
 
   const handleError = () => {
     setHasCamera(false);
-    // setErrorMessage('There is some error scanning the code, please type the code manually.');
   };
 
   const handleChange = (e) => {
@@ -90,19 +90,32 @@ const ScannerPage = () => {
 
   return (
     <div className="w-screen h-screen flex flex-col items-center justify-center bg-gradient-to-r from-blue-100 via-indigo-50 to-green-100 p-4">
-      <div className="absolute top-4 left-4">
+      {/* <div className="absolute top-4 left-4">
         <button
           className="text-gray-700 hover:text-gray-900 focus:outline-none"
           onClick={() => navigate('/')} 
         >
           <MdOutlineArrowBackIos size={32} />
         </button>
+      </div> */}
+      
+      <div className="w-full max-w-lg flex flex-col items-center bg-purple-50 rounded-lg shadow-2xl mb-6 p-4">
+        <div className="flex items-center  justify-between w-full">
+          <div>
+            <p className="text-lg font-bold text-gray-800"> <span className='text-[#56a4ff] font-semibold'> ({empcode})</span>  {empfname} {emplname} </p>
+          </div>
+          <button
+            onClick={() => navigate('/empscan')}
+            className="flex items-center bg-red-500 text-white px-4 py-2 gap-3 rounded-lg hover:bg-red-600 transition duration-200"
+          >
+           <IoMdExit size={22} /> <p className='text-base'>Exit</p> 
+          </button>
+        </div>
       </div>
+      
       <div className="w-full max-w-lg flex flex-col items-center justify-center bg-white rounded-lg shadow-2xl p-8 pt-2">
 
-        <h2 className="text-2xl font-bold text-center gap-5 mb-6 text-gray-700">Scan Job for  
-        <span className="text-xl font-semibold text-[#56a4ff]  text-left w-full">   {empcode}</span>
-        
+        <h2 className="text-2xl font-bold text-center gap-5 mb-6 text-gray-700">Scan Job   
          </h2>
         {hasCamera ? (
           <div className="h-64 w-64 flex items-center justify-center bg-gray-100 rounded-lg shadow-lg mx-auto">

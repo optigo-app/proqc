@@ -1,0 +1,178 @@
+.backImg_container{
+    background: linear-gradient(to left, rgb(172, 240, 172) , lightblue);
+    width: 100%;
+    height: 100%; 
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+.main_container{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width:100%;
+    height: 100%;
+    flex-direction: column;
+}
+
+.Activate_btn{
+    background-color: white;
+    border-radius: 30px;
+    font-family: sans-serif;
+    cursor: pointer;
+    outline: none;
+    border:none;
+    font-size: 25px;
+    padding: 0.5% 6%;
+    margin-top: 12px;
+}
+
+.qr-reader {
+    width: 430px;
+    height: 100vh;
+    margin: 0 auto;
+    position: relative;
+  }
+  
+  .qr-reader video {
+    width: 100%;
+    height: 500px;
+    object-fit: cover;
+  }
+  
+  .qr-reader .qr-box {
+    width: 100% !important;
+    left: 0 !important;
+  }
+  
+  .qr-reader .qr-frame {
+    position: absolute;
+    fill: none;
+    left: 50%;
+    top: 50%;
+    transform: translateX(-50%) translateY(-50%);
+  }
+  
+  .startBtn {
+    height: 40px;
+    width: 150px;
+    border: none;
+    background-color: lightgreen;
+    font-weight: 600;
+  
+  }
+  
+  .stopBtn {
+    height: 40px;
+    width: 150px;
+    border: none;
+    background-color: red;
+    margin-inline: 10px;
+    font-weight: 600;
+  }
+
+  .scaneBoxMain{
+    /* border:1px solid red; */
+    height: 50%;
+    width: 50%;
+  }
+  
+  .scanneBox {
+    width: 100%;
+    height: 100%;
+    padding:0;
+    margin:0 
+  }
+  .error-message {
+    color: red;
+    font-weight: bold;
+    margin-top: 10px;
+  }
+  
+  .dropdownList1 {
+    height: 40px;
+    width: 49%;
+    padding: 5px;
+    margin: 2px;
+    border-radius: 5px;
+    font-size: 14px;
+    font-weight: 600;
+  }
+  /* Modal styles */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .modal-content {
+    background-color: white;
+    padding: 20px;
+    border-radius: 10px;
+    text-align: center;
+    width: 400px;
+    max-width: 90%;
+  }
+  
+  .modal-content h4 {
+    margin-bottom: 10px;
+  }
+  
+  .modal-content p {
+    word-break: break-all;
+  }
+  
+  .modal-content button {
+    margin-top: 20px;
+    padding: 10px 20px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  
+  .modal-content button:hover {
+    background-color: #0056b3;
+  }
+  
+  @media (max-width: 426px) {
+    .qr-reader {
+      width: 100%;
+    }
+  }
+  
+  .resultData {
+    height: 30px;
+    background-color: rgb(117, 228, 84);
+    width: 150px;
+    border-radius: 2px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 5px;
+  }
+  
+  
+  @media (max-width: 600px) {
+  
+    .scannerView {
+      width: 90%;
+    }
+  
+    .scaneBoxMain {
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+  
+  
+  }

@@ -44,7 +44,6 @@ const ScannerCompo = () => {
   const handleOptionSelect = (option) => {
     console.log(`Selected option: ${option}`);
     setIsModalOpen(false);
-    // Handle navigation or other logic here
   };
 
   const handleScan = (result) => {

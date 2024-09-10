@@ -5,6 +5,9 @@ import ScannerPage from './Pages/ScannerPage';
 import Scanemp from './Pages/Scanemployee';
 import FetchDataComponent from './Recoil/FetchDataComponent'
 import EventSelectionPage from './Pages/EventPage';
+import AdminScan from './Pages/AdminScan/AdminScan';
+import Login from './Pages/Login';
+
 const App = () => {
   return (
    <>
@@ -13,8 +16,13 @@ const App = () => {
 <Router>
 {/* <Router basename="/proqc"> */}
   <Routes>
-    {/* <Route path="/" element={<EventSelectionPage  />} /> */}
-    <Route path="/*" element={<Scanemp/>} />
+    <Route path="/" element={<Login/>} />
+    <Route path="/*" element=
+    
+    { <>
+   <Login/>
+    </>} /> 
+    <Route path="/empscan" element={ <><FetchDataComponent /><Scanemp/></>} />
     <Route path="/ScannerPage/*" element={<ScannerPage />} />
     <Route path="/job-questions" element={<JobQuestions />} />
   </Routes>

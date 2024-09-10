@@ -38,7 +38,9 @@ const empid = atob(queryParams.get('employeeid'));
 const eveid = atob(queryParams.get('eventid'));
 
 console.log('qcID',qcID);
-const yc = useRecoilValue(YearCodeState) || JSON.parse(localStorage.getItem('yearcode'));
+const yc = localStorage.getItem('yearcode');
+const token = localStorage.getItem('proqctoken');
+
 const questionsData = useRecoilValue(rdState);
 const optionsData = useRecoilValue(rd1State);
 const bindedData = useRecoilValue(rd2State);
@@ -216,10 +218,11 @@ const handleSubmit = async () => {
   try {
     const response = await axios.post('https://api.optigoapps.com/ReactStore/ReactStore.aspx',  payload, {
       headers: {
-        Authorization: "9726350724901930",
+        Authorization:token,
         Yearcode: `${yc}`,
         Version: "qcv1",
         sp: "4",
+        sv:'2',
         domain: "",
         "Content-Type": "application/json",
       }
