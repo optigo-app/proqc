@@ -18,9 +18,11 @@ const SideDetails = ({ togglepanel }) => {
   
   const empcode = atob(queryParams.get('empbarcode'));
   const jobid = atob(queryParams.get('jobid'));
-  const imglink = useRecoilValue(UploadLogicalPathState) || localStorage.getItem('UploadLogicalPath');
-  const ukeylink = useRecoilValue(ukeyState) || localStorage.getItem('ukey');
-  const yc = useRecoilValue(YearCodeState) || JSON.parse(localStorage.getItem('yearcode'));
+  const imglink =  localStorage.getItem('UploadLogicalPath');
+  const ukeylink =  localStorage.getItem('ukey');
+  const yc = localStorage.getItem('yearcode');
+  const token = localStorage.getItem('proqctoken');
+
   console.log(yc,"yc");
 
   useEffect(() => {
@@ -52,7 +54,7 @@ const SideDetails = ({ togglepanel }) => {
         })
       }, {
         headers: {
-          Authorization: "972635 0724901930",
+          Authorization:token,
           // Yearcode: yc,
           Yearcode: yc,
           Version: "qcv1",
