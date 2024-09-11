@@ -78,14 +78,16 @@ const questionsToDisplay = hasQuestions ? (showSelection ? allQuestions : filter
 const conclusionQuestion = {
   id: 'conclusion',
   question: 'Conclusion',
-  options: 'Approved,Rejected,On Hold',
+  // options: 'Approved,Rejected,On Hold',
+  options: 'Approved,Rejected',
 };
 const [selectedConclusion, setSelectedConclusion] = useState(null);
 
 const Conclusion =
 [{id:'1',status:'Approved',icon:'FaRegThumbsUp',iconcolor:'#4CAF50',bgcolor:'#4CAF5030 '},
 {id:'2',status:'Rejected',icon:'FaRegThumbsDown',iconcolor:'#F44336',bgcolor:'#F4433630'},  
-{id:'3',status:'On Hold',icon:'FaPause',iconcolor:'#FF9800',bgcolor:'#FF980030 '},]
+// {id:'3',status:'On Hold',icon:'FaPause',iconcolor:'#FF9800',bgcolor:'#FF980030 '},
+]
 const getIconComponent = (iconName) => {
   switch (iconName) {
     case 'FaRegThumbsUp':
@@ -341,7 +343,6 @@ const getSelectedCount = () => {
   return (answers[currentQuestion.id] || []).length;
 };
 
-
 const handleRemarkChange = (questionId, newRemark) => {
   const updatedRemarks = { ...remarks, [questionId]: newRemark };
   setRemarks(updatedRemarks);
@@ -417,39 +418,40 @@ return (
        
             <>
               <div className="flex w-full justify-between items-center mb-4">
-                <div className="flex space-x-2 my-5 w-fit justify-between flex-row items-center">
-                  <button
-                    onClick={handleScrollLeft}
-                    disabled={pageStartIndex === 0}
-                    className={`w-8 h-8 rounded-full shadow-md focus:outline-none text-[#56a4ff] hover:bg-gray-300 justify-center items-center disabled:text-gray-300 ${selectedQuestions.length > 5 ? 'flex' : 'hidden'}`}
-                  >
-                    <FaChevronLeft />
-                  </button>
+              <div className="flex space-x-2 my-5 w-fit justify-between flex-row items-center">
+  <button
+    onClick={handleScrollLeft}
+    disabled={pageStartIndex === 0}
+    className={`w-8 h-8 rounded-full shadow-md focus:outline-none text-[#56a4ff] hover:bg-gray-300 justify-center items-center disabled:text-gray-300 ${selectedQuestions.length > 10 ? 'flex' : 'hidden'}`}
+  >
+    <FaChevronLeft />
+  </button>
 
-                  <div className='flex flex-row gap-3'>
-                    {questionsToDisplay.slice(pageStartIndex, pageStartIndex + 5).map((_, index) => (
-                      <button
-                        key={index + pageStartIndex}
-                        onClick={() => handlePaginationClick(index + pageStartIndex)}
-                        className={`w-8 h-8 rounded-full shadow-md focus:outline-none ${
-                          currentQuestionIndex === index + pageStartIndex
-                            ? ' text-[#fff] hover:bg-[#56a4ff] bg-[#56a5ffb9]'
-                            : 'text-gray-700 hover:bg-gray-300'
-                        }`}
-                      >
-                        {index + pageStartIndex + 1}
-                      </button>
-                    ))}
-                  </div>
+  <div className='flex flex-row gap-3'>
+    {questionsToDisplay.slice(pageStartIndex, pageStartIndex + 10).map((_, index) => (
+      <button
+        key={index + pageStartIndex}
+        onClick={() => handlePaginationClick(index + pageStartIndex)}
+        className={`w-8 h-8 rounded-full shadow-md focus:outline-none ${
+          currentQuestionIndex === index + pageStartIndex
+            ? 'text-[#fff] hover:bg-[#56a4ff] bg-[#56a5ffb9]'
+            : 'text-gray-700 hover:bg-gray-300'
+        }`}
+      >
+        {index + pageStartIndex + 1}
+      </button>
+    ))}
+  </div>
 
-                  <button
-                    onClick={handleScrollRight}
-                    disabled={pageStartIndex + 5 >= questionsToDisplay.length}
-                    className={`w-8 h-8 rounded-full shadow-md focus:outline-none text-[#56a4ff] hover:bg-gray-300 justify-center items-center disabled:text-gray-300 ${selectedQuestions.length > 5 ? 'flex' : 'hidden'}`}
-                  >
-                    <FaChevronRight />
-                  </button>
-                </div>
+  <button
+    onClick={handleScrollRight}
+    disabled={pageStartIndex + 10 >= questionsToDisplay.length}
+    className={`w-8 h-8 rounded-full shadow-md focus:outline-none text-[#56a4ff] hover:bg-gray-300 justify-center items-center disabled:text-gray-300 ${selectedQuestions.length > 10 ? 'flex' : 'hidden'}`}
+  >
+    <FaChevronRight />
+  </button>
+</div>
+
                 <p className='text-lg font-bold text-green-500'>
                   {getSelectedCount()}
                 </p>
@@ -484,11 +486,11 @@ return (
                 ))}       
               </div>
 
-              <div className='h-96'>
+              {/* <div className='h-96'> */}
                 {isLastQuestion ? (
                   <>
                     <div className="mt-6">
-                      <h2 className="text-3xl font-bold mb-6 text-gray-800">{conclusionQuestion.question}</h2>
+                      <h2 className="text-xl font-semibold mb-6 text-gray-800">{conclusionQuestion.question}</h2>
                    <div className='flex flex-col '>
                    <div className='flex flex-wrap gap-4 mb-2'>
                    <div className="flex flex-wrap gap-4 mb-5">
@@ -513,7 +515,7 @@ return (
     </div>
                         
 
-                        <div className="flex flex-wrap gap-4 mb-5">
+                        {/* <div className="flex flex-wrap gap-4 mb-5">
                           <label
                             htmlFor="file-input"
                             className={`flex flex-col items-center py-4 px-6 rounded-lg shadow-lg border border-gray-300 cursor-pointer ${images.length >= 4 ? 'bg-gray-300 text-gray-700 cursor-not-allowed' : 'bg-white text-gray-700 hover:bg-gray-100'}`}
@@ -530,11 +532,11 @@ return (
                               disabled={images.length >= 4}
                             />
                           </label>
-                        </div>
+                        </div> */}
 
                        
                       </div>
-                      <div className="flex  h-32 flex-wrap gap-4 mb-8">
+                      {/* <div className="flex  h-32 flex-wrap gap-4 mb-8"> */}
                         {imageUrls.length > 0 && (
                             <div className="flex flex-wrap gap-4">
                               {imageUrls.map((img, index) => (
@@ -552,10 +554,10 @@ return (
                           )}
                         </div>
                    </div>
-                    </div>
+                    {/* </div> */}
                   </>
                 ) : null}
-              </div>
+              {/* </div> */}
 
               <div className="flex justify-between">
                 <button

@@ -59,7 +59,6 @@ const Login = () => {
         localStorage.setItem('yearcode', yearcode);
         localStorage.setItem('proqctoken', dbUniqueKey);
 
-        // Set state variables for useEffect
         setProqctoken(dbUniqueKey);
         setYearcode(yearcode);
 
@@ -110,25 +109,25 @@ const Login = () => {
 
       fetchData();
     }
-  }, [proqctoken, yearcode]); // Dependencies to re-run the effect
-
+  }, [proqctoken, yearcode]); 
   return (
     <div className="w-screen h-screen flex items-center justify-center bg-gradient-to-r from-blue-100 via-indigo-50 to-green-100 p-4">
-      <div className="w-full max-w-4xl flex flex-col md:flex-row bg-white rounded-lg shadow-2xl p-6">
-        {/* Banner Section */}
+      <div className="w-full max-w-4xl flex flex-col md:flex-row bg-white rounded-xl shadow-2xl p-6">
         <div className="w-full md:w-1/2 flex items-center justify-center p-4">
-          <img src={banner} alt="banner" className="object-contain w-full h-auto" />
+          <img src={banner} alt="banner" className="object-contain w-full h-60  md:h-auto md:rounded-none rounded-xl md:rounded-l-xl " />
         </div>
 
-        {/* Login Form Section */}
         <div className="w-full md:w-1/2 flex flex-col items-center justify-center p-4">
           <h2 className="text-3xl font-semibold text-gray-800 text-center mb-6">Login</h2>
 
-          {errorMessage && (
-            <div className="mb-4 p-3 text-center bg-red-100 text-red-600 border border-red-400 rounded-lg">
+       <div className='h-7'>
+       {errorMessage && (
+            <div className="mb-3 text-center  text-red-600   rounded-lg">
               {errorMessage}
             </div>
           )}
+       </div>
+
 
           <div className="mb-4 w-full">
             <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="companyCode">

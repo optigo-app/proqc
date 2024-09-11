@@ -83,7 +83,8 @@ const SideDetails = ({ togglepanel }) => {
   return (
     <div className="flex flex-col w-full p-4  transform transition-all duration-300 ease-in-out">
       <div className="flex justify-between items-center mb-4">
-        <h3 className="text-lg font-bold text-gray-700">Job Details</h3>
+        {productData ? (
+        <h3 className="text-2xl font-bold text-gray-700"> {productData.jobserialno}</h3>):(<></>)}
         <button
           className="p-2 bg-gray-500 text-white rounded"
           onClick={togglepanel}
@@ -96,7 +97,7 @@ const SideDetails = ({ togglepanel }) => {
         <div className="space-y-6">
           <div className="text-center">
             <p className="text-xl font-semibold text-gray-800">
-              {productData.jobserialno} ({productData.designno}) for <span className="text-blue-500">{productData.CustomerCode}</span>
+              ({productData.designno}) for <span className="text-blue-500">{productData.CustomerCode}</span>
             </p>
           </div>
           <div className="w-full flex justify-center mb-4">
@@ -116,33 +117,34 @@ const SideDetails = ({ togglepanel }) => {
             {[
               { label: "Gross Wt", value: productData.GrossWeightgm, subValue: productData.estmatedGrossWt || '0' },
               { label: "Net Wt", value: productData.NetWtgm, subValue: productData.estmatedNetWt || '0' },
-              { label: "Diamond", value: `${productData.Diamond_actualctw} | ${productData.Diamond_actualpcsused}`, subValue: `${productData.estmatedDiamondctw || '0'} | ${productData.estmatedDiamondpcs || '0'}` },
-              { label: "Colorstone", value: `${productData.ColorStone_actualctw} | ${productData.ColorStone_actualpcsused}`, subValue: `${productData.estmatedColorstonectw || '0'} | ${productData.estmatedcolorstonepcs || '0'}` },
-              { label: "Misc", value: `${productData.Misc_actualctw} | ${productData.Misc_actualpcsused}`, subValue: `${productData.estmatedMiscctw || '0'} | ${productData.estmatedMiscPcs || '0'}` },
+              { label: "Dia (Wt/Pc)", value: `${productData.Diamond_actualctw} | ${productData.Diamond_actualpcsused}`, subValue: `${productData.estmatedDiamondctw || '0'} | ${productData.estmatedDiamondpcs || '0'}` },
+              { label: "Cs (Wt/Pc)", value: `${productData.ColorStone_actualctw} | ${productData.ColorStone_actualpcsused}`, subValue: `${productData.estmatedColorstonectw || '0'} | ${productData.estmatedcolorstonepcs || '0'}` },
+              { label: "Misc (Wt/Pc)", value: `${productData.Misc_actualctw} | ${productData.Misc_actualpcsused}`, subValue: `${productData.estmatedMiscctw || '0'} | ${productData.estmatedMiscPcs || '0'}` },
             ].map((item, idx) => (
               <div key={idx} className="p-4 bg-gray-50 border rounded-lg shadow-sm">
-                <span className="block text-sm text-gray-400">{item.label}:</span>
+                <span className="block text-sm text-gray-400">{item.label}</span>
                 <span className="block text-lg font-semibold text-blue-500">{item.value}</span>
-                <span className="block text-xs text-gray-500">{item.subValue}</span>
+                {/* <span className="block text-xs text-gray-500">{item.subValue}</span> */}
               </div>
             ))}
           </div>
 
           <div className="mt-6">
             <div className="flex justify-between items-center">
-              <span className="text-sm text-gray-400">Status:</span>
+              <span className="text-sm  text-gray-400">Status :
               <span
-                className={`px-4 py-2 rounded-md text-white font-semibold ${
-                  productData.qccurrentstatus=== 'approved'
-                    ? 'bg-green-600'
-                    : productData.qccurrentstatus === 'rejected'
-                    ? 'bg-red-600'
-                    : productData.qccurrentstatus === 'pending'
-                    ? 'bg-yellow-500'
-                    : 'bg-gray-300'
+                className={`px-4 pl-1 py-2 rounded-md  font-semibold ${
+                  productData.qccurrentstatus=== 'Approved'
+                    ? '  text-xl text-green-600'
+                    : productData.qccurrentstatus === 'Rejected'
+                    ? '  text-xl text-red-600'
+                    : productData.qccurrentstatus === 'Pending'
+                    ? ' text-xl text-yellow-500'
+                    : ' text-xl text-gray-300'
                 }`}
               >
                 {productData.qccurrentstatus}
+              </span>
               </span>
             </div>
           </div>

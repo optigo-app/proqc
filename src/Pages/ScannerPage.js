@@ -25,12 +25,13 @@ const ScannerPage = () => {
   const queryParams = useQueryParams();
   const qcID = atob(queryParams.get('QCID'));
   const empcode = atob(queryParams.get('empbarcode'));
-  const empid = atob(queryParams.get('employeeid'));
+  // const empid = atob(queryParams.get('employeeid'));
   const eveid = atob(queryParams.get('eventid'));
   const yc = localStorage.getItem('yearcode');
   const empfname = localStorage.getItem('empfname');
   const emplname = localStorage.getItem('emplname');
   const token = localStorage.getItem('proqctoken');
+  const  empid = localStorage.getItem('empid');
 
   const handleCodeSubmit = async (e) => {
     e.preventDefault();

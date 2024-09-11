@@ -73,10 +73,11 @@ const Scanemp = () => {
           const lname = response.data.Data.rd[0].emp_lastname; 
           localStorage.setItem('empfname',fname)
           localStorage.setItem('emplname',lname)
+          localStorage.setItem('empid',empid)
           setEmployeeid(empid);
           setEventid(eveid); 
           console.log("eid",eventid);
-  
+  console.log("emloyeeid",employeeid);
           const filteredQcdeptNames = rd4
             .filter(item => qcdepartment.includes(item.id.toString()))
             .map(item => item.qcdeptname);
@@ -92,7 +93,7 @@ const Scanemp = () => {
             setIsModalOpen(true);
           } else if (filteredQcdeptNames.length === 1) {
             const qcdeptId = filteredQcdeptIds[0];
-            navigate(`/ScannerPage?QCID=${btoa(qcdeptId)}&empbarcode=${btoa(barcode)}&employeeid=${btoa(employeeid)}&eventid=${btoa(eveid)}`);
+            navigate(`/ScannerPage?QCID=${btoa(qcdeptId)}&empbarcode=${btoa(barcode)}&eventid=${btoa(eveid)}`);
           }
         } else {
           setErrorMessage("Error: Invalid Employee Barcode. Please try again.");
