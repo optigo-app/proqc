@@ -18,6 +18,7 @@ const SideDetails = ({ togglepanel }) => {
   
   const empcode = atob(queryParams.get('empbarcode'));
   const jobid = atob(queryParams.get('jobid'));
+  const eid = atob(queryParams.get('eventid'));
   const imglink =  localStorage.getItem('UploadLogicalPath');
   const ukeylink =  localStorage.getItem('ukey');
   const yc = localStorage.getItem('yearcode');
@@ -50,7 +51,8 @@ const SideDetails = ({ togglepanel }) => {
           empbarcode: empcode,
           Jobno: jobid,
           Customerid: "10",
-          eventid: "1"
+          eventid: eid,
+
         })
       }, {
         headers: {

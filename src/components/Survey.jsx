@@ -36,8 +36,6 @@ const empbarcode = atob(queryParams.get('empbarcode'));
 const jobid = atob(queryParams.get('jobid'));
 const empid = atob(queryParams.get('employeeid'));
 const eveid = atob(queryParams.get('eventid'));
-
-console.log('qcID',qcID);
 const yc = localStorage.getItem('yearcode');
 const token = localStorage.getItem('proqctoken');
 
@@ -204,7 +202,7 @@ const handleSubmit = async () => {
     p: "eyJQYWNrYWdlSWQxIjoiMSIsIkZyb250RW5kX1JlZ05vMSI6Ijgwa2dpemJpZHV3NWU3Z2ciLCJDdXN0b21lcmlkMSI6IjEwIn0=",
     dp: JSON.stringify({
       empid: `${empid}`,
-      qcdeptid: "1",
+      qcdeptid: qcID,
       Jobno: `${jobid}`,
       conclusion: selectedConclusion === "Approved" ? "1" : selectedConclusion === "Rejected" ? "2" : "3",
       que: btoa(JSON.stringify(

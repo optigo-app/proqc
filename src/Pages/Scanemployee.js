@@ -6,6 +6,7 @@ import { FaQrcode, FaTimes, FaSignOutAlt } from 'react-icons/fa';
 import Scannericon from '../Assets/Qrcode.png';
 import { useRecoilValue } from 'recoil';
 import { rd4State } from '../Recoil/FetchDataComponent';
+import { ClipLoader } from 'react-spinners';
 
 const Scanemp = () => {
   const navigate = useNavigate();
@@ -17,7 +18,8 @@ const Scanemp = () => {
   const [eventid, setEventid] = useState();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalButtons, setModalButtons] = useState([]);
-  const [errorMessage, setErrorMessage] = useState(''); 
+  const [errorMessage, setErrorMessage] = useState('');
+  const [loading, setLoading] = useState(false); // Added loading state
 
   const yc = localStorage.getItem('yearcode');
   const token = localStorage.getItem('proqctoken');
@@ -38,14 +40,18 @@ const Scanemp = () => {
   const handleChange = (e) => {
     setBarcode(e.target.value);
     setScannedCode(e.target.value);
+    if (errorMessage) setErrorMessage(''); // Hide error on input change
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    sendBarcodeToAPI(barcode);
+    if (barcode.trim() !== '') {
+      sendBarcodeToAPI(barcode);
+    }
   };
 
   const sendBarcodeToAPI = (barcode) => {
+    setLoading(true); // Set loading to true when starting API request
     const myHeaders = {
       Authorization: token,
       Yearcode: yc,
@@ -64,20 +70,23 @@ const Scanemp = () => {
   
     axios.post('https://api.optigoapps.com/ReactStore/ReactStore.aspx', raw, { headers: myHeaders })
       .then((response) => {
+        setLoading(false); // Set loading to false when API request is done
         const status = response.data.Data.rd[0].stat;
         if (status === 1) {
           const qcdepartment = response.data.Data.rd[0].qcdept.split(',');
           const empid = response.data.Data.rd[0].emp_id;
           const eveid = response.data.Data.rd[0].eventid; 
+          const qcdept = response.data.Data.rd[0].qcdept; 
           const fname = response.data.Data.rd[0].emp_firstname; 
           const lname = response.data.Data.rd[0].emp_lastname; 
           localStorage.setItem('empfname',fname)
           localStorage.setItem('emplname',lname)
           localStorage.setItem('empid',empid)
+          localStorage.setItem('qcdept',qcdept)
           setEmployeeid(empid);
           setEventid(eveid); 
           console.log("eid",eventid);
-  console.log("emloyeeid",employeeid);
+          console.log("emloyeeid",employeeid);
           const filteredQcdeptNames = rd4
             .filter(item => qcdepartment.includes(item.id.toString()))
             .map(item => item.qcdeptname);
@@ -100,19 +109,18 @@ const Scanemp = () => {
         }
       })
       .catch((error) => {
+        setLoading(false); // Set loading to false if there's an error
         console.error('Error:', error);
       });
   };
-  
-  
 
   const handlebuttonclick = (qcdeptId) => {
-    navigate(`/ScannerPage?QCID=${btoa(qcdeptId)}&empbarcode=${btoa(barcode)}&employeeid=${btoa(employeeid)}&eventid=${btoa(1)}  `);
-  }
+    navigate(`/ScannerPage?QCID=${btoa(qcdeptId)}&empbarcode=${btoa(barcode)}&employeeid=${btoa(employeeid)}&eventid=${btoa(1)}`);
+  };
 
   const Modal = ({ buttons, onClose }) => (
     <div className="fixed inset-0 flex items-center justify-center bg-gray-800 p-4 md:p-20 bg-opacity-30 z-50">
-      <div className="bg-white p-6 rounded-lg shadow-lg w-full h-full flex flex-col justify-center items-center relative">
+      <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-lg flex flex-col justify-center items-center relative">
         <button
           onClick={onClose}
           className="absolute top-2 right-2 text-gray-600 hover:text-gray-900 transition duration-200"
@@ -153,7 +161,7 @@ const Scanemp = () => {
       </div>
 
       <div className="w-full max-w-lg flex flex-col justify-center bg-white rounded-lg shadow-2xl p-8">
-        <h2 className="text-2xl font-bold text-center mb-6 text-gray-700">Scan Employee here</h2>
+        <h2 className="text-2xl font-bold text-center mb-6 text-gray-700">Scan Employee Barcode</h2>
         {hasCamera ? (
           <div className="h-64 w-64 flex items-center justify-center bg-gray-100 rounded-lg shadow-lg mx-auto">
             <QrReader
@@ -181,19 +189,24 @@ const Scanemp = () => {
               <input
                 type="text"
                 className="p-3 w-full text-gray-700 placeholder-gray-400 focus:outline-none"
-                placeholder="Enter Employee Code"
+                placeholder="Enter Employee Barcode"
                 value={barcode}
                 onChange={handleChange}
+                onKeyDown={(e) => e.key === 'Enter' && handleSubmit(e)} 
               />
               <button
                 type="submit"
-                className="bg-gradient-to-r from-green-400 to-green-600 text-white px-6 py-3 font-semibold rounded-r-lg hover:bg-green-700 transition duration-200"
+                className={`bg-gradient-to-r from-green-400 to-green-600 text-white px-6 py-3 font-semibold rounded-r-lg hover:bg-green-700 transition duration-200 ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                disabled={loading} 
               >
-                Go
+              {loading ? <ClipLoader size={20} color="#fff" /> : 'Go'}
+                
               </button>
             </div>
           </form> 
         </div>
+
+     
 
         {isModalOpen && (
           <Modal
@@ -208,4 +221,3 @@ const Scanemp = () => {
 };
 
 export default Scanemp;
-

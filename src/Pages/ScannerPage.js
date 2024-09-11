@@ -5,10 +5,11 @@ import axios from 'axios';
 import Scannericon from '../Assets/Qrcode.png';
 import '../components/Sacnner.css';
 import { MdOutlineArrowBackIos } from "react-icons/md";
-import { FaArrowRight } from 'react-icons/fa'; // Import the exit icon from react-icons
+import { FaArrowRight } from 'react-icons/fa';
 import { useRecoilValue } from 'recoil';
 import { rd3State, rd4State, YearCodeState } from '../Recoil/FetchDataComponent';
 import { IoMdExit } from "react-icons/io";
+import { ClipLoader } from 'react-spinners';
 
 const useQueryParams = () => {
   const location = useLocation();
@@ -21,20 +22,22 @@ const ScannerPage = () => {
   const [scannedCode, setScannedCode] = useState('');
   const [barcode, setBarcode] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
+  const [loading, setLoading] = useState(false);
 
   const queryParams = useQueryParams();
   const qcID = atob(queryParams.get('QCID'));
   const empcode = atob(queryParams.get('empbarcode'));
-  // const empid = atob(queryParams.get('employeeid'));
   const eveid = atob(queryParams.get('eventid'));
   const yc = localStorage.getItem('yearcode');
   const empfname = localStorage.getItem('empfname');
   const emplname = localStorage.getItem('emplname');
   const token = localStorage.getItem('proqctoken');
-  const  empid = localStorage.getItem('empid');
+  const empid = localStorage.getItem('empid');
 
   const handleCodeSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
+
     if (barcode) {
       try {
         const response = await axios.post('https://api.optigoapps.com/ReactStore/ReactStore.aspx', {
@@ -68,6 +71,8 @@ const ScannerPage = () => {
       } catch (error) {
         setErrorMessage('API call failed. Please try again.');
         console.error(error);
+      } finally {
+        setLoading(false);
       }
     }
   };
@@ -87,37 +92,29 @@ const ScannerPage = () => {
   const handleChange = (e) => {
     setBarcode(e.target.value);
     setScannedCode(e.target.value);
+    setErrorMessage('');
   };
 
   return (
     <div className="w-screen h-screen flex flex-col items-center justify-center bg-gradient-to-r from-blue-100 via-indigo-50 to-green-100 p-4">
-      {/* <div className="absolute top-4 left-4">
-        <button
-          className="text-gray-700 hover:text-gray-900 focus:outline-none"
-          onClick={() => navigate('/')} 
-        >
-          <MdOutlineArrowBackIos size={32} />
-        </button>
-      </div> */}
-      
       <div className="w-full max-w-lg flex flex-col items-center bg-purple-50 rounded-lg shadow-2xl mb-6 p-4">
-        <div className="flex items-center  justify-between w-full">
+        <div className="flex items-center justify-between w-full">
           <div>
-            <p className="text-lg font-bold text-gray-800"> <span className='text-[#56a4ff] font-semibold'> ({empcode})</span>  {empfname} {emplname} </p>
+            <p className="text-lg font-bold text-gray-800">
+              <span className='text-[#56a4ff] font-semibold'>({empcode})</span> {empfname} {emplname}
+            </p>
           </div>
           <button
             onClick={() => navigate('/empscan')}
             className="flex items-center bg-red-500 text-white px-4 py-2 gap-3 rounded-lg hover:bg-red-600 transition duration-200"
           >
-           <IoMdExit size={22} /> <p className='text-base'>Exit</p> 
+            <IoMdExit size={22} /> <p className='text-base'>Exit</p>
           </button>
         </div>
       </div>
-      
-      <div className="w-full max-w-lg flex flex-col items-center justify-center bg-white rounded-lg shadow-2xl p-8 pt-2">
 
-        <h2 className="text-2xl font-bold text-center gap-5 mb-6 text-gray-700">Scan Job   
-         </h2>
+      <div className="w-full max-w-lg flex flex-col items-center justify-center bg-white rounded-lg shadow-2xl p-8 pt-2">
+        <h2 className="text-2xl font-bold text-center gap-5 mb-6 text-gray-700">Scan Job</h2>
         {hasCamera ? (
           <div className="h-64 w-64 flex items-center justify-center bg-gray-100 rounded-lg shadow-lg mx-auto">
             <QrReader
@@ -149,12 +146,14 @@ const ScannerPage = () => {
                 placeholder="Enter job#"
                 value={barcode}
                 onChange={handleChange}
+                onKeyDown={(e) => e.key === 'Enter' && handleCodeSubmit(e)} 
               />
               <button
                 type="submit"
-                className="bg-gradient-to-r from-green-400 to-green-600 text-white px-6 py-3 font-semibold rounded-r-lg hover:bg-green-700 transition duration-200"
+                className={`bg-gradient-to-r from-green-400 to-green-600 text-white px-6 py-3 font-semibold rounded-r-lg hover:bg-green-700 transition duration-200 ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                disabled={loading}
               >
-                Go
+                {loading ? <ClipLoader size={20} color="#fff" /> : 'Go'}
               </button>
             </div>
           </form>
@@ -164,4 +163,4 @@ const ScannerPage = () => {
   );
 };
 
-export default ScannerPage;
+export default ScannerPage; 

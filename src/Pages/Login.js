@@ -1,19 +1,27 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
+import { ClipLoader } from 'react-spinners'; // import a spinner component
 import axios from 'axios';
 import banner from '../Assets/proqc.png';
 
 const Login = () => {
   const [companyCode, setCompanyCode] = useState('');
   const [password, setPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false); 
+  const [showPassword, setShowPassword] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [proqctoken, setProqctoken] = useState('');
   const [yearcode, setYearcode] = useState('');
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleLogin = async () => {
+    if (!companyCode || !password) {
+      setErrorMessage('Please fill in both fields.');
+      return;
+    }
+
+    setLoading(true);
     localStorage.clear();
     try {
       const response = await axios.post('https://api.optigoapps.com/ReactStore/ReactStore.aspx', {
@@ -64,12 +72,26 @@ const Login = () => {
 
         navigate('/empscan');
       } else {
-        setErrorMessage('Invalid Company Code or Password. Please try again.'); 
+        setErrorMessage('Invalid Company Code or Password. Please try again.');
       }
 
     } catch (error) {
       console.error("There was an error making the request!", error);
       setErrorMessage('An unexpected error occurred. Please try again later.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter') {
+      handleLogin();
+    }
+  };
+
+  const clearError = () => {
+    if (errorMessage) {
+      setErrorMessage('');
     }
   };
 
@@ -109,25 +131,25 @@ const Login = () => {
 
       fetchData();
     }
-  }, [proqctoken, yearcode]); 
+  }, [proqctoken, yearcode]);
+
   return (
     <div className="w-screen h-screen flex items-center justify-center bg-gradient-to-r from-blue-100 via-indigo-50 to-green-100 p-4">
       <div className="w-full max-w-4xl flex flex-col md:flex-row bg-white rounded-xl shadow-2xl p-6">
-        <div className="w-full md:w-1/2 flex items-center justify-center p-4">
-          <img src={banner} alt="banner" className="object-contain w-full h-60  md:h-auto md:rounded-none rounded-xl md:rounded-l-xl " />
+        <div className="w-full md:w-1/2 flex items-center justify-center p-4 h-60 md:h-auto">
+          <img src={banner} alt="banner" className="object-contain w-full h-full md:h-auto md:rounded-none rounded-xl md:rounded-l-xl" />
         </div>
 
         <div className="w-full md:w-1/2 flex flex-col items-center justify-center p-4">
-          <h2 className="text-3xl font-semibold text-gray-800 text-center mb-6">Login</h2>
+          <h2 className="text-3xl font-semibold text-gray-800 text-center mb-6">Welcome To ProQC</h2>
 
-       <div className='h-7'>
-       {errorMessage && (
-            <div className="mb-3 text-center  text-red-600   rounded-lg">
-              {errorMessage}
-            </div>
-          )}
-       </div>
-
+          <div className="h-7">
+            {errorMessage && (
+              <div className="mb-3 text-center text-red-600 rounded-lg">
+                {errorMessage}
+              </div>
+            )}
+          </div>
 
           <div className="mb-4 w-full">
             <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="companyCode">
@@ -138,7 +160,8 @@ const Login = () => {
               type="text"
               placeholder="Enter your company code"
               value={companyCode}
-              onChange={(e) => setCompanyCode(e.target.value)}
+              onChange={(e) => { setCompanyCode(e.target.value); clearError(); }}
+              onKeyDown={handleKeyDown}
               className="w-full px-3 py-2 border rounded-lg shadow-sm focus:outline-none"
             />
           </div>
@@ -147,13 +170,14 @@ const Login = () => {
             <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="password">
               Password
             </label>
-            <div className='flex items-center border rounded-lg shadow-sm'>
+            <div className="flex items-center border rounded-lg shadow-sm">
               <input
                 id="password"
                 type={showPassword ? 'text' : 'password'}
                 placeholder="Enter your password"
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                onChange={(e) => { setPassword(e.target.value); clearError(); }}
+                onKeyDown={handleKeyDown}
                 className="w-full px-3 py-2 border-none outline-none rounded-l-lg"
               />
               <div
@@ -172,9 +196,11 @@ const Login = () => {
           <div className="w-full flex justify-center">
             <button
               onClick={handleLogin}
+              type="submit"
               className="w-full bg-gradient-to-r from-green-500 via-green-600 to-green-500 text-white font-bold py-2 px-4 rounded-lg shadow-lg focus:outline-none transition-transform transform hover:scale-105"
+              disabled={loading}
             >
-              Continue
+              {loading ? <ClipLoader size={20} color="#fff" /> : 'Login'}
             </button>
           </div>
         </div>
