@@ -115,7 +115,6 @@ function FetchDataComponent() {
   // }, [setYearCode,setUploadLogicalPath,setUkey,setSalesrd]);
 
   useEffect(() => {
-
     const headers = {
       Authorization: proqctoken,
       Yearcode: yc,
