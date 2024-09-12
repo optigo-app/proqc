@@ -1,377 +1,264 @@
-// import React, { useState, useEffect } from 'react';
-// import { FaChevronLeft, FaChevronRight, FaCheck, FaRegThumbsUp, FaRegThumbsDown, FaPause, FaEllipsisH, FaQuestionCircle, FaCheckCircle, FaRegEdit } from 'react-icons/fa';
-// import { BiSolidImageAdd } from "react-icons/bi";
-// import { IoCloseOutline } from "react-icons/io5";
-// import { useRecoilValue } from 'recoil';
-// import { rdState, rd1State, rd2State, rd5State } from '../Recoil/FetchDataComponent';
-// import Question from './Question';
-// import { useLocation } from "react-router-dom";
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
+import QrReader from 'react-qr-barcode-scanner';
+import { FaQrcode, FaTimes, FaSignOutAlt } from 'react-icons/fa';
+import Scannericon from '../Assets/Qrcode.png';
+import { useRecoilValue } from 'recoil';
+import { rd4State } from '../Recoil/FetchDataComponent';
+import { ClipLoader } from 'react-spinners';
 
-// const useQueryParams = () => {
-//   const location = useLocation();
-//   return new URLSearchParams(location.search);
-// };
+const Scanemp = () => {
+  const navigate = useNavigate();
+  const [barcode, setBarcode] = useState('');
+  const [scannedCode, setScannedCode] = useState('');
+  const [hasCamera, setHasCamera] = useState(true);
+  const [qcdept, setQcdept] = useState([]);
+  const [employeeid, setEmployeeid] = useState();
+  const [eventid, setEventid] = useState();
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalButtons, setModalButtons] = useState([]);
+  const [errorMessage, setErrorMessage] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [pin, setPin] = useState('');
+  const [isSlideVisible, setIsSlideVisible] = useState(false);
 
-// function Survey() {
-//   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
-//   const [answers, setAnswers] = useState({});
-//   const [selectedQuestions, setSelectedQuestions] = useState([]);
-//   const [pageStartIndex, setPageStartIndex] = useState(0);
-//   const [showSelection, setShowSelection] = useState(true);
-//   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
-//   const [remarks, setRemarks] = useState({});
-//   const [editingRemark, setEditingRemark] = useState(null);
-//   const [images, setImages] = useState([]); 
-//   const [noQuestionsAvailable, setNoQuestionsAvailable] = useState(false);
+  const yc = localStorage.getItem('yearcode');
+  const token = localStorage.getItem('proqctoken');
+  const rd4 = useRecoilValue(rd4State);
 
-//   const queryParams = useQueryParams();
-//   const qcID = queryParams.get('QCID');
-//   console.log('qcID', qcID);
-//   const questionsData = useRecoilValue(rdState);
-//   const optionsData = useRecoilValue(rd1State);
-//   const bindedData = useRecoilValue(rd2State);
-//   const bindedQuestionsData = useRecoilValue(rd5State);
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (errorMessage) {
+        setErrorMessage('');
+        setBarcode('');
+        setScannedCode('');
+      }
+    }, 5000);
 
-//   const Questions = questionsData.length ? questionsData : JSON.parse(localStorage.getItem('rd')) || [];
-//   const Options = optionsData.length ? optionsData : JSON.parse(localStorage.getItem('rd1')) || [];
-//   const Binded = bindedData.length ? bindedData : JSON.parse(localStorage.getItem('rd2')) || [];
-//   const BindedQuestions = bindedQuestionsData.length ? bindedQuestionsData : JSON.parse(localStorage.getItem('rd5')) || [];
+    return () => clearTimeout(timer);
+  }, [errorMessage]);
 
-//   const filteredBindedQuestions = BindedQuestions.filter(bq => bq.qcdeptid === Number(qcID));
-//   const bindedQuestionIds = filteredBindedQuestions.flatMap(bq => bq.que.split(',').map(Number));
+  const handleScan = (result) => {
+    if (result) {
+      setScannedCode(result.text);
+      setBarcode(result.text);
+    }
+  };
 
-//   const filteredQuestions = Questions.filter(q => bindedQuestionIds.includes(q.id));
+  const handleError = () => {
+    setHasCamera(false);
+  };
 
-//   const QuestionOptBinded = Binded.map((bind) => {
-//     const question = filteredQuestions.find(q => q.id === bind.queid);
-//     if (question) {
-//       const optionIds = bind.opt.split(',').map(Number);
-//       const questionOptions = Options.filter(option => optionIds.includes(option.id));
-//       return {
-//         id: question.id,
-//         question: question.que,
-//         options: questionOptions.map(opt => opt.opt).join(', ')
-//       };
-//     }
-//     return null;
-//   }).filter(item => item !== null);
+  const handleChange = (e) => {
+    setBarcode(e.target.value);
+    setScannedCode(e.target.value);
+    if (errorMessage) setErrorMessage('');
+  };
 
-//   useEffect(() => {
-//     if (QuestionOptBinded.length > 0) {
-//       setNoQuestionsAvailable(false);
-//       const allQuestions = QuestionOptBinded;
-//       const filteredQuestionsList = allQuestions.filter(q => selectedQuestions.includes(q.id));
-//       setQuestionsToDisplay(showSelection ? allQuestions : filteredQuestionsList);
-//     } else {
-//       setNoQuestionsAvailable(true);
-//     }
-//   }, [QuestionOptBinded, selectedQuestions, showSelection]);
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (barcode.trim() === '') {
+      setErrorMessage('Please enter a valid barcode.');
+    } else {
+      setIsSlideVisible(true); 
+    }
+  };
 
-//   const [questionsToDisplay, setQuestionsToDisplay] = useState([]);
+  const handlePinSubmit = (e) => {
+    e.preventDefault();
+    if (pin.trim() === '') {
+      setErrorMessage('Please enter your PIN.');
+    } else {
+      senddatatoapi(barcode, pin);
+    }
+  };
 
-//   const conclusionQuestion = {
-//     id: 'conclusion',
-//     question: 'Conclusion',
-//     options: 'Approved,Rejected,On Hold',
-//   };
+  const senddatatoapi = (barcode, pin) => {
+    setLoading(true);
+    const myHeaders = {
+      Authorization: token,
+      Yearcode: yc,
+      Version: "v1",
+      sp: "4",
+      sv: "2",
+      domain: "",
+      "Content-Type": "application/json",
+    };
 
-//   const currentQuestion = questionsToDisplay[currentQuestionIndex];
-//   const isLastQuestion = currentQuestionIndex === questionsToDisplay.length - 1;
+    const raw = JSON.stringify({
+      con: "{\"id\":\"\",\"mode\":\"SCANEMP\",\"appuserid\":\"kp23@gmail.com\"}",
+      p: "eyJQYWNrYWdlSWQxIjoiMSIsIkZyb250RW5kX1JlZ05vMSI6Ijgwa2tpemJpZHV3NWU3Z2ciLCJDdXN0b21lcmlkMSI6IjEwIn0=",
+      dp: `{\"empbarcode\":\"${barcode}\",\"FrontEnd_RegNo\":\"\",\"pin\":\"${pin}\",\"Customerid\":\"\"}`,
+    });
 
-//   useEffect(() => {
-//     const storedAnswers = JSON.parse(localStorage.getItem('answers'));
-//     const storedSelectedQuestions = JSON.parse(localStorage.getItem('selectedQuestions'));
-//     const storedRemarks = JSON.parse(localStorage.getItem('remarks'));
-//     if (storedAnswers) {
-//       setAnswers(storedAnswers);
-//     }
-//     if (storedSelectedQuestions) {
-//       setSelectedQuestions(storedSelectedQuestions);
-//       if (storedSelectedQuestions.length > 0) {
-//         setShowSelection(false);
-//       }
-//     }
-//     if (storedRemarks) {
-//       setRemarks(storedRemarks);
-//     }
-//   }, []);
+    axios.post('https://api.optigoapps.com/ReactStore/ReactStore.aspx', raw, { headers: myHeaders })
+      .then((response) => {
+        setLoading(false);
+        const status = response.data.Data.rd[0].stat;
+        if (status === 1) {
+          const qcdepartment = response.data.Data.rd[0].qcdept.split(',');
+          const empid = response.data.Data.rd[0].emp_id;
+          const eveid = response.data.Data.rd[0].eventid;
+          const fname = response.data.Data.rd[0].emp_firstname;
+          const lname = response.data.Data.rd[0].emp_lastname;
 
-//   useEffect(() => {
-//     if (showSuccessMessage) {
-//       setTimeout(() => {
-//         setShowSuccessMessage(false);
-//         setCurrentQuestionIndex(0);
-//         setPageStartIndex(0);
-//         setShowSelection(true);
-//       }, 3000);
-//     }
-//   }, [showSuccessMessage]);
+          localStorage.setItem('empfname', fname);
+          localStorage.setItem('emplname', lname);
+          localStorage.setItem('empid', empid);
 
-//   const handleOptionClick = (option) => {
-//     const selectedOptions = answers[currentQuestion.id] || [];
-//     const updatedOptions = selectedOptions.includes(option)
-//       ? selectedOptions.filter(opt => opt !== option)
-//       : [...selectedOptions, option];
-//     const updatedAnswers = { ...answers, [currentQuestion.id]: updatedOptions };
-//     setAnswers(updatedAnswers);
-//     localStorage.setItem('answers', JSON.stringify(updatedAnswers));
-//   };
+          setEmployeeid(empid);
+          setEventid(eveid);
 
-//   const handleNext = () => {
-//     if (currentQuestionIndex < questionsToDisplay.length - 1) {
-//       setCurrentQuestionIndex(currentQuestionIndex + 1);
-//       if (currentQuestionIndex + 1 >= pageStartIndex + 5) {
-//         setPageStartIndex(pageStartIndex + 5);
-//       }
-//     }
-//   };
+          const filteredQcdeptNames = rd4
+            .filter(item => qcdepartment.includes(item.id.toString()))
+            .map(item => item.qcdeptname);
 
-//   const handlePrevious = () => {
-//     if (currentQuestionIndex > 0) {
-//       setCurrentQuestionIndex(currentQuestionIndex - 1);
-//       if (currentQuestionIndex - 1 < pageStartIndex) {
-//         setPageStartIndex(pageStartIndex - 5);
-//       }
-//     }
-//   };
+          const filteredQcdeptIds = rd4
+            .filter(item => qcdepartment.includes(item.id.toString()))
+            .map(item => item.id);
 
-//   const handlePaginationClick = (index) => {
-//     setCurrentQuestionIndex(index);
-//     if (index >= pageStartIndex + 5) {
-//       setPageStartIndex(index - 4);
-//     } else if (index < pageStartIndex) {
-//       setPageStartIndex(index);
-//     }
-//   };
+          if (filteredQcdeptNames.length > 1) {
+            setModalButtons(filteredQcdeptNames);
+            setIsModalOpen(true);
+          } else if (filteredQcdeptNames.length === 1) {
+            const qcdeptId = filteredQcdeptIds[0];
+            navigate(`/ScannerPage?QCID=${btoa(qcdeptId)}&empbarcode=${btoa(barcode)}&employeeid=${btoa(empid)}&eventid=${btoa(eveid)}`);
+          }
+        } else {
+          setErrorMessage('Error: Invalid Employee Barcode or PIN.');
+        }
+      })
+      .catch(() => {
+        setLoading(false);
+        setErrorMessage('Error: API call failed. Please try again.');
+      });
+  };
 
-//   const handleScrollRight = () => {
-//     if (pageStartIndex + 5 < questionsToDisplay.length) {
-//       setPageStartIndex(pageStartIndex + 5);
-//     }
-//   };
+  const handlebuttonclick = (qcdeptId) => {
+    navigate(`/ScannerPage?QCID=${btoa(qcdeptId)}&empbarcode=${btoa(barcode)}&employeeid=${btoa(employeeid)}&eventid=${btoa(eventid)}`);
+  };
 
-//   const handleScrollLeft = () => {
-//     if (pageStartIndex > 0) {
-//       setPageStartIndex(pageStartIndex - 5);
-//     }
-//   };
+  const Modal = ({ buttons, onClose }) => (
+    <div className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50 z-50 animate-fadeIn">
+      <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-lg flex flex-col justify-center items-center relative">
+        <button
+          onClick={onClose}
+          className="absolute top-2 right-2 text-gray-600 hover:text-gray-900 transition duration-200"
+        >
+          <FaTimes size={20} />
+        </button>
+        <h3 className="text-3xl font-bold mb-4 text-center text-gray-600">Select QC Department</h3>
+        <div className="flex flex-wrap gap-4">
+          {buttons.map(({ name, id }) => (
+            <button
+              key={id}
+              onClick={() => handlebuttonclick(id)}
+              className="bg-gradient-to-r from-blue-100 via-indigo-50 text-lg h-44 w-44 to-green-100 text-black px-4 py-2 rounded-lg hover:from-green-200 hover:text-white font-normal hover:via-indigo-200 hover:to-blue-200 transition duration-200"
+            >
+              {name}
+            </button>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
 
-//   const handleSubmit = () => {
-//     localStorage.removeItem('answers');
-//     localStorage.removeItem('selectedQuestions');
-//     localStorage.removeItem('remarks');
-//     setAnswers({});
-//     setRemarks({});
-//     setShowSuccessMessage(true);
-//   };
+  const handleLogout = () => {
+    localStorage.clear();
+    navigate('/');
+  };
 
-//   const getSelectedCount = () => {
-//     return (answers[currentQuestion.id] || []).length;
-//   };
+  return (
+    <div className="relative w-screen h-screen flex items-center justify-center bg-gradient-to-r from-blue-100 via-indigo-50 to-green-100 p-4">
+      <div className="absolute top-4 right-4">
+        <button
+          onClick={handleLogout}
+          className="flex items-center bg-red-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-red-700 transition duration-200"
+        >
+          <FaSignOutAlt className="mr-2" />
+          Logout
+        </button>
+      </div>
 
-//   const handleQuestionSelectionChange = (questionId) => {
-//     const updatedSelectedQuestions = selectedQuestions.includes(questionId)
-//       ? selectedQuestions.filter(id => id !== questionId)
-//       : [...selectedQuestions, questionId];
-//     setSelectedQuestions(updatedSelectedQuestions);
-//     localStorage.setItem('selectedQuestions', JSON.stringify(updatedSelectedQuestions));
-//   };
+      {!isSlideVisible ? (
+        <div className="w-full max-w-lg flex flex-col justify-center bg-white rounded-lg shadow-2xl p-8">
+          <h2 className="text-2xl font-bold text-center mb-6 text-gray-700">Scan Employee Barcode</h2>
+          {hasCamera ? (
+            <div className="h-64 w-64 flex items-center justify-center bg-gray-100 rounded-lg shadow-lg mx-auto">
+              <QrReader
+                delay={300}
+                onError={handleError}
+                onScan={handleScan}
+                style={{ width: '100%', height: '100%' }}
+              />
+            </div>
+          ) : (
+            <div className="h-64 w-64 flex items-center justify-center bg-gray-100 rounded-lg shadow-lg mx-auto">
+              <img src={Scannericon} alt="Scanner" />
+            </div>
+          )}
 
-//   const handleRemarkChange = (questionId, newRemark) => {
-//     const updatedRemarks = { ...remarks, [questionId]: newRemark };
-//     setRemarks(updatedRemarks);
-//     localStorage.setItem('remarks', JSON.stringify(updatedRemarks));
-//   };
+          <form onSubmit={handleSubmit} className="mt-6">
+            <input
+              type="text"
+              value={barcode}
+              onChange={handleChange}
+              placeholder="Enter Barcode"
+              className="border border-gray-400 rounded-lg w-full px-4 py-2 text-gray-700 focus:ring-2 focus:ring-blue-400"
+            />
+            <button
+              type="submit"
+              className="mt-4 w-full bg-gradient-to-r from-blue-500 to-green-500 text-white py-2 rounded-lg hover:bg-gradient-to-l hover:from-green-500 hover:to-blue-500 transition duration-200"
+            >
+              Go
+            </button>
+          </form>
 
-//   const handleRemarkEdit = (questionId) => {
-//     if (editingRemark === questionId) {
-//       setEditingRemark(null);
-//     } else {
-//       setEditingRemark(questionId);
-//     }
-//   };
+          {errorMessage && (
+            <div className="mt-4 p-2 bg-red-100 text-red-600 text-center rounded-lg">
+              {errorMessage}
+            </div>
+          )}
+        </div>
+      ) : (
+        <div className={`slide-container transition-transform transform ${isSlideVisible ? 'translate-x-0' : '-translate-x-full'} w-full max-w-lg bg-white rounded-lg shadow-2xl p-8`}>
+          <h2 className="text-2xl font-bold text-center mb-6 text-gray-700">Enter PIN</h2>
+          <form onSubmit={handlePinSubmit}>
+            <input
+              type="password"
+              value={pin}
+              onChange={(e) => setPin(e.target.value)}
+              placeholder="Enter PIN"
+              className="border border-gray-400 rounded-lg w-full px-4 py-2 text-gray-700 focus:ring-2 focus:ring-blue-400"
+            />
+            <button
+              type="submit"
+              className="mt-4 w-full bg-gradient-to-r from-blue-500 to-green-500 text-white py-2 rounded-lg hover:bg-gradient-to-l hover:from-green-500 hover:to-blue-500 transition duration-200"
+            >
+              Submit
+            </button>
+          </form>
 
-//   const handleRemarkSave = (questionId) => {
-//     setEditingRemark(null);
-//     handleRemarkChange(questionId, remarks[questionId] || '');
-//   };
+          {errorMessage && (
+            <div className="mt-4 p-2 bg-red-100 text-red-600 text-center rounded-lg">
+              {errorMessage}
+            </div>
+          )}
+        </div>
+      )}
 
-//   const toggleSelectAll = () => {
-//     if (selectedQuestions.length === QuestionOptBinded.length) {
-//       setSelectedQuestions([]);
-//     } else {
-//       setSelectedQuestions(QuestionOptBinded.map(q => q.id));
-//     }
-//   };
+      {loading && (
+        <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-30 z-50">
+          <ClipLoader color="green" size={60} />
+        </div>
+      )}
 
-//   const handleImageUpload = (event) => {
-//     const files = Array.from(event.target.files);
-//     const newImages = files.map(file => URL.createObjectURL(file));
-//     setImages(prevImages => [
-//       ...prevImages,
-//       ...newImages
-//     ].slice(0, 4)); 
-//   };
+      {isModalOpen && (
+        <Modal buttons={modalButtons} onClose={() => setIsModalOpen(false)} />
+      )}
+    </div>
+  );
+};
 
-//   const handleRemoveImage = (index) => {
-//     setImages(prevImages => prevImages.filter((_, i) => i !== index));
-//   };
-
-//   const currentQuestionNumber = currentQuestionIndex + 1;
-//   const totalQuestions = selectedQuestions.length;
-
-//   return (
-//     <div className="flex flex-col lg:flex-row max-w-screen w-full  lg:w-[60vw]  mb-5 md:mb-5 h-fit  overflow-auto mx-auto p-6 bg-white shadow-md rounded-lg">
-//       <div className="flex-grow">
-//         {noQuestionsAvailable ? (
-//           <div>No Questions Available</div>
-//         ) : (
-//           <div>
-//             {questionsToDisplay.length > 0 && (
-//               <div className="flex flex-col lg:flex-row mb-4">
-//                 <div className="flex-none lg:w-32 lg:mr-4">
-//                   <button
-//                     className="bg-gray-200 text-gray-800 px-4 py-2 rounded-lg"
-//                     onClick={handlePrevious}
-//                     disabled={currentQuestionIndex === 0}
-//                   >
-//                     <FaChevronLeft />
-//                   </button>
-//                   <button
-//                     className="bg-gray-200 text-gray-800 px-4 py-2 rounded-lg ml-2"
-//                     onClick={handleNext}
-//                     disabled={isLastQuestion}
-//                   >
-//                     <FaChevronRight />
-//                   </button>
-//                 </div>
-//                 <div className="flex-grow">
-//                   {showSelection ? (
-//                     <div className="mb-4">
-//                       {QuestionOptBinded.map(q => (
-//                         <div key={q.id} className="border p-4 mb-4 rounded-lg">
-//                           <h3 className="text-lg font-semibold">{q.question}</h3>
-//                           <div>
-//                             {q.options.split(', ').map(option => (
-//                               <label key={option} className="block">
-//                                 <input
-//                                   type="checkbox"
-//                                   checked={selectedQuestions.includes(q.id)}
-//                                   onChange={() => handleQuestionSelectionChange(q.id)}
-//                                 />
-//                                 {option}
-//                               </label>
-//                             ))}
-//                           </div>
-//                         </div>
-//                       ))}
-//                       <button
-//                         onClick={toggleSelectAll}
-//                         className="bg-blue-500 text-white px-4 py-2 rounded-lg mt-4"
-//                       >
-//                         {selectedQuestions.length === QuestionOptBinded.length ? 'Deselect All' : 'Select All'}
-//                       </button>
-//                     </div>
-//                   ) : (
-//                     <div>
-//                       {currentQuestion && (
-//                         <div>
-//                           <h2 className="text-xl font-bold mb-2">{currentQuestion.question}</h2>
-//                           <div className="mb-4">
-//                             {currentQuestion.options.split(', ').map(option => (
-//                               <button
-//                                 key={option}
-//                                 className={`bg-gray-200 text-gray-800 px-4 py-2 rounded-lg mr-2 mb-2 ${
-//                                   (answers[currentQuestion.id] || []).includes(option) ? 'bg-blue-500 text-white' : ''
-//                                 }`}
-//                                 onClick={() => handleOptionClick(option)}
-//                               >
-//                                 {option}
-//                               </button>
-//                             ))}
-//                           </div>
-//                           <div className="mb-4">
-//                             <label htmlFor="remark" className="block mb-2 text-lg font-semibold">Remarks:</label>
-//                             {editingRemark === currentQuestion.id ? (
-//                               <div className="flex items-center">
-//                                 <input
-//                                   type="text"
-//                                   value={remarks[currentQuestion.id] || ''}
-//                                   onChange={(e) => handleRemarkChange(currentQuestion.id, e.target.value)}
-//                                   className="border px-2 py-1 rounded-lg"
-//                                 />
-//                                 <button
-//                                   onClick={() => handleRemarkSave(currentQuestion.id)}
-//                                   className="bg-green-500 text-white px-4 py-2 rounded-lg ml-2"
-//                                 >
-//                                   Save
-//                                 </button>
-//                                 <button
-//                                   onClick={() => setEditingRemark(null)}
-//                                   className="bg-red-500 text-white px-4 py-2 rounded-lg ml-2"
-//                                 >
-//                                   Cancel
-//                                 </button>
-//                               </div>
-//                             ) : (
-//                               <div className="flex items-center">
-//                                 <span className="flex-grow">{remarks[currentQuestion.id]}</span>
-//                                 <button
-//                                   onClick={() => handleRemarkEdit(currentQuestion.id)}
-//                                   className="bg-yellow-500 text-white px-4 py-2 rounded-lg"
-//                                 >
-//                                   Edit
-//                                 </button>
-//                               </div>
-//                             )}
-//                           </div>
-//                           <div className="mb-4">
-//                             <label htmlFor="images" className="block mb-2 text-lg font-semibold">Upload Images:</label>
-//                             <input
-//                               type="file"
-//                               id="images"
-//                               accept="image/*"
-//                               multiple
-//                               onChange={handleImageUpload}
-//                               className="block"
-//                             />
-//                             <div className="flex mt-2">
-//                               {images.map((image, index) => (
-//                                 <div key={index} className="relative">
-//                                   <img src={image} alt={`Uploaded ${index}`} className="w-20 h-20 object-cover rounded-lg mr-2" />
-//                                   <button
-//                                     onClick={() => handleRemoveImage(index)}
-//                                     className="absolute top-0 right-0 bg-red-500 text-white rounded-full p-1"
-//                                   >
-//                                     <IoCloseOutline />
-//                                   </button>
-//                                 </div>
-//                               ))}
-//                             </div>
-//                           </div>
-//                         </div>
-//                       )}
-//                     </div>
-//                   )}
-//                 </div>
-//               </div>
-//             )}
-//             <div className="flex justify-between items-center">
-//               <button
-//                 onClick={handleSubmit}
-//                 className="bg-green-500 text-white px-4 py-2 rounded-lg"
-//                 disabled={showSelection || questionsToDisplay.length === 0}
-//               >
-//                 Submit
-//               </button>
-//               {showSuccessMessage && <p className="text-green-500">Survey submitted successfully!</p>}
-//             </div>
-//           </div>
-//         )}
-//       </div>
-//     </div>
-//   );
-// }
-
-// export default Survey;
-
+export default Scanemp;

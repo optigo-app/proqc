@@ -28,9 +28,8 @@ const [showSuccessMessage, setShowSuccessMessage] = useState(false);
 const [remarks, setRemarks] = useState({});
 const [editingRemark, setEditingRemark] = useState(null);
 const [images, setImages] = useState([]); 
-const queryParams = useQueryParams();
 const [imageUrls, setImageUrls] = useState([]); 
-
+const queryParams = useQueryParams();
 const qcID = atob(queryParams.get('QCID'));
 const empbarcode = atob(queryParams.get('empbarcode'));
 const jobid = atob(queryParams.get('jobid'));
@@ -123,6 +122,8 @@ useEffect(() => {
     setRemarks(storedRemarks);
   }
 }, []);
+
+
 
 
 useEffect(() => {
@@ -220,7 +221,7 @@ const handleSubmit = async () => {
       headers: {
         Authorization:token,
         Yearcode: `${yc}`,
-        Version: "qcv1",
+        Version: "v1",
         sp: "4",
         sv:'2',
         domain: "",
@@ -306,7 +307,7 @@ console.log("optionmap",optionMap['Quality/Color']);
 //       headers: {
 //         Authorization: "9726350724901930",
 //         Yearcode: `${yc}`,
-//         Version: "qcv1",
+//         Version: "v1",
 //         sp: "4",
 //         sv:"0",
 //         domain: "",

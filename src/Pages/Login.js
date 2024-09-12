@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
-import { ClipLoader } from 'react-spinners'; // import a spinner component
+import { ClipLoader } from 'react-spinners';
 import axios from 'axios';
 import banner from '../Assets/proqc.png';
 
 const Login = () => {
   const [companyCode, setCompanyCode] = useState('');
+  const [userName, setUserName] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
@@ -17,7 +18,7 @@ const Login = () => {
 
   const handleLogin = async () => {
     if (!companyCode || !password) {
-      setErrorMessage('Please fill in both fields.');
+      setErrorMessage('Please fill in all the  fields.');
       return;
     }
 
@@ -48,7 +49,7 @@ const Login = () => {
       }, {
         headers: {
           Authorization: "proqc_json_api",
-          Version: "qcv1",
+          Version: "v1",
           sp: "4",
           domain: "",
           sv: "2",
@@ -101,7 +102,7 @@ const Login = () => {
         const headers = {
           Authorization: proqctoken,
           Yearcode: yearcode,
-          Version: 'qcv1',
+          Version: "v1",
           sp: '4',
           domain: '',
           'Content-Type': 'application/json',
@@ -117,7 +118,6 @@ const Login = () => {
         try {
           const response = await axios.post('https://api.optigoapps.com/ReactStore/ReactStore.aspx', data, { headers });
           const responseData = response.data.Data;
-
           localStorage.setItem('rd', JSON.stringify(responseData.rd));
           localStorage.setItem('rd1', JSON.stringify(responseData.rd1));
           localStorage.setItem('rd2', JSON.stringify(responseData.rd2));
@@ -135,14 +135,13 @@ const Login = () => {
 
   return (
     <div className="w-screen h-screen flex items-center justify-center bg-gradient-to-r from-blue-100 via-indigo-50 to-green-100 p-4">
-      <div className="w-full max-w-4xl flex flex-col md:flex-row bg-white rounded-xl shadow-2xl p-6">
-        <div className="w-full md:w-1/2 flex items-center justify-center p-4 h-60 md:h-auto">
+      <div className="w-full max-w-4xl flex flex-col md:flex-row bg-white rounded-xl shadow-2xl max-h-[97vh] overflow-auto ">
+        <div className="w-full md:w-1/2 flex items-center justify-center  h-60 md:h-auto">
           <img src={banner} alt="banner" className="object-contain w-full h-full md:h-auto md:rounded-none rounded-xl md:rounded-l-xl" />
         </div>
 
-        <div className="w-full md:w-1/2 flex flex-col items-center justify-center p-4">
-          <h2 className="text-3xl font-semibold text-gray-800 text-center mb-6">Welcome To ProQC</h2>
-
+        <div className="w-full md:w-1/2 flex flex-col items-center justify-center p-6">
+          <h2 className="text-3xl font-semibold text-gray-800 text-center mb-6">Sign In</h2>
           <div className="h-7">
             {errorMessage && (
               <div className="mb-3 text-center text-red-600 rounded-lg">
@@ -165,6 +164,19 @@ const Login = () => {
               className="w-full px-3 py-2 border rounded-lg shadow-sm focus:outline-none"
             />
           </div>
+          {/* <div className="mb-4 w-full">
+            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="companyCode">
+User Name            </label>
+            <input
+              id="userName"
+              type="text"
+              placeholder="Enter your User Name"
+              value={userName}
+              onChange={(e) => { setUserName(e.target.value); clearError(); }}
+              onKeyDown={handleKeyDown}
+              className="w-full px-3 py-2 border rounded-lg shadow-sm focus:outline-none"
+            />
+          </div> */}
 
           <div className="mb-6 w-full">
             <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="password">

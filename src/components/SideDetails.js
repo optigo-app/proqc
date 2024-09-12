@@ -59,7 +59,7 @@ const SideDetails = ({ togglepanel }) => {
           Authorization:token,
           // Yearcode: yc,
           Yearcode: yc,
-          Version: "qcv1",
+          Version: "v1",
           sp: "4",
           sv:'0',
           domain: "",

@@ -76,7 +76,7 @@ function FetchDataComponent() {
   //         headers: {
   //           Authorization: '9726350724901930' ,
   //           Yearcode: 'e3tsaXZlLm9wdGlnb2FwcHMuY29tfX17ezIwfX17e3Rlc3Q2OH19e3t0ZXN0Njh9fQ==',
-  //           Version: "qcv1",
+  //           Version: "v1",
   //                       sp: '4',
   //           domain: '',
   //           'Content-Type': 'application/json',
@@ -118,7 +118,7 @@ function FetchDataComponent() {
     const headers = {
       Authorization: proqctoken,
       Yearcode: yc,
-      Version: 'qcv1',
+      Version: "v1",
       sp: '4',
       sv:'2',
       domain: '',

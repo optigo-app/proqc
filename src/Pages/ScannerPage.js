@@ -1,14 +1,14 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import QrReader from 'react-qr-barcode-scanner';
 import axios from 'axios';
 import Scannericon from '../Assets/Qrcode.png';
 import '../components/Sacnner.css';
-import { MdOutlineArrowBackIos } from "react-icons/md";
+import { MdOutlineArrowBackIos } from 'react-icons/md';
 import { FaArrowRight } from 'react-icons/fa';
 import { useRecoilValue } from 'recoil';
 import { rd3State, rd4State, YearCodeState } from '../Recoil/FetchDataComponent';
-import { IoMdExit } from "react-icons/io";
+import { IoMdExit } from 'react-icons/io';
 import { ClipLoader } from 'react-spinners';
 
 const useQueryParams = () => {
@@ -34,6 +34,19 @@ const ScannerPage = () => {
   const token = localStorage.getItem('proqctoken');
   const empid = localStorage.getItem('empid');
 
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (errorMessage) {
+        setErrorMessage('');
+        setBarcode('');
+        setScannedCode('');
+        setHasCamera(true);
+      }
+    }, 5000);
+
+    return () => clearTimeout(timer); // Clean up timer on component unmount
+  }, [errorMessage]);
+
   const handleCodeSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -53,7 +66,7 @@ const ScannerPage = () => {
           headers: {
             Authorization: token,
             Yearcode: yc,
-            Version: "qcv1",
+            Version: "v1",
             sp: "4",
             sv:'2',
             domain: "",
@@ -163,4 +176,4 @@ const ScannerPage = () => {
   );
 };
 
-export default ScannerPage; 
+export default ScannerPage;

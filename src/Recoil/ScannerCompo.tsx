@@ -71,7 +71,7 @@ const ScannerCompo = () => {
           headers: {
             Authorization: `9726350724901930`,
             Yearcode: '',
-            Version: 'qcv1',
+            Version: "v1",
             sp: '4',
             domain: '',
             'Content-Type': 'application/json',
@@ -109,7 +109,7 @@ const ScannerCompo = () => {
     const headers = {
       Authorization: '9726350724901930',
       Yearcode: yearCode,
-      Version: 'qcv1',
+      Version: "v1",
       sp: '4',
       domain: '',
       'Content-Type': 'application/json',

@@ -23,7 +23,7 @@ const AdminScan = () => {
         'Yearcode',
         'e3tsaXZlLm9wdGlnb2FwcHMuY29tfX17ezIwfX17e3Rlc3Q2OH19e3t0ZXN0Njh9fQ=='
       );
-      myHeaders.append('Version', 'qcv1');
+      myHeaders.append('Version', "v1");
       myHeaders.append('sp', '4');
       myHeaders.append('Content-Type', 'application/json');
       myHeaders.append(
