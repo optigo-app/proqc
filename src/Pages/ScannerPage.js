@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+
+import React, { useState, useEffect ,useRef} from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import QrReader from 'react-qr-barcode-scanner';
 import axios from 'axios';
@@ -23,6 +24,14 @@ const ScannerPage = () => {
   const [barcode, setBarcode] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
   const [loading, setLoading] = useState(false);
+  // const [errorMessage, setErrorMessage] = useState('');
+  const companyCodeRef = useRef(null); 
+
+  useEffect(() => {
+    if (companyCodeRef.current) {
+      companyCodeRef.current.focus();
+    }
+  }, []);
 
   const queryParams = useQueryParams();
   const qcID = atob(queryParams.get('QCID'));
@@ -44,14 +53,16 @@ const ScannerPage = () => {
       }
     }, 5000);
 
-    return () => clearTimeout(timer); // Clean up timer on component unmount
+    return () => clearTimeout(timer);
   }, [errorMessage]);
 
   const handleCodeSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true);
-
-    if (barcode) {
+    e.preventDefault();
+    if (barcode.trim() === '') {
+      setErrorMessage('Please enter your PIN.');
+    } else {
+          setLoading(true); 
       try {
         const response = await axios.post('https://api.optigoapps.com/ReactStore/ReactStore.aspx', {
           con: "{\"id\":\"\",\"mode\":\"SCANJOB\",\"appuserid\":\"kp23@gmail.com\"}",
@@ -147,7 +158,7 @@ const ScannerPage = () => {
         )}
 
         {errorMessage && (
-          <p className="text-red-500 text-center mt-4">{errorMessage}</p>
+          <p className="text-red-600 text-center mt-4">{errorMessage}</p>
         )}
 
         <div className="mt-6">
@@ -160,7 +171,9 @@ const ScannerPage = () => {
                 value={barcode}
                 onChange={handleChange}
                 onKeyDown={(e) => e.key === 'Enter' && handleCodeSubmit(e)} 
-              />
+                ref={companyCodeRef}
+           
+           />
               <button
                 type="submit"
                 className={`bg-gradient-to-r from-green-400 to-green-600 text-white px-6 py-3 font-semibold rounded-r-lg hover:bg-green-700 transition duration-200 ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}

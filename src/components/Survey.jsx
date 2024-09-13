@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { FaRegQuestionCircle, FaChevronLeft, FaChevronRight, FaCheck, FaRegThumbsUp, FaRegThumbsDown, FaPause, FaEllipsisH, FaQuestionCircle, FaCheckCircle, FaRegEdit } from 'react-icons/fa';
+import React, { useState, useEffect ,useRef} from 'react';
+import {  FaChevronLeft, FaChevronRight, FaCheck, FaRegThumbsUp, FaRegThumbsDown, FaPause, FaEllipsisH, FaQuestionCircle, FaCheckCircle, FaRegEdit } from 'react-icons/fa';
 import { BiSolidImageAdd } from "react-icons/bi";
 import { IoCloseOutline } from "react-icons/io5";
 import { useRecoilValue } from 'recoil';
@@ -10,6 +10,8 @@ import { faBarcode, faArrowRight } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useLocation,useNavigate } from "react-router-dom";
 import axios from 'axios';
+import { ClipLoader } from 'react-spinners';
+
 
 const useQueryParams = () => {
 const location = useLocation();
@@ -30,6 +32,8 @@ const [editingRemark, setEditingRemark] = useState(null);
 const [images, setImages] = useState([]); 
 const [imageUrls, setImageUrls] = useState([]); 
 const queryParams = useQueryParams();
+const [loading, setLoading] = useState(false);
+
 const qcID = atob(queryParams.get('QCID'));
 const empbarcode = atob(queryParams.get('empbarcode'));
 const jobid = atob(queryParams.get('jobid'));
@@ -79,7 +83,12 @@ const conclusionQuestion = {
   options: 'Approved,Rejected',
 };
 const [selectedConclusion, setSelectedConclusion] = useState(null);
-
+const RemarkRef = useRef(null); 
+useEffect(() => {
+  if (editingRemark && RemarkRef.current) {
+    RemarkRef.current.focus();
+  }
+}, [editingRemark]);
 const Conclusion =
 [{id:'1',status:'Approved',icon:'FaRegThumbsUp',iconcolor:'#4CAF50',bgcolor:'#4CAF5030 '},
 {id:'2',status:'Rejected',icon:'FaRegThumbsDown',iconcolor:'#F44336',bgcolor:'#F4433630'},  
@@ -126,9 +135,23 @@ useEffect(() => {
 
 
 
+// useEffect(() => {
+//   if (showSuccessMessage) {
+//     setTimeout(() => {
+//       setShowSuccessMessage(false);
+//       setCurrentQuestionIndex(0);
+//       setPageStartIndex(0);
+//       setShowSelection(true);
+//       navigate(`/Scannerpage?QCID=${btoa(qcID)}&empbarcode=${btoa(empbarcode)}&employeeid=${btoa(empid)}&eventid=${btoa(eveid)} `);
+//     }, 10000);
+//   }
+// }, [showSuccessMessage, navigate, qcID, empbarcode]);
+
 useEffect(() => {
+  let timeoutId;
+
   if (showSuccessMessage) {
-    setTimeout(() => {
+    timeoutId = setTimeout(() => {
       setShowSuccessMessage(false);
       setCurrentQuestionIndex(0);
       setPageStartIndex(0);
@@ -136,7 +159,13 @@ useEffect(() => {
       navigate(`/Scannerpage?QCID=${btoa(qcID)}&empbarcode=${btoa(empbarcode)}&employeeid=${btoa(empid)}&eventid=${btoa(eveid)} `);
     }, 10000);
   }
+  return () => clearTimeout(timeoutId);
 }, [showSuccessMessage, navigate, qcID, empbarcode]);
+
+const handleContinue = () => {
+  setShowSuccessMessage(false); 
+  navigate(`/Scannerpage?QCID=${btoa(qcID)}&empbarcode=${btoa(empbarcode)}&employeeid=${btoa(empid)}&eventid=${btoa(eveid)} `);
+};
 
 
 const handleOptionClick = (option) => {
@@ -188,12 +217,27 @@ const handleScrollLeft = () => {
   }
 };
 
+// const optionMap = Options.reduce((acc, option) => {
+//   acc[option.opt] = option.id;
+//   return acc;
+// }, {});
+
 const optionMap = Options.reduce((acc, option) => {
   acc[option.opt] = option.id;
   return acc;
 }, {});
 
+function mapValuesToIds(valueString) {
+  const values = valueString.split(",").map(value => value.trim());
+  const ids = values.map(value => optionMap[value]);
+  return ids.join(","); 
+}
+
+
 const handleSubmit = async () => {
+  setLoading(true);
+  const ipResponse = await axios.get('https://api.ipify.org?format=json');
+  const ipAddress = ipResponse.data.ip;
   const payload = {
     con: JSON.stringify({
       id: "",
@@ -209,11 +253,13 @@ const handleSubmit = async () => {
       que: btoa(JSON.stringify(
         Object.keys(answers).map(questionId => ({
           queid: questionId,
-          optid: answers[questionId].join(','), 
+          optid:mapValuesToIds( answers[questionId].join(',')), 
           rem: remarks[questionId] || ""        
         }))
+        
       )),
-      image: images.join(','),                   
+      image: images.join(','), 
+      ipaddress: ipAddress                  
     }),
   };
   try {
@@ -247,97 +293,11 @@ const handleSubmit = async () => {
   } catch (error) {
     alert("Error saving your answer. Try again.");
   }
+  finally {
+    setLoading(false);
+  }
 };
-
-
 console.log("optionmap",optionMap['Quality/Color']);
-
-// const handleSubmit = async () => {
-//   let arr = [];
-//   console.log('optionmap answers', answers);
-
-//   const transformedAnswers = Object.keys(answers)?.map(questionId => {
-//     console.log('optionmap ..', answers[questionId]);
-//     arr.push(answers[questionId]);
-//     const selectedOptions = answers[questionId]?.map(optionName => {
-//       console.log(optionMap[optionName], optionMap, optionName);
-//     });
-//     return {
-//       queid: questionId,
-//       optid: selectedOptions.join(','), 
-//       rem: remarks[questionId] || ""
-//     };
-//   });
-
-//   console.log('optionmap transformedAnswers..', transformedAnswers);
-
-
-// arr?.forEach((a) => {
-//     a?.forEach((e) => {
-//       console.log(e, optionMap);
-//     })
-// })
-// console.log(optionMap,"optionMap");
-// arr?.forEach((a) => {
-//   if (optionMap.hasOwnProperty(a)) {
-//     console.log(`Key: ${a}, ID: ${optionMap[a]}`);
-//   } else {
-//     console.log(`Key: ${a} not found in optionMap`);
-//   }
-// });
-//   const payload = {
-//     con: JSON.stringify({
-//       id: "",
-//       mode: "SAVEQC",
-//       appuserid: "kp23@gmail.com",
-//     }),
-//     p: "eyJQYWNrYWdlSWQxIjoiMSIsIkZyb250RW5kX1JlZ05vMSI6Ijgwa2dpemJpZHV3NWU3Z2ciLCJDdXN0b21lcmlkMSI6IjEwIn0=",
-//     dp: JSON.stringify({
-//       empid: `${empid}`,
-//       qcdeptid: "1",
-//       Jobno: `${jobid}`,
-//       conclusion: selectedConclusion === "Approved" ? "1" : selectedConclusion === "Rejected" ? "2" : "3",
-//       que: btoa(JSON.stringify(transformedAnswers)), 
-//       image: images.join(','),                   
-//     }),
-//   };
-
-//   try {
-//     const response = await axios.post("http://api.optigoapps.com/ReactStore/ReactStore.aspx", payload, {
-//       headers: {
-//         Authorization: "9726350724901930",
-//         Yearcode: `${yc}`,
-//         Version: "v1",
-//         sp: "4",
-//         sv:"0",
-//         domain: "",
-//         "Content-Type": "application/json",
-//       }
-//     });
-//     console.log("response.data", response.data);
-
-//     if (response.data.Status == 200) {
-//       setShowSuccessMessage(true);
-//       setAnswers({});
-//       setSelectedQuestions([]);
-//       setRemarks({});
-//       setImages([]);
-//       setImageUrls([]);
-//       localStorage.removeItem('answers');
-//       localStorage.removeItem('selectedQuestions');
-//       localStorage.removeItem('remarks');
-//       localStorage.removeItem('images'); 
-//     } else {
-//       alert("Error saving your answer. Try again.");
-//     }
-//   } catch (error) {
-//     alert("Error saving your answer. Try again.");
-//   }
-// };
-
-
-
-
 const getSelectedCount = () => {
   return (answers[currentQuestion.id] || []).length;
 };
@@ -379,13 +339,10 @@ const handleRemoveImage = (index) => {
   setImages(prevImages => prevImages.filter((_, i) => i !== index));
   setImageUrls(prevImageUrls => prevImageUrls.filter((_, i) => i !== index));
 };
-
-
 const currentQuestionNumber = currentQuestionIndex + 1;
 const totalQuestions = allQuestions.length;
-
-
 console.log("allQuestions",allQuestions); 
+
 return (
   <div className="flex flex-col lg:flex-row max-w-screen w-full  lg:w-[60vw]  mb-5 md:mb-5 h-fit  overflow-auto mx-auto p-6 bg-white shadow-md rounded-lg">
     {showSuccessMessage ? (
@@ -398,7 +355,7 @@ return (
         <p className="text-gray-700 text-center mb-6">Thank you.</p>
         <button
      className="flex items-center justify-center px-6 py-3 bg-green-600 text-white text-lg font-semibold rounded-full shadow-md hover:bg-green-700 transition-colors duration-300"
-     onClick={() => navigate(`/Scannerpage?QCID=${btoa(qcID)}&empbarcode=${btoa(empbarcode)}&employeeid=${btoa(empid)}&eventid=${btoa(eveid)}   `)}
+     onClick={handleContinue}
    >
      <FontAwesomeIcon icon={faArrowRight} className="mr-2" />
      Continue
@@ -485,7 +442,7 @@ return (
                 ))}       
               </div>
 
-              {/* <div className='h-96'> */}
+        {/* <div className='h-96'> */}
                 {isLastQuestion ? (
                   <>
                     <div className="mt-6">
@@ -570,9 +527,12 @@ return (
                   <>
                     <button
                       onClick={handleSubmit}
-                      className="py-2 px-4 bg-[#56a4ff] text-white rounded-full shadow-md"
-                    >
-                      Submit
+                      className={`py-2 px-4 bg-[#56a4ff] w-20 text-white rounded-full shadow-md${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
+              disabled={loading}
+                  
+                  >
+                 {loading ? <ClipLoader size={20} color="#fff" /> : 'Submit'}
+  
                     </button>
                   </>
                 ) : (
@@ -594,8 +554,9 @@ return (
               <textarea
                 value={remarks[currentQuestion.id] || ''}
                 onChange={(e) => handleRemarkChange(currentQuestion.id, e.target.value)}
-                className="w-full p-2 border border-gray-300 rounded-lg mb-4"
+                className="w-full p-2 border border-gray-300 outline-none rounded-lg mb-4"
                 rows="4"
+                ref={RemarkRef}
               />
               <div className="flex justify-end">
                 <button

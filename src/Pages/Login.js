@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect ,useRef} from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
 import { ClipLoader } from 'react-spinners';
@@ -15,6 +15,13 @@ const Login = () => {
   const [yearcode, setYearcode] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const companyCodeRef = useRef(null);
+
+  useEffect(() => {
+    if (companyCodeRef.current) {
+      companyCodeRef.current.focus();
+    }
+  }, []);
 
   const handleLogin = async () => {
     if (!companyCode || !password) {
@@ -23,7 +30,7 @@ const Login = () => {
     }
 
     setLoading(true);
-    localStorage.clear();
+    // localStorage.clear();
     try {
       const response = await axios.post('https://api.optigoapps.com/ReactStore/ReactStore.aspx', {
         con: JSON.stringify({
@@ -52,7 +59,7 @@ const Login = () => {
           Version: "v1",
           sp: "4",
           domain: "",
-          sv: "2",
+          sv:'2',
           "Content-Type": "application/json",
           Cookie: "ASP.NET_SessionId=z2cfg3oh2v5rydatgx43dqqb"
         }
@@ -104,6 +111,7 @@ const Login = () => {
           Yearcode: yearcode,
           Version: "v1",
           sp: '4',
+          sv:'2',
           domain: '',
           'Content-Type': 'application/json',
           Cookie: 'ASP.NET_SessionId=i4btgm10k555buulfvmqyeyc',
@@ -162,6 +170,8 @@ const Login = () => {
               onChange={(e) => { setCompanyCode(e.target.value); clearError(); }}
               onKeyDown={handleKeyDown}
               className="w-full px-3 py-2 border rounded-lg shadow-sm focus:outline-none"
+              ref={companyCodeRef} // Step 3: Add the ref to the input
+
             />
           </div>
           {/* <div className="mb-4 w-full">
@@ -191,6 +201,12 @@ User Name            </label>
                 onChange={(e) => { setPassword(e.target.value); clearError(); }}
                 onKeyDown={handleKeyDown}
                 className="w-full px-3 py-2 border-none outline-none rounded-l-lg"
+                style={{
+                  WebkitTextSecurity: !showPassword ? 'disc' : 'none',  
+                  textSecurity: !showPassword ? 'disc' : 'none', 
+                  fontFamily: !showPassword ? 'inherit' : 'inherit', 
+                  // letterSpacing: !showPassword ? '3px' : 'normal',
+                }}
               />
               <div
                 className="px-3 flex items-center cursor-pointer"
@@ -222,3 +238,5 @@ User Name            </label>
 };
 
 export default Login;
+
+
