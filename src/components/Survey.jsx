@@ -1,5 +1,8 @@
+
+
+
 import React, { useState, useEffect ,useRef} from 'react';
-import {  FaChevronLeft, FaChevronRight, FaCheck, FaRegThumbsUp, FaRegThumbsDown, FaPause, FaEllipsisH, FaQuestionCircle, FaCheckCircle, FaRegEdit } from 'react-icons/fa';
+import {  FaChevronLeft, FaChevronRight, FaCheck, FaRegThumbsUp, FaRegThumbsDown, FaPause, FaEllipsisH, FaQuestionCircle, FaCheckCircle,FaRegEdit } from 'react-icons/fa';
 import { BiSolidImageAdd } from "react-icons/bi";
 import { IoCloseOutline } from "react-icons/io5";
 import { useRecoilValue } from 'recoil';
@@ -11,6 +14,8 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useLocation,useNavigate } from "react-router-dom";
 import axios from 'axios';
 import { ClipLoader } from 'react-spinners';
+import { MdOutlineArrowBackIosNew } from 'react-icons/md';
+
 
 
 const useQueryParams = () => {
@@ -33,6 +38,8 @@ const [images, setImages] = useState([]);
 const [imageUrls, setImageUrls] = useState([]); 
 const queryParams = useQueryParams();
 const [loading, setLoading] = useState(false);
+const [showConclusionSlide, setShowConclusionSlide] = useState(false);
+const [errorMessage, setErrorMessage] = useState("");
 
 const qcID = atob(queryParams.get('QCID'));
 const empbarcode = atob(queryParams.get('empbarcode'));
@@ -106,9 +113,10 @@ const getIconComponent = (iconName) => {
       return null;
   }
 };
-const handleConclusionClick = (status, bgcolor) => {
-  setSelectedConclusion(status);
-};
+
+// const handleConclusionClick = (status, bgcolor) => {
+//   setSelectedConclusion(status);
+// };
 
 
 const currentQuestion = questionsToDisplay[currentQuestionIndex];
@@ -178,14 +186,52 @@ const handleOptionClick = (option) => {
   localStorage.setItem('answers', JSON.stringify(updatedAnswers));
 };
 
+// const handleNext = () => {
+//   if (currentQuestionIndex < questionsToDisplay.length - 1) {
+//     setCurrentQuestionIndex(currentQuestionIndex + 1);
+//     if (currentQuestionIndex + 1 >= pageStartIndex + 5) {
+//       setPageStartIndex(pageStartIndex + 5);
+//     }
+//   }
+// };
+
 const handleNext = () => {
-  if (currentQuestionIndex < questionsToDisplay.length - 1) {
+  if (isLastQuestion) {
+    setShowConclusionSlide(true); 
+  } else {
     setCurrentQuestionIndex(currentQuestionIndex + 1);
     if (currentQuestionIndex + 1 >= pageStartIndex + 5) {
       setPageStartIndex(pageStartIndex + 5);
     }
   }
 };
+
+// const handleConclusionClick = (statusid,status, bgcolor) => {
+//   console.log("Selected Conclusion:", status); 
+//   setSelectedConclusion(status);
+//   console.log(statusid,"statusid");
+//   handleSubmit(statusid);
+// };
+
+const handleConclusionClick = (statusid, status, bgcolor) => {
+  const answerssel = answers[Object.keys(answers)] ?? [];
+  
+  if (status === 'Rejected' && answerssel.length === 0) {
+    setErrorMessage("Please select at least one reason before rejection.");
+    
+    const timeoutId = setTimeout(() => {
+      setErrorMessage("");
+    }, 5000);
+    
+    return timeoutId; 
+  }
+
+  setSelectedConclusion(status);
+  setErrorMessage(""); 
+  handleSubmit(statusid); 
+};
+
+
 
 const handlePrevious = () => {
   if (currentQuestionIndex > 0) {
@@ -234,7 +280,8 @@ function mapValuesToIds(valueString) {
 }
 
 
-const handleSubmit = async () => {
+const handleSubmit = async (statusid) => {
+  
   setLoading(true);
   const ipResponse = await axios.get('https://api.ipify.org?format=json');
   const ipAddress = ipResponse.data.ip;
@@ -249,16 +296,17 @@ const handleSubmit = async () => {
       empid: `${empid}`,
       qcdeptid: qcID,
       Jobno: `${jobid}`,
-      conclusion: selectedConclusion === "Approved" ? "1" : selectedConclusion === "Rejected" ? "2" : "3",
+      conclusion: statusid ? statusid:'',
       que: btoa(JSON.stringify(
         Object.keys(answers).map(questionId => ({
           queid: questionId,
           optid:mapValuesToIds( answers[questionId].join(',')), 
-          rem: remarks[questionId] || ""        
+          rem: remarks[questionId] || ""   
         }))
         
       )),
       image: images.join(','), 
+      eventid:eveid,
       ipaddress: ipAddress                  
     }),
   };
@@ -269,14 +317,14 @@ const handleSubmit = async () => {
         Yearcode: `${yc}`,
         Version: "v1",
         sp: "4",
-        sv:'2',
+        sv:'0',
         domain: "",
         "Content-Type": "application/json",
       }
     });
     console.log("response.data", response.data);
 
-    if (response.data.Status == 200) {
+    if (response.data.Data.rd[0].stat == 1) {
       setShowSuccessMessage(true);
       setAnswers({});
       setSelectedQuestions([]);
@@ -288,7 +336,7 @@ const handleSubmit = async () => {
       localStorage.removeItem('remarks');
       localStorage.removeItem('images'); 
     } else {
-      alert("Error saving your answer. Try again.");
+      setErrorMessage("Thee is some issue saving your answers ! Please try again")
     }
   } catch (error) {
     alert("Error saving your answer. Try again.");
@@ -301,7 +349,10 @@ console.log("optionmap",optionMap['Quality/Color']);
 const getSelectedCount = () => {
   return (answers[currentQuestion.id] || []).length;
 };
-
+const handleback = () =>{
+  setErrorMessage(""); 
+  setShowConclusionSlide(false)
+}
 const handleRemarkChange = (questionId, newRemark) => {
   const updatedRemarks = { ...remarks, [questionId]: newRemark };
   setRemarks(updatedRemarks);
@@ -344,7 +395,7 @@ const totalQuestions = allQuestions.length;
 console.log("allQuestions",allQuestions); 
 
 return (
-  <div className="flex flex-col lg:flex-row max-w-screen w-full  lg:w-[60vw]  mb-5 md:mb-5 h-fit  overflow-auto mx-auto p-6 bg-white shadow-md rounded-lg">
+  <div className="flex flex-col lg:flex-row max-w-screen w-full  lg:w-[60vw]  min-h-[80vh] mb-5 md:mb-5 h-fit  overflow-auto mx-auto p-6 bg-white shadow-md rounded-lg">
     {showSuccessMessage ? (
     <>
       <div className="flex-1  flex flex-col items-center justify-center p-6 bg-green-100 rounded-lg shadow-md">
@@ -362,28 +413,127 @@ return (
    </button>
         <div className='h-64'></div>
         </div>
-
-
-
     </>
  
-    ) : hasQuestions  && allQuestions ? ( 
+    ) :  showConclusionSlide ? (
+      <>
+         <div className="mt-6 flex flex-col justify-between " style={{ width: '100%', }}>
+  <div className="flex h-fit justify-between items-center">
+    <button
+      onClick={handleback}
+      className="py-2 mb-6 text-gray-600 hover:text-gray-800 transition-all"
+    >
+      <MdOutlineArrowBackIosNew className="text-3xl font-bold" />
+    </button>
+  </div>
+
+  <div className='flex flex-col  justify-center items-center' style={{height:'-webkit-fill-available'}}>
+  <h2 className="text-2xl font-semibold w-full  text-center mb-6 text-gray-800">{conclusionQuestion.question}</h2>
+
+<div className="flex flex-col h-fit">
+  <div className="flex flex-wrap gap-10 mb-4 justify-center">
+    {Conclusion.map((item) => (
+      <button
+        key={item.id}
+        onClick={() => handleConclusionClick(item.id, item.status, item.bgcolor)}
+        style={{
+          backgroundColor: selectedConclusion === item.status ? item.bgcolor : 'white',
+          color: item.iconcolor,
+          border: `2px solid ${item.iconcolor}`,
+          transition: 'all 0.3s ease',
+        }}
+        className={`flex flex-col items-center py-5 px-8 rounded-lg shadow-md focus:outline-none transform hover:scale-105 transition-transform ${
+          selectedConclusion === item.status ? 'bg-opacity-90' : 'bg-opacity-100'
+        }`}
+      >
+        {loading && selectedConclusion === item.status ? (
+          <ClipLoader size={26} color={`${item.iconcolor}`} />
+        ) : (
+          <>{getIconComponent(item.icon)}</>
+        )}
+        <span className="mt-3 text-xl font-semibold">{item.status}</span>
+      </button>
+    ))}
+  </div>
+
+  <div className='h-[2.5rem]'>
+  {errorMessage && (
+    <div className="text-red-500 p-2 bg-red-50 border-red-200 border   text-center mb-6">
+      {errorMessage}
+    </div>
+  )}
+  </div>
+
+  {/* 
+  <div className="flex flex-wrap gap-4 mb-6 justify-center">
+    <label
+      htmlFor="file-input"
+      className={`flex flex-col items-center py-4 px-6 rounded-lg shadow-lg border border-gray-300 cursor-pointer ${
+        images.length >= 4 ? 'bg-gray-300 text-gray-700 cursor-not-allowed' : 'bg-white text-gray-700 hover:bg-gray-100'
+      }`}
+    >
+      <BiSolidImageAdd size={30} color="#a9a9a9" />
+      <span className="mt-2 text-base font-medium">Add Photo</span>
+      <input
+        id="file-input"
+        type="file"
+        accept="image/*"
+        multiple
+        onChange={handleImageUpload}
+        className="hidden"
+        disabled={images.length >= 4}
+      />
+    </label>
+  </div>
+  */}
+   {/* <div className="flex  h-32 flex-wrap gap-4 mb-8">
+   {imageUrls.length > 0 && (
+       <div className="flex flex-wrap gap-4">
+         {imageUrls.map((img, index) => (
+           <div key={index} className="relative rounded-lg shadow-lg border border-gray-300">
+             <img src={img} alt={`Uploaded ${index}`} className="w-32 h-32 object-cover rounded-md" />
+             <button
+               onClick={() => handleRemoveImage(index)}
+               className="absolute top-[-10px]   right-[-5px] bg-gray-500 text-white rounded-full p-1"
+             >
+<IoCloseOutline size={15} color="white" />
+             </button>
+           </div>
+         ))}
+       </div>
+     )}
+   </div> */}
+
+</div>
+  </div>
+
+  <div className="flex h-fit justify-between items-center">
+    <div  className="py-2 mb-6 text-gray-600 hover:text-gray-800 transition-all"
+    >
+      <div className="h-[2.25rem] font-bold" />
+    </div>
+  </div>
+</div>
       
-      <div className="flex w-full flex-col lg:flex-row lg:pr-4">
-        <div className="flex-1">
-       
+    
+    </>
+    ) : hasQuestions  && allQuestions ? ( 
+
+      <div className="flex w-full flex-col lg:flex-row lg:pr-4 ">
+        <div className=" flex flex-col justify-between h-full " style={{width:'-webkit-fill-available'}}>
             <>
-              <div className="flex w-full justify-between items-center mb-4">
+        <div>
+        <div className="flex w-full justify-between items-center mb-4">
               <div className="flex space-x-2 my-5 w-fit justify-between flex-row items-center">
   <button
     onClick={handleScrollLeft}
     disabled={pageStartIndex === 0}
-    className={`w-8 h-8 rounded-full shadow-md focus:outline-none text-[#56a4ff] hover:bg-gray-300 justify-center items-center disabled:text-gray-300 ${selectedQuestions.length > 10 ? 'flex' : 'hidden'}`}
+    className={`w-8 h-8 rounded-full shadow-md focus:outline-none text-white bg-gray-600 hover:bg-gray-300 justify-center items-center disabled:text-gray-300 ${selectedQuestions.length > 10 ? 'flex' : 'hidden'}`}
   >
     <FaChevronLeft />
   </button>
-
   <div className='flex flex-row gap-3'>
+
     {questionsToDisplay.slice(pageStartIndex, pageStartIndex + 10).map((_, index) => (
       <button
         key={index + pageStartIndex}
@@ -399,6 +549,7 @@ return (
     ))}
   </div>
 
+
   <button
     onClick={handleScrollRight}
     disabled={pageStartIndex + 10 >= questionsToDisplay.length}
@@ -408,11 +559,11 @@ return (
   </button>
 </div>
 
-                <p className='text-lg font-bold text-green-500'>
+
+<p className='text-lg font-bold text-green-500'>
                   {getSelectedCount()}
                 </p>
               </div>
-
               <div className="flex items-center mb-6">
                 <div className="text-lg font-semibold mr-4 text-[#39aa78]" >
                   {currentQuestionNumber}/{totalQuestions}
@@ -425,7 +576,6 @@ return (
                   <FaRegEdit className="text-2xl transition text-blue-600 duration-300 ease-in-out hover:text-blue-200" />
                 </button>
               </div>
-
               <div className="flex  flex-wrap gap-3 mb-6">
                 {currentQuestion.options.split(',').map((option) => (
                   <button
@@ -441,8 +591,8 @@ return (
                   </button>
                 ))}       
               </div>
-
-        {/* <div className='h-96'> */}
+        </div>
+        {/* <div className='h-96'>
                 {isLastQuestion ? (
                   <>
                     <div className="mt-6">
@@ -451,27 +601,30 @@ return (
                    <div className='flex flex-wrap gap-4 mb-2'>
                    <div className="flex flex-wrap gap-4 mb-5">
                    {Conclusion.map((item) => (
-        <button
-          key={item.id}
-          onClick={() => handleConclusionClick(item.status, item.bgcolor)}
-          style={{
-            backgroundColor: selectedConclusion === item.status ? item.bgcolor : 'white',
-            color: item.iconcolor,
-            border: `1px solid ${item.iconcolor}`, 
-          }}
-          className={`flex flex-col items-center py-4 px-6 rounded-lg shadow-lg border border-gray-300 focus:outline-none transition-transform transform ${
-            selectedConclusion === item.status ? 'bg-opacity-80' : 'bg-opacity-100'
-          } `}
-         
-        >
-          {getIconComponent(item.icon)}
-          <span className="mt-2 text-lg font-medium">{item.status}</span>
-        </button>
+           <button
+                  key={item.id}
+                  onClick={() => handleConclusionClick(item.id, item.status, item.bgcolor)}
+                  style={{
+                    backgroundColor: selectedConclusion === item.status ? item.bgcolor : 'white',
+                    color: item.iconcolor,
+                    border: `1px solid ${item.iconcolor}`,
+                  }}
+                  className={`flex flex-col items-center py-4 px-6 rounded-lg shadow-lg border border-gray-300 focus:outline-none transition-transform transform ${
+                    selectedConclusion === item.status ? 'bg-opacity-80' : 'bg-opacity-100'
+                  }`}
+                >
+                  {loading && selectedConclusion === item.status ? (
+                    <ClipLoader size={20} color={`${item.iconcolor}`} />
+                  ) : (
+                    <>{getIconComponent(item.icon)}</>
+                  )}
+                  <span className="mt-2 text-lg font-medium">{item.status}</span>
+                </button>
       ))}
     </div>
                         
 
-                        {/* <div className="flex flex-wrap gap-4 mb-5">
+                        <div className="flex flex-wrap gap-4 mb-5">
                           <label
                             htmlFor="file-input"
                             className={`flex flex-col items-center py-4 px-6 rounded-lg shadow-lg border border-gray-300 cursor-pointer ${images.length >= 4 ? 'bg-gray-300 text-gray-700 cursor-not-allowed' : 'bg-white text-gray-700 hover:bg-gray-100'}`}
@@ -488,11 +641,11 @@ return (
                               disabled={images.length >= 4}
                             />
                           </label>
-                        </div> */}
+                        </div>
 
                        
                       </div>
-                      {/* <div className="flex  h-32 flex-wrap gap-4 mb-8"> */}
+                      <div className="flex  h-32 flex-wrap gap-4 mb-8">
                         {imageUrls.length > 0 && (
                             <div className="flex flex-wrap gap-4">
                               {imageUrls.map((img, index) => (
@@ -509,11 +662,19 @@ return (
                             </div>
                           )}
                         </div>
+                        <div className="flex justify-between">
+            <button
+              onClick={() => setShowConclusionSlide(false)}
+              className="py-2 px-4 bg-gray-600 text-white rounded-full shadow-md"
+            >
+              Previous
+            </button>
+          </div>
+                   </div> 
                    </div>
-                    {/* </div> */}
                   </>
-                ) : null}
-              {/* </div> */}
+                ) : null} 
+              </div>  */}
 
               <div className="flex justify-between">
                 <button
@@ -523,7 +684,7 @@ return (
                 >
                   Previous
                 </button>
-                {isLastQuestion ? (
+                {/* {isLastQuestion ? (
                   <>
                     <button
                       onClick={handleSubmit}
@@ -535,17 +696,16 @@ return (
   
                     </button>
                   </>
-                ) : (
+                ) : ( */}
                   <button
                     onClick={handleNext}
                     className="py-2 px-4 bg-[#56a4ff] text-white rounded-full shadow-md"
                   >
                     Next
                   </button>
-                )}
+                {/* )} */}
               </div>
             </>
-          
         </div>
         {editingRemark === currentQuestion.id && (
           <div className="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50 z-50">
@@ -580,12 +740,9 @@ return (
   </div>
   <div className="h-64"></div>
 </div>
-
     )}
   </div>
 );  
 }                                         
 
 export default Survey;
-
-

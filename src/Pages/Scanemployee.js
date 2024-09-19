@@ -11,6 +11,9 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { FaEye, FaEyeSlash, FaArrowLeft } from 'react-icons/fa';
 
 const Scanemp = () => {
+  useEffect(() => {
+    localStorage.setItem('lastScreen', 'empscan'); // Make sure you're storing the correct path here
+  }, []);
   const navigate = useNavigate();
   const [barcode, setBarcode] = useState('');
   const [scannedCode, setScannedCode] = useState('');
@@ -107,7 +110,7 @@ const Scanemp = () => {
       Yearcode: yc,
       Version: "v1",
       sp: "4",
-      sv:'2',
+      sv:'0',
       domain: "",
       "Content-Type": "application/json",
     };
@@ -134,6 +137,7 @@ const Scanemp = () => {
           localStorage.setItem('emplname', lname);
           localStorage.setItem('empid', empid);
           localStorage.setItem('qcdept', qcdept);
+          localStorage.setItem('eventId', eveid);
           setEmployeeid(empid);
           setEventid(eveid);
 
@@ -152,7 +156,7 @@ const Scanemp = () => {
             setIsModalOpen(true);
           } else if (filteredQcdeptNames.length === 1) {
             const qcdeptId = filteredQcdeptIds[0];
-            navigate(`/ScannerPage?QCID=${btoa(qcdeptId)}&empbarcode=${btoa(barcode)}&employeeid=${btoa(empid)}&eventid=${btoa(eveid)}`);
+            navigate(`/ScannerPage?QCID=${btoa(qcdeptId)}&empbarcode=${btoa(barcode)}&employeeid=${btoa(empid)}}`);
           }
         } else {
           setErrorMessage("  Invalid Employee Barcode or pin . Please try again.");
@@ -160,13 +164,13 @@ const Scanemp = () => {
       })
       .catch((error) => {
         setLoading(false);
-        setErrorMessage("  Some ErrorOccured. Please try again.");
+        setErrorMessage(" Some ErrorOccured. Please try again.");
         console.error(' ', error);
       });
   };
 
   const handlebuttonclick = (qcdeptId) => {
-    navigate(`/ScannerPage?QCID=${btoa(qcdeptId)}&empbarcode=${btoa(barcode)}&employeeid=${btoa(employeeid)}&eventid=${btoa(eventid)}`);
+    navigate(`/ScannerPage?QCID=${btoa(qcdeptId)}&empbarcode=${btoa(barcode)}&employeeid=${btoa(employeeid)}}`);
   };
 
 

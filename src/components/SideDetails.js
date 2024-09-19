@@ -61,7 +61,7 @@ const SideDetails = ({ togglepanel }) => {
           Yearcode: yc,
           Version: "v1",
           sp: "4",
-          sv:'2',
+          sv:'0',
           domain: "",
           "Content-Type": "application/json",
         }

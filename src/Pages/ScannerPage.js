@@ -24,7 +24,6 @@ const ScannerPage = () => {
   const [barcode, setBarcode] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
   const [loading, setLoading] = useState(false);
-  // const [errorMessage, setErrorMessage] = useState('');
   const companyCodeRef = useRef(null); 
 
   useEffect(() => {
@@ -36,7 +35,7 @@ const ScannerPage = () => {
   const queryParams = useQueryParams();
   const qcID = atob(queryParams.get('QCID'));
   const empcode = atob(queryParams.get('empbarcode'));
-  const eveid = atob(queryParams.get('eventid'));
+  const eveid = localStorage.getItem('eventId');
   const yc = localStorage.getItem('yearcode');
   const empfname = localStorage.getItem('empfname');
   const emplname = localStorage.getItem('emplname');
@@ -79,7 +78,7 @@ const ScannerPage = () => {
             Yearcode: yc,
             Version: "v1",
             sp: "4",
-            sv:'2',
+            sv:'0',
             domain: "",
             "Content-Type": "application/json",
             "Cookie": "ASP.NET_SessionId=f0w3jjmd1vryhwsww0dfds1z"

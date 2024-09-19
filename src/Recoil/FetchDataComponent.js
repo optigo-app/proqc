@@ -120,7 +120,7 @@ function FetchDataComponent() {
       Yearcode: yc,
       Version: "v1",
       sp: '4',
-      sv:'2',
+      sv:'0',
       domain: '',
       'Content-Type': 'application/json',
       Cookie: 'ASP.NET_SessionId=i4btgm10k555buulfvmqyeyc',

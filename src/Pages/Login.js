@@ -4,7 +4,7 @@ import { FaEye, FaEyeSlash } from 'react-icons/fa';
 import { ClipLoader } from 'react-spinners';
 import axios from 'axios';
 import banner from '../Assets/proqc.png';
-
+import horizontalbanner from '../Assets/banner.png'
 const Login = () => {
   const [companyCode, setCompanyCode] = useState('');
   const [userName, setUserName] = useState('');
@@ -14,6 +14,8 @@ const Login = () => {
   const [proqctoken, setProqctoken] = useState('');
   const [yearcode, setYearcode] = useState('');
   const [loading, setLoading] = useState(false);
+  const [imageLoaded, setImageLoaded] = useState(false);
+
   const navigate = useNavigate();
   const companyCodeRef = useRef(null);
 
@@ -30,7 +32,6 @@ const Login = () => {
     }
 
     setLoading(true);
-    // localStorage.clear();
     try {
       const response = await axios.post('https://api.optigoapps.com/ReactStore/ReactStore.aspx', {
         con: JSON.stringify({
@@ -59,7 +60,7 @@ const Login = () => {
           Version: "v1",
           sp: "4",
           domain: "",
-          sv:'2',
+          sv:'0',
           "Content-Type": "application/json",
           Cookie: "ASP.NET_SessionId=z2cfg3oh2v5rydatgx43dqqb"
         }
@@ -74,13 +75,15 @@ const Login = () => {
         localStorage.setItem('ukey', ukeyData);
         localStorage.setItem('yearcode', yearcode);
         localStorage.setItem('proqctoken', dbUniqueKey);
+        localStorage.removeItem('lastScreen');
+        localStorage.setItem('lastVisitedScreen','/empscan')
 
         setProqctoken(dbUniqueKey);
         setYearcode(yearcode);
 
         navigate('/empscan');
       } else {
-        setErrorMessage('Invalid Company Code or Password. Please try again.');
+        setErrorMessage('Please Enter A Valid Company Code Or Password');
       }
 
     } catch (error) {
@@ -111,7 +114,7 @@ const Login = () => {
           Yearcode: yearcode,
           Version: "v1",
           sp: '4',
-          sv:'2',
+          sv:'0',
           domain: '',
           'Content-Type': 'application/json',
           Cookie: 'ASP.NET_SessionId=i4btgm10k555buulfvmqyeyc',
@@ -144,11 +147,13 @@ const Login = () => {
   return (
     <div className="w-screen h-screen flex items-center justify-center bg-gradient-to-r from-blue-100 via-indigo-50 to-green-100 p-4">
       <div className="w-full max-w-4xl flex flex-col md:flex-row bg-white rounded-xl shadow-2xl max-h-[97vh] overflow-auto ">
-        <div className="w-full md:w-1/2 flex items-center justify-center  h-60 md:h-auto">
+        <div className="w-full md:w-1/2 hidden md:flex items-center justify-center  h-60 md:h-auto">
           <img src={banner} alt="banner" className="object-contain w-full h-full md:h-auto md:rounded-none rounded-xl md:rounded-l-xl" />
         </div>
-
-        <div className="w-full md:w-1/2 flex flex-col items-center justify-center p-6">
+        <div className="w-full  flex md:hidden items-center justify-center  bg-yellow-400 h-60 md:h-auto">
+          <img src={horizontalbanner} alt="banner" className="object-contain w-full h-fit md:h-auto md:rounded-none rounded-xl md:rounded-l-xl" />
+        </div>
+        <div className="w-full md:w-1/2 flex flex-col items-center min-h-[75vh] justify-center p-6">
           <h2 className="text-3xl font-semibold text-gray-800 text-center mb-6">Sign In</h2>
           <div className="h-7">
             {errorMessage && (
@@ -157,7 +162,6 @@ const Login = () => {
               </div>
             )}
           </div>
-
           <div className="mb-4 w-full">
             <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="companyCode">
               Company Code
@@ -167,10 +171,10 @@ const Login = () => {
               type="text"
               placeholder="Enter your company code"
               value={companyCode}
-              onChange={(e) => { setCompanyCode(e.target.value); clearError(); }}
+              onChange={(e) => {setCompanyCode(e.target.value); clearError(); }}
               onKeyDown={handleKeyDown}
               className="w-full px-3 py-2 border rounded-lg shadow-sm focus:outline-none"
-              ref={companyCodeRef} // Step 3: Add the ref to the input
+              ref={companyCodeRef} 
 
             />
           </div>
@@ -238,5 +242,3 @@ User Name            </label>
 };
 
 export default Login;
-
-
