@@ -1,10 +1,12 @@
 
-
-
 import React, { useState, useEffect ,useRef} from 'react';
 import {  FaChevronLeft, FaChevronRight, FaCheck, FaRegThumbsUp, FaRegThumbsDown, FaPause, FaEllipsisH, FaQuestionCircle, FaCheckCircle,FaRegEdit } from 'react-icons/fa';
 import { BiSolidImageAdd } from "react-icons/bi";
+import { SiTicktick } from "react-icons/si";
+import Swal from 'sweetalert2';
+import { FaExclamationCircle, FaExclamationTriangle, FaSkullCrossbones } from 'react-icons/fa'; 
 import { IoCloseOutline } from "react-icons/io5";
+import { ImCross } from "react-icons/im";
 import { useRecoilValue } from 'recoil';
 import { rdState, rd1State, rd2State,rd5State,YearCodeState,salesrdState } from '../Recoil/FetchDataComponent';
 import { TbMoodEmpty } from "react-icons/tb";
@@ -15,16 +17,14 @@ import { useLocation,useNavigate } from "react-router-dom";
 import axios from 'axios';
 import { ClipLoader } from 'react-spinners';
 import { MdOutlineArrowBackIosNew } from 'react-icons/md';
-
-
+import { Slider } from '@mui/material'; 
 
 const useQueryParams = () => {
 const location = useLocation();
 return new URLSearchParams(location.search);
 };
 
-
-function Survey() {
+function Survey({onSuccess }) {
   const navigate = useNavigate();
 const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
 const [answers, setAnswers] = useState({});
@@ -40,12 +40,16 @@ const queryParams = useQueryParams();
 const [loading, setLoading] = useState(false);
 const [showConclusionSlide, setShowConclusionSlide] = useState(false);
 const [errorMessage, setErrorMessage] = useState("");
-
+const [intensities, setIntensities] = useState({}); // State to store intensities per option
 const qcID = atob(queryParams.get('QCID'));
 const empbarcode = atob(queryParams.get('empbarcode'));
-const jobid = atob(queryParams.get('jobid'));
+// const jobid = atob(queryParams.get('jobid'));
+const jobid = localStorage.getItem('Jobid');
 const empid = atob(queryParams.get('employeeid'));
-const eveid = atob(queryParams.get('eventid'));
+// const eveid = atob(queryParams.get('eventid'));
+const eveid = localStorage.getItem('eventId');
+const JobStatusId = localStorage.getItem('JobCompleteStatusId');
+
 const yc = localStorage.getItem('yearcode');
 const token = localStorage.getItem('proqctoken');
 
@@ -53,7 +57,6 @@ const questionsData = useRecoilValue(rdState);
 const optionsData = useRecoilValue(rd1State);
 const bindedData = useRecoilValue(rd2State);
 const bindedQuestionsData = useRecoilValue(rd5State);
-const eid = queryParams.get('eventid');
 
 const salesrd = useRecoilValue(salesrdState) || JSON.parse(localStorage.getItem('salesrd')) || [];
 const Questions = questionsData.length ? questionsData : JSON.parse(localStorage.getItem('rd')) || [];
@@ -87,7 +90,7 @@ const conclusionQuestion = {
   id: 'conclusion',
   question: 'Conclusion',
   // options: 'Approved,Rejected,On Hold',
-  options: 'Approved,Rejected',
+  options: 'Approved,Rejected,FinalApproved,FinalReject',
 };
 const [selectedConclusion, setSelectedConclusion] = useState(null);
 const RemarkRef = useRef(null); 
@@ -96,19 +99,29 @@ useEffect(() => {
     RemarkRef.current.focus();
   }
 }, [editingRemark]);
-const Conclusion =
-[{id:'1',status:'Approved',icon:'FaRegThumbsUp',iconcolor:'#4CAF50',bgcolor:'#4CAF5030 '},
-{id:'2',status:'Rejected',icon:'FaRegThumbsDown',iconcolor:'#F44336',bgcolor:'#F4433630'},  
-// {id:'3',status:'On Hold',icon:'FaPause',iconcolor:'#FF9800',bgcolor:'#FF980030 '},
-]
+
+
+
+const Conclusion = [
+  { id: '1', status: 'Approved', icon: 'FaRegThumbsUp', iconcolor: '#4CAF50', bgcolor: '#4CAF5030' },
+  { id: '2', status: 'Rejected', icon: 'FaRegThumbsDown', iconcolor: '#F44336', bgcolor: '#F4433630' },
+  { id: '3', status: 'FinalApproved', icon: 'SiTicktick ', iconcolor: '#4CAF50', bgcolor: '#4CAF5030',rem:'Move to Stock Book' },
+  { id: '4', status: 'FinalReject', icon: 'ImCross', iconcolor: '#F44336', bgcolor: '#F4433630',rem:'Move to Production' },
+];
+const topConclusions = Conclusion.slice(0, 2);
+const bottomConclusions = eveid === '1' ? Conclusion.slice(2, 4) : [];
+
+
 const getIconComponent = (iconName) => {
   switch (iconName) {
     case 'FaRegThumbsUp':
       return <FaRegThumbsUp size={24} color="#4CAF50" />;
     case 'FaRegThumbsDown':
       return <FaRegThumbsDown size={24} color="#F44336" />;
-    case 'FaPause':
-      return <FaPause size={24} color="#FF9800" />;
+    case 'SiTicktick ':
+      return <SiTicktick  size={24} />;
+    case 'ImCross':
+      return <ImCross size={24}  />;
     default:
       return null;
   }
@@ -140,9 +153,6 @@ useEffect(() => {
   }
 }, []);
 
-
-
-
 // useEffect(() => {
 //   if (showSuccessMessage) {
 //     setTimeout(() => {
@@ -164,7 +174,9 @@ useEffect(() => {
       setCurrentQuestionIndex(0);
       setPageStartIndex(0);
       setShowSelection(true);
-      navigate(`/Scannerpage?QCID=${btoa(qcID)}&empbarcode=${btoa(empbarcode)}&employeeid=${btoa(empid)}&eventid=${btoa(eveid)} `);
+      // navigate(`/Scannerpage?QCID=${btoa(qcID)}&empbarcode=${btoa(empbarcode)}&employeeid=${btoa(empid)}&eventid=${btoa(eveid)} `);
+  onSuccess();
+
     }, 10000);
   }
   return () => clearTimeout(timeoutId);
@@ -172,20 +184,54 @@ useEffect(() => {
 
 const handleContinue = () => {
   setShowSuccessMessage(false); 
-  navigate(`/Scannerpage?QCID=${btoa(qcID)}&empbarcode=${btoa(empbarcode)}&employeeid=${btoa(empid)}&eventid=${btoa(eveid)} `);
+  // navigate(`/Scannerpage?QCID=${btoa(qcID)}&empbarcode=${btoa(empbarcode)}&employeeid=${btoa(empid)}&eventid=${btoa(eveid)} `);
+  onSuccess();
 };
 
+
+// const handleOptionClick = (option) => {
+//   const selectedOptions = answers[currentQuestion.id] || [];
+//   const updatedOptions = selectedOptions.includes(option)
+//     ? selectedOptions.filter(opt => opt !== option)
+//     : [...selectedOptions, option];
+//   const updatedAnswers = { ...answers, [currentQuestion.id]: updatedOptions };
+//   setAnswers(updatedAnswers);
+//   localStorage.setItem('answers', JSON.stringify(updatedAnswers));
+// };
 
 const handleOptionClick = (option) => {
   const selectedOptions = answers[currentQuestion.id] || [];
   const updatedOptions = selectedOptions.includes(option)
     ? selectedOptions.filter(opt => opt !== option)
     : [...selectedOptions, option];
+
   const updatedAnswers = { ...answers, [currentQuestion.id]: updatedOptions };
   setAnswers(updatedAnswers);
   localStorage.setItem('answers', JSON.stringify(updatedAnswers));
+
+  // If an option is selected and has no intensity, set default intensity to 0
+  if (!intensities[option]) {
+    setIntensities(prev => ({ ...prev, [option]: 0 }));
+  }
 };
 
+// Handle intensity change
+const handleIntensityChange = (option, value) => {
+  setIntensities(prev => ({ ...prev, [option]: value }));
+};
+
+// Function to calculate background color based on intensity
+const getBackgroundColor = (intensity) => {
+  const startColor = [86, 164, 255]; // #56a4ff
+  const endColor = [147, 105, 186]; // #9369ba
+  const ratio = intensity / 100;
+
+  const interpolatedColor = startColor.map((start, index) => {
+    return Math.round(start + ratio * (endColor[index] - start));
+  });
+
+  return `rgb(${interpolatedColor.join(",")})`;
+};
 // const handleNext = () => {
 //   if (currentQuestionIndex < questionsToDisplay.length - 1) {
 //     setCurrentQuestionIndex(currentQuestionIndex + 1);
@@ -206,17 +252,11 @@ const handleNext = () => {
   }
 };
 
-// const handleConclusionClick = (statusid,status, bgcolor) => {
-//   console.log("Selected Conclusion:", status); 
-//   setSelectedConclusion(status);
-//   console.log(statusid,"statusid");
-//   handleSubmit(statusid);
-// };
 
-const handleConclusionClick = (statusid, status, bgcolor) => {
+const handleConclusionClick = (statusid, status) => {
   const answerssel = answers[Object.keys(answers)] ?? [];
-  
-  if (status === 'Rejected' && answerssel.length === 0) {
+
+  if ((status === 'Rejected' || status === 'FinalReject') && answerssel.length === 0) {
     setErrorMessage("Please select at least one reason before rejection.");
     
     const timeoutId = setTimeout(() => {
@@ -226,10 +266,106 @@ const handleConclusionClick = (statusid, status, bgcolor) => {
     return timeoutId; 
   }
 
+  if (status === 'FinalReject') {
+    Swal.fire({
+      icon: 'error',
+      title: 'Are You Sure Want To Reject?',
+      text: 'On conformation your job will be moved to production.',
+      showCancelButton: true,  
+      confirmButtonText: 'Confirm', 
+      cancelButtonText: 'Cancel',
+      showClass: {
+        popup: `
+          animate__animated
+          animate__fadeInUp
+          animate__faster
+        `
+      },
+      hideClass: {
+        popup: `
+          animate__animated
+          animate__fadeOutDown
+          animate__faster
+        `
+      },  
+      customClass: {
+        confirmButton: 'bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded',
+      },
+      reverseButtons: true, 
+    }).then((result) => {
+      if (result.isConfirmed) {
+        
+        setSelectedConclusion(status);
+        handleSubmit(statusid);
+      } else if (result.dismiss === Swal.DismissReason.cancel) {
+       
+      }
+    });
+
+    return;
+  }
+  if (status === 'FinalApproved') {
+    Swal.fire({
+      icon: 'success',
+      title: 'Are You Sure Want To Approve?',
+      text: 'On conformation your job will be moved to StockBook.',
+      showCancelButton: true,  
+      confirmButtonText: 'Confirm', 
+      cancelButtonText: 'Cancel',
+      showClass: {
+        popup: `
+          animate__animated
+          animate__fadeInUp
+          animate__faster
+        `
+      },
+      hideClass: {
+        popup: `
+          animate__animated
+          animate__fadeOutDown
+          animate__faster
+        `
+      }, 
+      customClass: {
+        confirmButton: 'bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded',
+      },
+      reverseButtons: true, 
+    }).then((result) => {
+      if (result.isConfirmed) {
+        
+        setSelectedConclusion(status);
+        handleSubmit(statusid);
+      } else if (result.dismiss === Swal.DismissReason.cancel) {
+       
+      }
+    });
+
+    return;
+  }
+
   setSelectedConclusion(status);
-  setErrorMessage(""); 
-  handleSubmit(statusid); 
+  handleSubmit(statusid);
 };
+
+
+
+// const handleConclusionClick = (statusid, status, bgcolor) => {
+//   const answerssel = answers[Object.keys(answers)] ?? [];
+  
+//   if (status === 'Rejected' && answerssel.length === 0) {
+//     setErrorMessage("Please select at least one reason before rejection.");
+    
+//     const timeoutId = setTimeout(() => {
+//       setErrorMessage("");
+//     }, 5000);
+    
+//     return timeoutId; 
+//   }
+
+//   setSelectedConclusion(status);
+//   setErrorMessage(""); 
+//   handleSubmit(statusid); 
+// };
 
 
 
@@ -278,13 +414,11 @@ function mapValuesToIds(valueString) {
   const ids = values.map(value => optionMap[value]);
   return ids.join(","); 
 }
-
-
 const handleSubmit = async (statusid) => {
-  
   setLoading(true);
   const ipResponse = await axios.get('https://api.ipify.org?format=json');
   const ipAddress = ipResponse.data.ip;
+
   const payload = {
     con: JSON.stringify({
       id: "",
@@ -296,28 +430,33 @@ const handleSubmit = async (statusid) => {
       empid: `${empid}`,
       qcdeptid: qcID,
       Jobno: `${jobid}`,
-      conclusion: statusid ? statusid:'',
+      conclusion: statusid ? statusid : '',
       que: btoa(JSON.stringify(
-        Object.keys(answers).map(questionId => ({
-          queid: questionId,
-          optid:mapValuesToIds( answers[questionId].join(',')), 
-          rem: remarks[questionId] || ""   
-        }))
-        
+        Object.keys(answers).map(questionId => {
+          // Ensure that answers[questionId] is an array before using join()
+          const optionsArray = Array.isArray(answers[questionId]) ? answers[questionId] : [answers[questionId]];
+          return {
+            queid: questionId,
+            optid: mapValuesToIds(optionsArray.join(',')), // Join only if it's an array
+            rem: remarks[questionId] || ""   
+          };
+        })
       )),
       image: images.join(','), 
-      eventid:eveid,
-      ipaddress: ipAddress                  
+      eventid: eveid,
+      JobCompleteStatusId: JobStatusId,
+      ipaddress: ipAddress
     }),
   };
+
   try {
-    const response = await axios.post('https://api.optigoapps.com/ReactStore/ReactStore.aspx',  payload, {
+    const response = await axios.post('https://api.optigoapps.com/ReactStore/ReactStore.aspx', payload, {
       headers: {
-        Authorization:token,
+        Authorization: token,
         Yearcode: `${yc}`,
         Version: "v1",
         sp: "4",
-        sv:'0',
+        sv: '0',
         domain: "",
         "Content-Type": "application/json",
       }
@@ -336,15 +475,15 @@ const handleSubmit = async (statusid) => {
       localStorage.removeItem('remarks');
       localStorage.removeItem('images'); 
     } else {
-      setErrorMessage("Thee is some issue saving your answers ! Please try again")
+      setErrorMessage("There is some issue saving your answers! Please try again.");
     }
   } catch (error) {
     alert("Error saving your answer. Try again.");
-  }
-  finally {
+  } finally {
     setLoading(false);
   }
 };
+
 console.log("optionmap",optionMap['Quality/Color']);
 const getSelectedCount = () => {
   return (answers[currentQuestion.id] || []).length;
@@ -431,7 +570,7 @@ return (
   <h2 className="text-2xl font-semibold w-full  text-center mb-6 text-gray-800">{conclusionQuestion.question}</h2>
 
 <div className="flex flex-col h-fit">
-  <div className="flex flex-wrap gap-10 mb-4 justify-center">
+  {/* <div className="flex flex-wrap gap-10 mb-4 justify-center">
     {Conclusion.map((item) => (
       <button
         key={item.id}
@@ -454,6 +593,57 @@ return (
         <span className="mt-3 text-xl font-semibold">{item.status}</span>
       </button>
     ))}
+  </div> */}
+  <div className="flex flex-col items-center mb-4 space-y-6">
+    <div className="flex space-x-10">
+      {topConclusions.map((item) => (
+        <button
+          key={item.id}
+          onClick={() => handleConclusionClick(item.id, item.status)}
+          style={{
+            backgroundColor: selectedConclusion === item.status ? item.bgcolor : 'white',
+            color: item.iconcolor,
+            border: `2px solid ${item.iconcolor}`,
+          }}
+          className="flex flex-col w-48 items-center py-5 px-8 rounded-lg shadow-md focus:outline-none transform hover:scale-105 transition-transform"
+        >
+          <div className='h-[1rem] md:h-[0.625rem] md:'/>
+          {loading && selectedConclusion === item.status ? (
+            <ClipLoader size={26} color={item.iconcolor} />
+          ) : (
+            getIconComponent(item.icon)
+          )}
+          <span className="mt-3 text-base md:text-xl  font-semibold">{item.status}</span>
+          <div className='h-[1rem] md:-[0.625rem]'/>
+        </button>
+      ))}
+    </div>
+
+    {bottomConclusions.length > 0 && (
+      <div className="flex space-x-10">
+        {bottomConclusions.map((item) => (
+          <button
+            key={item.id}
+            onClick={() => handleConclusionClick(item.id, item.status)}
+            style={{
+              backgroundColor: selectedConclusion === item.status ? item.bgcolor : item.iconcolor,
+              color: 'white',
+            }}
+            className="flex flex-col w-48 items-center py-5 px-8 rounded-lg shadow-md focus:outline-none transform hover:scale-105 transition-transform"
+          >
+            <div className='h-[1rem] md:h-[0.625rem] '/>
+            {loading && selectedConclusion === item.status ? (
+              <ClipLoader size={26} color={item.iconcolor} />
+            ) : (
+              getIconComponent(item.icon)
+            )}
+            <span className="mt-3 text-base md:text-xl  font-semibold">{item.status}</span>
+            {item.rem && <span className="text-xs md:text-sm font-semibold">{item.rem}</span>}
+            <div className='h-[1rem] md:-[0.625rem]'/>
+          </button>
+        ))}
+      </div>
+    )}
   </div>
 
   <div className='h-[2.5rem]'>
@@ -505,17 +695,16 @@ return (
    </div> */}
 
 </div>
+
   </div>
 
   <div className="flex h-fit justify-between items-center">
-    <div  className="py-2 mb-6 text-gray-600 hover:text-gray-800 transition-all"
-    >
+    <div  className="py-2 mb-6 text-gray-600 hover:text-gray-800 transition-all">
       <div className="h-[2.25rem] font-bold" />
     </div>
   </div>
-</div>
-      
-    
+
+</div>          
     </>
     ) : hasQuestions  && allQuestions ? ( 
 
@@ -540,16 +729,14 @@ return (
         onClick={() => handlePaginationClick(index + pageStartIndex)}
         className={`w-8 h-8 rounded-full shadow-md focus:outline-none ${
           currentQuestionIndex === index + pageStartIndex
-            ? 'text-[#fff] hover:bg-[#56a4ff] bg-[#56a5ffb9]'
-            : 'text-gray-700 hover:bg-gray-300'
+            ? 'text-[#fff] hover:bg-[#56a4ff] bg-gray-600'
+            : 'text-gray-500 hover:bg-gray-300'
         }`}
       >
         {index + pageStartIndex + 1}
       </button>
     ))}
   </div>
-
-
   <button
     onClick={handleScrollRight}
     disabled={pageStartIndex + 10 >= questionsToDisplay.length}
@@ -558,12 +745,10 @@ return (
     <FaChevronRight />
   </button>
 </div>
-
-
-<p className='text-lg font-bold text-green-500'>
-                  {getSelectedCount()}
-                </p>
-              </div>
+        <p className='text-lg font-bold text-green-500'>
+        {getSelectedCount()}
+        </p>
+  </div>
               <div className="flex items-center mb-6">
                 <div className="text-lg font-semibold mr-4 text-[#39aa78]" >
                   {currentQuestionNumber}/{totalQuestions}
@@ -577,21 +762,40 @@ return (
                 </button>
               </div>
               <div className="flex  flex-wrap gap-3 mb-6">
-                {currentQuestion.options.split(',').map((option) => (
-                  <button
-                    key={option}
-                    onClick={() => handleOptionClick(option)}
-                    className={`py-2 px-4 rounded-full shadow-md border border-gray-300 focus:outline-none ${
-                      answers[currentQuestion.id]?.includes(option)
-                        ? 'bg-[#56a4ff] text-white'
-                        : 'bg-white text-gray-700 hover:bg-teal-100'
-                    }`}
-                  >
-                    {option}
-                  </button>
-                ))}       
+              {currentQuestion.options.split(',').map((option) => (
+              <div key={option} className="option-item">
+              <button
+  onClick={() => handleOptionClick(option)}
+  style={{
+    backgroundColor: answers[currentQuestion.id]?.includes(option)
+      ? getBackgroundColor(intensities[option] || 0)
+      : 'white',
+  }}
+  className={`py-2 px-4 rounded-full shadow-md border border-gray-300 
+    ${answers[currentQuestion.id]?.includes(option) ? 'text-white' : ''}`}
+>
+  {option}
+</button>
+
+
+                {/* Show slider if option is selected */}
+                {answers[currentQuestion.id]?.includes(option) && (
+                  <div className="intensity-slider">
+                    <label>Fault Intensity: {intensities[option]}</label>
+                    <input
+                      type="range"
+                      min="0"
+                      max="100"
+                      value={intensities[option] || 0}
+                      onChange={(e) => handleIntensityChange(option, parseInt(e.target.value))}
+                    />
+                  </div>
+                )}
+              </div>
+            ))}      
               </div>
         </div>
+        
         {/* <div className='h-96'>
                 {isLastQuestion ? (
                   <>
@@ -699,7 +903,9 @@ return (
                 ) : ( */}
                   <button
                     onClick={handleNext}
-                    className="py-2 px-4 bg-[#56a4ff] text-white rounded-full shadow-md"
+                    className="py-2 px-4 
+                    bg-[#9369ba] text-white rounded-full shadow-md"
+                    // bg-[#56a4ff]
                   >
                     Next
                   </button>
@@ -746,3 +952,4 @@ return (
 }                                         
 
 export default Survey;
+

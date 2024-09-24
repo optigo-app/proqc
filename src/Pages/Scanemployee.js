@@ -156,21 +156,21 @@ const Scanemp = () => {
             setIsModalOpen(true);
           } else if (filteredQcdeptNames.length === 1) {
             const qcdeptId = filteredQcdeptIds[0];
-            navigate(`/ScannerPage?QCID=${btoa(qcdeptId)}&empbarcode=${btoa(barcode)}&employeeid=${btoa(empid)}}`);
+            navigate(`/job-questions?QCID=${btoa(qcdeptId)}&empbarcode=${btoa(barcode)}&employeeid=${btoa(empid)}}`);
           }
         } else {
-          setErrorMessage("  Invalid Employee Barcode or pin . Please try again.");
+          setErrorMessage("Invalid Employee Barcode or pin . Please try again.");
         }
       })
       .catch((error) => {
         setLoading(false);
-        setErrorMessage(" Some ErrorOccured. Please try again.");
+        setErrorMessage("Some ErrorOccured. Please try again.");
         console.error(' ', error);
       });
   };
 
   const handlebuttonclick = (qcdeptId) => {
-    navigate(`/ScannerPage?QCID=${btoa(qcdeptId)}&empbarcode=${btoa(barcode)}&employeeid=${btoa(employeeid)}}`);
+    navigate(`/job-questions?QCID=${btoa(qcdeptId)}&empbarcode=${btoa(barcode)}&employeeid=${btoa(employeeid)}`);
   };
 
 

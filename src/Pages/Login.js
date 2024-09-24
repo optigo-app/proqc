@@ -75,8 +75,6 @@ const Login = () => {
         localStorage.setItem('ukey', ukeyData);
         localStorage.setItem('yearcode', yearcode);
         localStorage.setItem('proqctoken', dbUniqueKey);
-        localStorage.removeItem('lastScreen');
-        localStorage.setItem('lastVisitedScreen','/empscan')
 
         setProqctoken(dbUniqueKey);
         setYearcode(yearcode);
