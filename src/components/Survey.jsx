@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect ,useRef} from 'react';
 import {  FaChevronLeft, FaChevronRight, FaCheck, FaRegThumbsUp, FaRegThumbsDown, FaPause, FaEllipsisH, FaQuestionCircle, FaCheckCircle,FaRegEdit } from 'react-icons/fa';
 import { BiSolidImageAdd } from "react-icons/bi";
@@ -18,6 +17,7 @@ import axios from 'axios';
 import { ClipLoader } from 'react-spinners';
 import { MdOutlineArrowBackIosNew } from 'react-icons/md';
 import { Slider } from '@mui/material'; 
+import { motion } from 'framer-motion';
 
 const useQueryParams = () => {
 const location = useLocation();
@@ -35,6 +35,7 @@ const [showSuccessMessage, setShowSuccessMessage] = useState(false);
 const [remarks, setRemarks] = useState({});
 const [editingRemark, setEditingRemark] = useState(null);
 const [images, setImages] = useState([]); 
+const [selectedOption, setSelectedOption] = useState(null); // New state for the selected option
 const [imageUrls, setImageUrls] = useState([]); 
 const queryParams = useQueryParams();
 const [loading, setLoading] = useState(false);
@@ -199,39 +200,58 @@ const handleContinue = () => {
 //   localStorage.setItem('answers', JSON.stringify(updatedAnswers));
 // };
 
+const intensityLevels = [
+  { value: 1, label: "Negligible" },
+  { value: 2, label: "Minor" },
+  { value: 3, label: "Moderate" },
+  { value: 4, label: "Significant" },
+  { value: 5, label: "Critical" },
+];
+
 const handleOptionClick = (option) => {
   const selectedOptions = answers[currentQuestion.id] || [];
-  const updatedOptions = selectedOptions.includes(option)
-    ? selectedOptions.filter(opt => opt !== option)
-    : [...selectedOptions, option];
-
-  const updatedAnswers = { ...answers, [currentQuestion.id]: updatedOptions };
-  setAnswers(updatedAnswers);
-  localStorage.setItem('answers', JSON.stringify(updatedAnswers));
-
-  // If an option is selected and has no intensity, set default intensity to 0
-  if (!intensities[option]) {
-    setIntensities(prev => ({ ...prev, [option]: 0 }));
+  if (selectedOptions.includes(option)) {
+    // Toggle logic: if option is already selected, deselect it
+    setSelectedOption(selectedOption === option ? null : option);
+  } else {
+    // Otherwise, add the new option
+    setSelectedOption(option);
+    const updatedOptions = [...selectedOptions, option];
+    const updatedAnswers = { ...answers, [currentQuestion.id]: updatedOptions };
+    setAnswers(updatedAnswers);
+    localStorage.setItem('answers', JSON.stringify(updatedAnswers));
+    if (!intensities[option]) {
+      setIntensities((prev) => ({ ...prev, [option]: 0 }));
+    }
   }
 };
 
-// Handle intensity change
-const handleIntensityChange = (option, value) => {
-  setIntensities(prev => ({ ...prev, [option]: value }));
+const handleIntensityChange = (value) => {
+  if (selectedOption) {
+    setIntensities((prev) => ({ ...prev, [selectedOption]: value }));
+  }
 };
 
-// Function to calculate background color based on intensity
+const handleCancel = () => {
+  if (selectedOption) {
+    setIntensities((prev) => ({ ...prev, [selectedOption]: 0 }));
+    setSelectedOption(null);
+    const updatedOptions = (answers[currentQuestion.id] || []).filter((opt) => opt !== selectedOption);
+    setAnswers((prev) => ({ ...prev, [currentQuestion.id]: updatedOptions }));
+    localStorage.setItem('answers', JSON.stringify({ ...answers, [currentQuestion.id]: updatedOptions }));
+  }
+};
+
 const getBackgroundColor = (intensity) => {
   const startColor = [86, 164, 255]; // #56a4ff
   const endColor = [147, 105, 186]; // #9369ba
-  const ratio = intensity / 100;
-
+  const ratio = intensity / 5; // Adjusting for 5 levels
   const interpolatedColor = startColor.map((start, index) => {
     return Math.round(start + ratio * (endColor[index] - start));
   });
-
   return `rgb(${interpolatedColor.join(",")})`;
 };
+
 // const handleNext = () => {
 //   if (currentQuestionIndex < questionsToDisplay.length - 1) {
 //     setCurrentQuestionIndex(currentQuestionIndex + 1);
@@ -761,38 +781,54 @@ return (
                   <FaRegEdit className="text-2xl transition text-blue-600 duration-300 ease-in-out hover:text-blue-200" />
                 </button>
               </div>
-              <div className="flex  flex-wrap gap-3 mb-6">
-              {currentQuestion.options.split(',').map((option) => (
-              <div key={option} className="option-item">
-              <button
-  onClick={() => handleOptionClick(option)}
-  style={{
-    backgroundColor: answers[currentQuestion.id]?.includes(option)
-      ? getBackgroundColor(intensities[option] || 0)
-      : 'white',
-  }}
-  className={`py-2 px-4 rounded-full shadow-md border border-gray-300 
-    ${answers[currentQuestion.id]?.includes(option) ? 'text-white' : ''}`}
->
-  {option}
-</button>
-
-
-                {/* Show slider if option is selected */}
-                {answers[currentQuestion.id]?.includes(option) && (
-                  <div className="intensity-slider">
-                    <label>Fault Intensity: {intensities[option]}</label>
-                    <input
-                      type="range"
-                      min="0"
-                      max="100"
-                      value={intensities[option] || 0}
-                      onChange={(e) => handleIntensityChange(option, parseInt(e.target.value))}
-                    />
+              <div className="flex flex-wrap gap-3 mb-6 relative">
+                {currentQuestion.options.split(',').map((option) => (
+                  <div key={option} className="relative">
+                    <button
+                      onClick={() => handleOptionClick(option)}
+                      style={{
+                        backgroundColor: answers[currentQuestion.id]?.includes(option)
+                          ? getBackgroundColor(intensities[option] || 0)
+                          : 'white',
+                      }}
+                      className={`py-2 px-4 rounded-full shadow-md border border-gray-300 
+                        ${answers[currentQuestion.id]?.includes(option) ? 'text-white' : ''}`}
+                    >
+                      {option}
+                    </button>
+                    {selectedOption === option && (
+                      <motion.div
+                        className={`absolute left-0 top-full mt-2 w-48 p-4 bg-white border border-gray-300 rounded-lg shadow-md z-10`}
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: 'auto' }}
+                        exit={{ opacity: 0, height: 0 }}
+                        transition={{ duration: 0.3 }}
+                      >
+                        <p className="mb-2 font-medium">Select Intensity:</p>
+                        <div className="flex flex-col space-y-2">
+                          {intensityLevels.map((level) => (
+                            <label key={level.value} className="flex items-center">
+                              <input
+                                type="radio"
+                                value={level.value}
+                                checked={intensities[option] === level.value}
+                                onChange={() => handleIntensityChange(level.value)}
+                                className="mr-2"
+                              />
+                              {level.label}
+                            </label>
+                          ))}
+                        </div>
+                        <button
+                          onClick={handleCancel}
+                          className="mt-4 py-1 px-3 text-blue-600 rounded-full"
+                        >
+                        Deselect
+                        </button>
+                      </motion.div>
+                    )}
                   </div>
-                )}
-              </div>
-            ))}      
+                ))}
               </div>
         </div>
         
@@ -912,6 +948,7 @@ return (
                 {/* )} */}
               </div>
             </>
+           
         </div>
         {editingRemark === currentQuestion.id && (
           <div className="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50 z-50">
@@ -935,7 +972,10 @@ return (
             </div>
           </div>
         )}
+
+
       </div>
+      
     ): (
       <div className="flex-1 flex flex-col items-center justify-center p-6 bg-white">
   <div className="h-64"></div>
