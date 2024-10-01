@@ -1,11 +1,9 @@
-
 import React, { useState, useEffect, useRef } from 'react';
-import { FaQrcode, FaUser, FaBriefcase, FaCheckCircle, FaArrowRight, FaTimesCircle } from 'react-icons/fa';
+import { FaQrcode, FaUser, FaBriefcase, FaCheckCircle, FaArrowRight, FaBarcode } from 'react-icons/fa';
 import QrScanner from 'qr-scanner';
 import { ClipLoader } from 'react-spinners';
 import ScannerIcon from '../../Assets/Qrcode.png';
 import img from '../../Assets/Jew.jpg';
-import '../../components/Scanner.css';
 
 export default function JobScan() {
   const [scannedCode, setScannedCode] = useState('');
@@ -81,7 +79,7 @@ export default function JobScan() {
       name: "GOLD 10K Shine Gold",
       designNumber: "FD4",
       serialFor: "WOMENS",
-      img: img,
+      image: img,
       customerName: "ashok01",
       poNumber: "100 jobs for testing",
       lastReceived: "1.000 Gm",
@@ -94,7 +92,7 @@ export default function JobScan() {
       name: "GOLD 18K Shine Yellow",
       designNumber: "NEW-COP",
       serialFor: "Titan Earring",
-      img: img,
+      image: img,
       customerName: "amolpatil",
       poNumber: "15030",
       lastReceived: "0.000 Gm",
@@ -150,141 +148,147 @@ export default function JobScan() {
 
   const renderJobDetails = () => (
     jobDetails && (
-      <div className="bg-white w-full flex flex-col md:flex-row shadow-lg rounded-lg overflow-hidden transition-all duration-300 ease-in-out transform hover:scale-105 p-6">
-        <div className='flex flex-col w-full'>
-          <div className='flex w-full flex-col md:flex-row gap-6'>
-            <div className="md:flex md:flex-shrink-0">
-              <img className="h-48 w-full object-cover md:w-48 rounded-lg shadow-md" src={jobDetails.img} alt="Job" width={192} height={192} />
-            </div>
-            <div className="flex-grow">
-              <div className="uppercase tracking-wide text-sm text-purple-600 font-semibold">{jobDetails.jobId}</div>
-              <h2 className="mt-2 text-3xl leading-tight font-bold text-gray-900">{jobDetails.name}</h2>
-              <p className="mt-2 text-gray-700 flex items-center">Design: <span className="font-medium ml-2">{jobDetails.designNumber}</span></p>
-              <p className="text-gray-700 flex items-center">Customer: <span className="font-medium ml-2">{jobDetails.customerName}</span></p>
-              <p className="text-gray-700 flex items-center">PO: <span className="font-medium ml-2">{jobDetails.poNumber}</span></p>
-              <p className="text-gray-700 flex items-center">Status: <span className="font-medium ml-2">{jobDetails.currentStatus}</span></p>
-              <p className="text-gray-700 flex items-center">Location: <span className="font-medium ml-2">{jobDetails.location}</span></p>
+      <div className="flex flex-col space-y-6">
+        <div className="flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-6">
+          <img className="w-full md:w-48 h-48 object-cover" src={jobDetails.image} alt="Job" />
+          <div className="flex-grow">
+            <h2 className="text-3xl font-bold text-gray-800">{jobDetails.name}</h2>
+            <p className="text-xl text-indigo-600 font-semibold">{jobDetails.jobId}</p>
+            <div className="mt-4 space-y-2">
+              <p className="text-gray-700">Design: <span className="font-semibold">{jobDetails.designNumber}</span></p>
+              <p className="text-gray-700">Customer: <span className="font-semibold">{jobDetails.customerName}</span></p>
+              <p className="text-gray-700">PO: <span className="font-semibold">{jobDetails.poNumber}</span></p>
+              <p className="text-gray-700">Status: <span className="font-semibold">{jobDetails.currentStatus}</span></p>
+              <p className="text-gray-700">Location: <span className="font-semibold">{jobDetails.location}</span></p>
             </div>
           </div>
-          <div className="mt-6">
-            {jobDetails.jobFlag === 'Return' && (
-              <div className="px-6 py-4 bg-blue-50 rounded-lg shadow-inner w-full lg:max-w-2xl">
-                <select className="w-full p-2 border bg-gray-100 font-bold rounded-lg mb-4 focus:border-blue-600 focus:ring focus:ring-blue-200" disabled>
-                  <option>Filing</option>
-                </select>
-                <div className='flex flex-row gap-3'>
-                  <button
-                    onClick={() => {
-                      alert("Job successfully returned");
-                      setJobDetails(null);
-                    }}
-                    className="bg-teal-500 text-white px-6 py-3 rounded-lg hover:bg-teal-600 transition duration-300 w-full flex items-center justify-center"
-                  >
-                    <FaCheckCircle className="mr-2" /> Return
-                  </button> 
-                  <button
-                    onClick={() => {
-                      setJobDetails(null);
-                    }}
-                    className="bg-rose-500 text-white px-6 py-3 rounded-lg hover:bg-rose-600 transition duration-300 w-full flex items-center justify-center"
-                  >
-                    <FaTimesCircle className="mr-2" /> Cancel
-                  </button> 
-                </div>
-              </div>
-            )}
-            {jobDetails.jobFlag === 'Issue' && (
-              <div className="px-6 py-4 bg-amber-50 rounded-lg shadow-inner w-full lg:max-w-2xl">
-                <h3 className="text-lg font-semibold mb-2 text-amber-600">Issue Job</h3>
-                <select className="w-full p-2 border rounded-lg mb-4 focus:border-amber-600 focus:ring focus:ring-amber-200">
-                  <option>Select Department</option>
-                  <option value="Filing">Filing</option>
-                  <option value="Casting">Casting</option>
-                  <option value="Polishing">Polishing</option>
-                </select>
-                <button
-                  onClick={() => {
-                    alert("Job successfully issued");
-                    setJobDetails(null);
-                  }}
-                  className="w-full bg-amber-500 text-white px-6 py-3 rounded-lg hover:bg-amber-600 transition duration-300 flex items-center justify-center"
-                >
-                  Issue Job <FaArrowRight className="ml-2" />
-                </button>
-              </div>
-            )}
-          </div>
-          {jobDetails.jobFlag === 'Return' && (
-            <div className="mt-6 w-full return-details bg-gray-50 p-6 rounded-lg shadow">
-              <h3 className="text-xl font-semibold mb-4 text-gray-800">Return Details</h3>
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                <p>Alloy Wt: <strong>0.000</strong></p>
-                <p>Lab Grown: <strong>0.000</strong></p>
-                <p>Diamond: <strong>0.000</strong></p>
-                <p>Color Stone: <strong>0.000</strong></p>
-                <p>Misc: <strong>0.000</strong></p>
-                <p>Current Net: <strong>0.000</strong></p>
-                <p>Current Gross: <strong>0.000</strong></p>
-                <hr className="my-2 border-gray-300 col-span-full" />
-                <p>Loss Weight: <strong>0.000</strong></p>
-                <p>Actual Loss: <strong>0.000</strong></p>
-                <p>Scrap Loss: <strong>0.000</strong></p>
-                <hr className="my-2 border-gray-300 col-span-full" />
-                <p>Exp Loss: <strong>0</strong></p>
-                <p>Max Loss %: <strong>0</strong></p>
-              </div>
-              <div className='flex flex-row mt-6 w-full md:w-1/2 items-center gap-4'>
-                <label htmlFor="scrap" className="font-medium text-gray-700">Scrap:</label>
-                <input
-                  id="scrap"
-                  type="number"
-                  value={scrap}
-                  onChange={(e) => setScrap(e.target.value)}
-                  placeholder="Enter scrap"
-                  className="flex-grow border p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
-                />
-              </div>
-            </div>
-          )}
         </div>
+
+        {jobDetails.jobFlag === 'Issue' && (
+          <div className="bg-indigo-50 p-6">
+            <h3 className="text-xl font-semibold mb-4 text-indigo-800">Issue Job</h3>
+            <select className="w-full p-3 border mb-4 focus:border-indigo-600 focus:ring focus:ring-indigo-200">
+              <option>Select Department</option>
+              <option value="Filing">Filing</option>
+              <option value="Casting">Casting</option>
+              <option value="Polishing">Polishing</option>
+            </select>
+            <button
+              onClick={() => {
+                alert("Job successfully issued");
+                setJobDetails(null);
+              }}
+              className="w-full bg-indigo-600 text-white px-6 py-3 hover:bg-indigo-700 transition duration-300 flex items-center justify-center text-lg font-semibold"
+            >
+              Issue Job <FaArrowRight className="ml-2" />
+            </button>
+          </div>
+        )}
+
+        {jobDetails.jobFlag === 'Return' && (
+          <div className="bg-gray-50 p-6">
+            <h3 className="text-xl font-semibold mb-4 text-gray-800">Return Details</h3>
+            <div className="grid grid-cols-2 gap-4">
+              <p className="text-gray-700">Alloy Wt: <span className="font-semibold">0.000</span></p>
+              <p className="text-gray-700">Lab Grown: <span className="font-semibold">0.000</span></p>
+              <p className="text-gray-700">Diamond: <span className="font-semibold">0.000</span></p>
+              <p className="text-gray-700">Color Stone: <span className="font-semibold">0.000</span></p>
+              <p className="text-gray-700">Misc: <span className="font-semibold">0.000</span></p>
+              <p className="text-gray-700">Current Net: <span className="font-semibold">0.000</span></p>
+              <p className="text-gray-700">Current Gross: <span className="font-semibold">0.000</span></p>
+              <p className="text-gray-700">Loss Weight: <span className="font-semibold">0.000</span></p>
+              <p className="text-gray-700">Actual Loss: <span className="font-semibold">0.000</span></p>
+              <p className="text-gray-700">Scrap Loss: <span className="font-semibold">0.000</span></p>
+              <p className="text-gray-700">Exp Loss: <span className="font-semibold">0</span></p>
+              <p className="text-gray-700">Max Loss %: <span className="font-semibold">0</span></p>
+            </div>
+            <div className="mt-6 flex items-center space-x-4">
+              <label className="text-gray-700 font-semibold">Scrap:</label>
+              <input
+                type="number"
+                value={scrap}
+                onChange={(e) => setScrap(e.target.value)}
+                placeholder="Enter scrap"
+                className="flex-grow p-2 border focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              />
+            </div>
+            <div className="mt-6 flex space-x-4">
+              <button
+                onClick={() => {
+                  alert("Job successfully returned");
+                  setJobDetails(null);
+                }}
+                className="flex-1 bg-green-500 text-white px-6 py-3 hover:bg-green-600 transition duration-300 font-semibold"
+              >
+                Return
+              </button>
+              <button
+                onClick={() => setJobDetails(null)}
+                className="flex-1 bg-gray-500 text-white px-6 py-3 hover:bg-gray-600 transition duration-300 font-semibold"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     )
   );
-  
+
   const renderRfBagDetails = () => (
     rfBagDetails && (
-      <div className="bg-white w-full shadow-lg rounded-lg overflow-hidden  transition-all duration-300 ease-in-out transform hover:scale-105">
-        <div className="p-8">
-          <h2 className="text-2xl font-bold mb-6 text-purple-700">RF Bag Details</h2>
-          <div className="grid grid-cols-2 gap-6">
-            <p><strong className="text-gray-700">RF Bag ID:</strong> <span className="text-purple-600">{rfBagDetails.rfbagid}</span></p>
-            <p><strong className="text-gray-700">Material:</strong> <span className="text-purple-600">{rfBagDetails.Material}</span></p>
-            <p><strong className="text-gray-700">Type:</strong> <span className="text-purple-600">{rfBagDetails.Type}</span></p>
-            <p><strong className="text-gray-700">Color:</strong> <span className="text-purple-600">{rfBagDetails.Color}</span></p>
-            <p><strong className="text-gray-700">Purity:</strong> <span className="text-purple-600">{rfBagDetails.Purity}</span></p>
-            <p><strong className="text-gray-700">Weight:</strong> <span className="text-purple-600">{rfBagDetails.Gm}</span></p>
-          </div>
-          <div className="mt-8">
-            <h3 className="text-xl font-semibold mb-4 text-purple-700">Material Requirements</h3>
+      <div className="bg-white p-8">
+        <h2 className="text-3xl font-bold mb-6 text-gray-800">RF Bag Details</h2>
+        <table className="w-full mb-8">
+          <tbody>
+            <tr>
+              <td className="py-2 text-gray-700">RF Bag ID:</td>
+              <td className="py-2 font-semibold">{rfBagDetails.rfbagid}</td>
+            </tr>
+            <tr>
+              <td className="py-2 text-gray-700">Material:</td>
+              <td className="py-2 font-semibold">{rfBagDetails.Material}</td>
+            </tr>
+            <tr>
+              <td className="py-2 text-gray-700">Type:</td>
+              <td className="py-2 font-semibold">{rfBagDetails.Type}</td>
+            </tr>
+            <tr>
+              <td className="py-2 text-gray-700">Color:</td>
+              <td className="py-2 font-semibold">{rfBagDetails.Color}</td>
+            </tr>
+            <tr>
+              <td className="py-2 text-gray-700">Purity:</td>
+              <td className="py-2 font-semibold">{rfBagDetails.Purity}</td>
+            </tr>
+            <tr>
+              <td className="py-2 text-gray-700">Weight:</td>
+              <td className="py-2 font-semibold">{rfBagDetails.Gm}</td>
+            </tr>
+          </tbody>
+        </table>
+        <div className="bg-gray-50 p-6">
+          <h3 className="text-xl font-semibold mb-4 text-gray-800">Material Requirements</h3>
+          <div className="space-y-4">
             <input
               type="number"
               value={mountWeight}
               onChange={(e) => setMountWeight(e.target.value)}
               placeholder="Enter Required Weight (Gm)"
-              className="w-full p-3 border rounded-lg mb-4 focus:border-purple-500 focus:ring focus:ring-purple-200"
+              className="w-full p-3 border focus:border-indigo-500 focus:ring focus:ring-indigo-200"
             />
             <input
               type="number"
               value={pcs}
               onChange={(e) => setPcs(e.target.value)}
               placeholder="Enter Number of Pieces"
-              className="w-full p-3 border rounded-lg mb-4 focus:border-purple-500 focus:ring focus:ring-purple-200"
+              className="w-full p-3 border focus:border-indigo-500 focus:ring focus:ring-indigo-200"
             />
             <button
               onClick={() => {
                 alert(`Weight: ${mountWeight} Gm, Pieces: ${pcs}`);
               }}
-              className="w-full bg-purple-500 text-white px-6 py-3 rounded-lg hover:bg-purple-600 transition duration-300 flex items-center justify-center"
+              className="w-full bg-green-500 text-white px-6 py-3 hover:bg-green-600 transition duration-300 flex items-center justify-center text-lg font-semibold"
             >
               Save Material Requirements <FaArrowRight className="ml-2" />
             </button>
@@ -295,93 +299,146 @@ export default function JobScan() {
   );
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-100 to-gray-200 p-6">
-      <div className="w-full mx-auto">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          <div className="lg:col-span-1">
-            <div className="bg-white p-6 rounded-lg shadow-lg mb-8 transition-all duration-300 ease-in-out transform hover:scale-105">
-              <div className="w-full flex flex-col items-center justify-center pt-2">
+    <div className="min-h-screen bg-gray-100 p-6">
+      <div className="w-full">
+        <div className="flex flex-col lg:flex-row space-y-8 lg:space-y-0 lg:space-x-8">
+          <div className="lg:w-1/4">
+            <div className="bg-white p-6 mb-8">
+              <h2 className="text-2xl font-bold mb-6 text-gray-800">Scan Job or RF Bag</h2>
+              <div className="flex flex-col items-center space-y-6">
                 {hasCamera ? (
-                  <div className="w-64 h-64 bg-gray-100 rounded-lg shadow-lg overflow-hidden">
+                  <div className="w-64 h-64 bg-gray-100 overflow-hidden">
                     <video ref={videoRef} className="w-full h-full object-cover" />
                   </div>
                 ) : (
-                  <div 
-                    className="relative h-64 w-64 bg-gray-50 rounded-lg shadow-lg overflow-hidden flex items-center justify-center cursor-pointer" 
-                    onClick={handleToggleScanner}
-                  >
-                    <img src={ScannerIcon} alt="scanner" layout="fill" objectFit="cover" />
+                  <div className="relative h-64 w-64 bg-gray-50 flex items-center justify-center cursor-pointer" onClick={handleToggleScanner}>
+                    <img src={ScannerIcon} alt="scanner" className="absolute inset-0 w-full h-full object-cover" />
                     <div className="absolute top-0 left-0 w-full h-full">
                       <div className="absolute top-0 w-full h-1 bg-red-500 animate-scanner-line"></div>
                     </div>
                   </div>
                 )}
-                <div className='h-[1.5rem] my-4'>
-                  {errorMessage && <p className="text-red-600 text-base text-center">{errorMessage}</p>}
-                </div>
                 <form onSubmit={(e) => { e.preventDefault(); handleCodeSubmit(barcode); }} className="w-full">
-                  <div className="flex items-center justify-between bg-white border border-gray-300 rounded-lg shadow-lg overflow-hidden w-full">
+                  <div className="flex items-center justify-between bg-white border border-gray-300 overflow-hidden">
                     <input
                       type="text"
                       className="p-3 w-full text-gray-700 placeholder-gray-400 focus:outline-none"
-                      placeholder="Enter job#"
+                      placeholder="Enter Code"
                       value={scannedCode}
                       onChange={handleChange}
                     />
                     <button
                       onClick={handleScanSubmit}
-                      className={`bg-gradient-to-r from-purple-400 to-purple-600 flex items-center justify-center text-white px-6 py-3 font-semibold rounded-r-lg hover:from-purple-500 hover:to-purple-700 transition duration-300 ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                      className={`bg-gradient-to-r from-indigo-500 to-indigo-600 flex items-center justify-center text-white px-6 py-3 font-semibold hover:from-indigo-600 hover:to-indigo-700 transition duration-300 ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
                       disabled={loading}
                     >
                       {loading ? <ClipLoader size={20} color="#fff" /> : (
                         <>
-                          <FaQrcode className="mr-2" /> Scan
+                          <FaBarcode className="mr-2" /> Scan
                         </>
                       )}
                     </button>
                   </div>
                 </form>
-              </div>
-            </div>
-            <div className="bg-white p-6 rounded-lg shadow-lg mb-8 transition-all duration-300 ease-in-out transform hover:scale-105">
-              <h2 className="text-2xl font-bold mb-4 text-purple-700">Employee Details</h2>
-              <div className="space-y-3">
-                <p className="flex items-center"><FaUser className="mr-2 text-purple-500" /> Pradeep Varma</p>
-                <p className="flex items-center"><FaBriefcase className="mr-2 text-purple-500" /> Filing</p>
-                <p className="flex items-center"><FaCheckCircle className="mr-2 text-green-500" /> Active</p>
+                {errorMessage && <p className="text-red-600 text-sm mt-2">{errorMessage}</p>}
               </div>
             </div>
           </div>
-          <div className="lg:col-span-2">
+          <div className="lg:w-1/4">
+            <div className="bg-white p-6">
+              <h2 className="text-2xl font-bold mb-4 text-gray-800">Employee Details</h2>
+              <div className="space-y-3">
+                <p className="flex items-center text-gray-700"><FaUser className="mr-2 text-indigo-500" /> Pradeep Varma</p>
+                <p className="flex items-center text-gray-700"><FaBriefcase className="mr-2 text-indigo-500" /> Filing</p>
+                <p className="flex items-center text-gray-700"><FaCheckCircle className="mr-2 text-green-500" /> Active</p>
+              </div>
+            </div>
+          </div>
+          <div className="lg:w-1/2 space-y-8">
             {renderJobDetails()}
             {renderRfBagDetails()}
-            {jobDetails && (
-              <div className="bg-white mt-8 p-6 rounded-lg shadow-lg transition-all duration-300 ease-in-out transform hover:scale-105">
-                <div className="flex space-x-4 mb-6">
-                  <button
-                    onClick={() => setActiveTab('summary')}
-                    className={`flex-1 py-2 px-4 rounded-full transition duration-300 ${activeTab === 'summary' ? 'bg-purple-600 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}
-                  >
-                    Summary
-                  </button>
-                  <button
-                    onClick={() => setActiveTab('details')}
-                    className={`flex-1 py-2 px-4 rounded-full transition duration-300 ${activeTab === 'details' ? 'bg-purple-600 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}
-                  >
-                    Details
-                  </button>
-                </div>
-                <div className="p-6 bg-gray-50 rounded-lg shadow">
-                  {activeTab === 'summary' ? (
-                    <p>This is the summary tab content.</p>
-                  ) : (
-                    <p>This is the details tab content.</p>
-                  )}
-                </div>
-              </div>
-            )}
           </div>
         </div>
+        {(jobDetails || rfBagDetails) && (
+          <div className="mt-8">
+            <div className="flex space-x-4 mb-6">
+              <button
+                onClick={() => setActiveTab('summary')}
+                className={`flex-1 py-2 px-4 text-lg font-semibold transition duration-300 ${activeTab === 'summary' ? 'bg-indigo-600 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}
+              >
+                Summary
+              </button>
+              <button
+                onClick={() => setActiveTab('details')}
+                className={`flex-1 py-2 px-4 text-lg font-semibold transition duration-300 ${activeTab === 'details' ? 'bg-indigo-600 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}
+              >
+                Details
+              </button>
+            </div>
+            <div className="bg-white p-6">
+              {activeTab === 'summary' ? (
+                <table className="w-full border-collapse">
+                  <thead>
+                    <tr className="bg-gray-100">
+                      <th className="p-2 text-left">Field</th>
+                      <th className="p-2 text-left">Value</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {jobDetails ? (
+                      <>
+                        <tr><td className="p-2 border-t">Job ID</td><td className="p-2 border-t">{jobDetails.jobId}</td></tr>
+                        <tr><td className="p-2 border-t">Name</td><td className="p-2 border-t">{jobDetails.name}</td></tr>
+                        <tr><td className="p-2 border-t">Design Number</td><td className="p-2 border-t">{jobDetails.designNumber}</td></tr>
+                        <tr><td className="p-2 border-t">Customer</td><td className="p-2 border-t">{jobDetails.customerName}</td></tr>
+                        <tr><td className="p-2 border-t">Status</td><td className="p-2 border-t">{jobDetails.currentStatus}</td></tr>
+                      </>
+                    ) : (
+                      <>
+                        <tr><td className="p-2 border-t">RF Bag ID</td><td className="p-2 border-t">{rfBagDetails.rfbagid}</td></tr>
+                        <tr><td className="p-2 border-t">Material</td><td className="p-2 border-t">{rfBagDetails.Material}</td></tr>
+                        <tr><td className="p-2 border-t">Type</td><td className="p-2 border-t">{rfBagDetails.Type}</td></tr>
+                        <tr><td className="p-2 border-t">Color</td><td className="p-2 border-t">{rfBagDetails.Color}</td></tr>
+                        <tr><td className="p-2 border-t">Purity</td><td className="p-2 border-t">{rfBagDetails.Purity}</td></tr>
+                      </>
+                    )}
+                  </tbody>
+                </table>
+              ) : (
+                <table className="w-full border-collapse">
+                  <thead>
+                    <tr className="bg-gray-100">
+                      <th className="p-2 text-left">Date</th>
+                      <th className="p-2 text-left">Action</th>
+                      <th className="p-2 text-left">Department</th>
+                      <th className="p-2 text-left">Employee</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td className="p-2 border-t">2023-06-01</td>
+                      <td className="p-2 border-t">Created</td>
+                      <td className="p-2 border-t">Design</td>
+                      <td className="p-2 border-t">John Doe</td>
+                    </tr>
+                    <tr>
+                      <td className="p-2 border-t">2023-06-02</td>
+                      <td className="p-2 border-t">Approved</td>
+                      <td className="p-2 border-t">Quality Control</td>
+                      <td className="p-2 border-t">Jane Smith</td>
+                    </tr>
+                    <tr>
+                      <td className="p-2 border-t">2023-06-03</td>
+                      <td className="p-2 border-t">In Progress</td>
+                      <td className="p-2 border-t">Manufacturing</td>
+                      <td className="p-2 border-t">Bob Johnson</td>
+                    </tr>
+                  </tbody>
+                </table>
+              )}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
