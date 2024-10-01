@@ -1,204 +1,270 @@
+import React, { useState } from 'react';
+import { FaQrcode, FaUser, FaBriefcase, FaCheckCircle, FaArrowRight } from 'react-icons/fa';
+import ScannerIcon from '../../Assets/Qrcode.png';
+import img from '../../Assets/Jew.jpg';
+import '../../components/Scanner.css';
 
-
-import React, { useState, useEffect, useRef } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
-import axios from 'axios';
-import '../components/Scanner.css';
-import { IoMdExit } from 'react-icons/io';
-import { ClipLoader } from 'react-spinners';
-import QrScanner from 'qr-scanner';
-import notiSound from "../components/sound/Timeout.mpeg";
-import Sound from 'react-sound'; 
-import Scannericon from '../Assets/Qrcode.png';
-
-const useQueryParams = () => {
-  const location = useLocation();
-  return new URLSearchParams(location.search);
-};
-
-const ScannerPage = () => {
-  const navigate = useNavigate();
+export default function JobScan() {
   const [scannedCode, setScannedCode] = useState('');
-  const [barcode, setBarcode] = useState('');
-  const [errorMessage, setErrorMessage] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [playSound, setPlaySound] = useState(false);
-  const [scanningEnabled, setScanningEnabled] = useState(true); 
-  const companyCodeRef = useRef(null);
-  const videoEl = useRef(null);
-  const scanner = useRef(null);
+  const [jobDetails, setJobDetails] = useState(null);
+  const [rfBagDetails, setRfBagDetails] = useState(null);
+  const [activeTab, setActiveTab] = useState('summary');
+  const [mountWeight, setMountWeight] = useState('');
+  const [pcs, setPcs] = useState('');
 
-  const queryParams = useQueryParams();
-  const empcode = atob(queryParams.get('empbarcode'));
-  const eveid = localStorage.getItem('eventId');
-  const token = localStorage.getItem('proqctoken');
-  const yc = localStorage.getItem('yearcode');
-  const empfname = localStorage.getItem('empfname');
-  const emplname = localStorage.getItem('emplname');
-  useEffect(() => {
-    if (companyCodeRef.current) {
-      companyCodeRef.current.focus();
+  const jobData = [
+    {
+      jobId: "1/266040",
+      name: "GOLD 10K Shine Gold",
+      designNumber: "FD4",
+      serialFor: "WOMENS",
+      image: img,
+      customerName: "ashok01",
+      poNumber: "100 jobs for testing",
+      lastReceived: "1.000 Gm",
+      currentStatus: "Filing-Issue",
+      location: "INDIA",
+      jobFlag: 'Issue',
+    },
+    {
+      jobId: "1/266041",
+      name: "GOLD 18K Shine Yellow",
+      designNumber: "NEW-COP",
+      serialFor: "Titan Earring",
+      image: img,
+      customerName: "amolpatil",
+      poNumber: "15030",
+      lastReceived: "0.000 Gm",
+      currentStatus: "EC QC1-Issue",
+      location: "INDIA",
+      jobFlag: 'Return',
     }
-  }, []);
-  useEffect(() => {
-    if (videoEl.current && scanningEnabled) {
-      scanner.current = new QrScanner(videoEl.current, handleScan, {
-        highlightScanRegion: true,
-        preferredCamera: "environment",
-      });
-      scanner.current.start().catch((err) => {
-        // setErrorMessage("Unable to access the camera.");
-        setScanningEnabled(false); 
-      });
-    }
+  ];
 
-    return () => {
-      if (scanner.current) {
-        scanner.current.stop();
+  const rfBags = [
+    {
+      rfbagid: "0000008992",
+      Material: "METAL",
+      Type: "GOLD",
+      Color: "YELLOW",
+      Purity: "14K",
+      Gm: "16.912/16.912"
+    },
+    {
+      rfbagid: "0000009399",
+      Lot: "1",
+      Material: "DIAMOND",
+      Shape: "ROUND",
+      Color: "IJ",
+      Size: "MIX",
+      Clarity: "SI",
+      Ctw: "97/100"
+    }
+  ];
+
+  const handleScanSubmit = () => {
+    const isJobId = scannedCode.startsWith("1/") && scannedCode.length > 2;
+    if (isJobId) {
+      const jobFound = jobData.find(job => job.jobId === scannedCode);
+      if (jobFound) {
+        setJobDetails(jobFound);
+        setRfBagDetails(null);
+      } else {
+        alert("Job ID not found.");
       }
-    };
-  }, [scanningEnabled]);
-  useEffect(() => {
-    if (playSound) {
-      const soundTimeout = setTimeout(() => setPlaySound(false), 1000); 
-      return () => clearTimeout(soundTimeout);
-    }
-  }, [playSound]);
-  
-  const handleScan = (result) => {
-    if (result) {
-      setScannedCode(result.data);
-      setBarcode(result.data);
-      // setPlaySound(true);
-      if (!playSound) {
-        setPlaySound(true);
-      }    
-      handleCodeSubmit(); 
-        
-    }
-  };
-  const handleCodeSubmit = async (e) => {
-    e?.preventDefault();
-
-    if (barcode.trim() === '') {
-      setErrorMessage('Please enter the job number.');
-      setPlaySound(true);
+    } else if (scannedCode.length === 10) {
+      const rfBagFound = rfBags.find(bag => bag.rfbagid === scannedCode);
+      if (rfBagFound) {
+        setRfBagDetails(rfBagFound);
+        setJobDetails(null);
+      } else {
+        alert("RF Bag ID not found.");
+      }
     } else {
-      setLoading(true);
-      try {
-        const response = await axios.post('https://api.optigoapps.com/ReactStore/ReactStore.aspx', {
-          con: "{\"id\":\"\",\"mode\":\"SCANJOB\",\"appuserid\":\"kp23@gmail.com\"}",
-          p: "eyJQYWNrYWdlSW5kX1JlZ05vMSI6Ijgwa2dpemJpZHV3NWU3Z2ciLCJDdXN0b21lcmlkMSI6IjEwIn0=",
-          dp: JSON.stringify({
-            empbarcode: empcode,
-            Jobno: barcode,
-            Customerid: "10",
-            eventid: eveid
-          })
-        }, {
-          headers: {
-            Authorization: token,
-            Yearcode: yc,
-            Version: "v1",
-            sp: "4",
-            sv: '0',
-            domain: "",
-            "Content-Type": "application/json"
-          }
-        });
-
-        if (response.data.Data.rd[0].stat === 1) {
-          navigate(`/job-questions?QCID=${btoa(queryParams.get('QCID'))}&empbarcode=${btoa(empcode)}&jobid=${btoa(barcode)}&employeeid=${btoa(localStorage.getItem('empid'))}&eventid=${btoa(eveid)}`);
-        } else {
-          setErrorMessage('Job scan failed. Please check the code and try again.');
-          setPlaySound(true);
-        }
-      } catch (error) {
-        setErrorMessage('API call failed. Please try again.');
-        setPlaySound(true);
-      } finally {
-        setLoading(false);
-        setScanningEnabled(false);
-      }
+      alert("Invalid code.");
     }
   };
-  const handleChange = (e) => {
-    setBarcode(e.target.value);
-    setScannedCode(e.target.value);
-    setErrorMessage('');
-  };
-  const handleScanAgain = () => {
-    setScanningEnabled(true);
-    setBarcode(''); 
-    setScannedCode(''); 
-  };
-  return (
-    <div className="w-screen h-screen flex flex-col items-center justify-center bg-gradient-to-r from-blue-100 via-indigo-50 to-green-100 p-4">
-      {playSound && (
-        <Sound
-          url={notiSound}
-          playStatus={Sound.status.PLAYING}
-          autoLoad={true} // Ensures sound is loaded in advance
-          onFinishedPlaying={() => setPlaySound(false)}
-        />
-      )}
 
-
-      <div className="w-full max-w-lg flex flex-col items-center bg-purple-50 rounded-lg shadow-2xl mb-6 p-4">
-        <div className="flex items-center justify-between w-full">
-          <p className="text-lg font-bold text-gray-800">
-            <span className='text-[#56a4ff] font-semibold'>({empcode})</span> {empfname} {emplname}
-          </p>
-          <button onClick={() => navigate('/empscan')} className="flex items-center bg-red-500 text-white px-4 py-2 gap-3 rounded-lg hover:bg-red-600 transition duration-200">
-            <IoMdExit size={22} /> Exit
-          </button>
-        </div>
-      </div>
-
-      <div className="w-full max-w-lg flex flex-col items-center justify-center bg-white rounded-lg shadow-2xl p-8 pt-2">
-        <h2 className="text-2xl font-bold text-center gap-5 mb-6 text-gray-700">Scan Job</h2>
-
-        {scanningEnabled ? (
-          <div className="h-64 w-64 flex items-center justify-center bg-gray-100 rounded-lg shadow-lg mx-auto">
-            <video ref={videoEl} className="h-full w-full object-cover"></video>
+  const renderJobDetails = () => (
+    jobDetails && (
+      <div className="bg-white shadow-lg rounded-lg overflow-hidden transition-all duration-300 ease-in-out transform hover:scale-102">
+        <div className="md:flex">
+          <div className="md:flex-shrink-0">
+            <img className="h-48 w-full object-cover md:w-48" src={jobDetails.image} alt="Job" />
           </div>
-        ) : (
-          <div className="h-64 w-64 bg-white flex items-center justify-center rounded-lg shadow-lg relative overflow-hidden">
-            <img src={Scannericon} alt="scanner" className="h-full w-full object-contain" />
-            <div className="absolute top-0 left-0 w-full h-full">
-              <div className="w-full h-2 bg-red-500 animate-scanner-line"></div>
-            </div>
-            <button className="absolute inset-0 flex bg-gray-300 items-center justify-center text-[#8431c4] text-xl font-bold" onClick={handleScanAgain}>
-              <p className='bg-gray-300 h-7 '>Click here to scan </p>
+          <div className="p-8 flex-grow">
+            <div className="uppercase tracking-wide text-sm text-indigo-500 font-semibold">{jobDetails.jobId}</div>
+            <h2 className="mt-2 text-2xl leading-8 font-semibold text-gray-900">{jobDetails.name}</h2>
+            <p className="mt-2 text-gray-600">Design: {jobDetails.designNumber}</p>
+            <p className="text-gray-600">Customer: {jobDetails.customerName}</p>
+            <p className="text-gray-600">PO: {jobDetails.poNumber}</p>
+            <p className="text-gray-600">Status: {jobDetails.currentStatus}</p>
+            <p className="text-gray-600">Location: {jobDetails.location}</p>
+          </div>
+        </div>
+        {jobDetails.jobFlag === 'Issue' && (
+          <div className="px-8 py-4 bg-gray-50">
+            <h3 className="text-lg font-semibold mb-2">Issue Job</h3>
+            <select className="w-full p-2 border rounded mb-4 focus:border-indigo-500 focus:ring focus:ring-indigo-200">
+              <option>Select Department</option>
+              <option value="Filing">Filing</option>
+              <option value="Casting">Casting</option>
+              <option value="Polishing">Polishing</option>
+            </select>
+            <button
+              onClick={() => {
+                alert("Job successfully issued");
+                setJobDetails(null);
+              }}
+              className="w-full bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700 transition duration-300 flex items-center justify-center"
+            >
+              Issue Job <FaArrowRight className="ml-2" />
             </button>
           </div>
         )}
-
-        {errorMessage && <p className="text-red-600 text-center mt-4">{errorMessage}</p>}
-        <div className="mt-6">
-          <form onSubmit={handleCodeSubmit} className="flex flex-col items-center">
-            <div className="flex items-center justify-between bg-white border border-gray-300 rounded-lg shadow-lg overflow-hidden w-full">
-              <input
-                type="text"
-                className="p-3 w-full text-gray-700 placeholder-gray-400 focus:outline-none"
-                placeholder="Enter job#"
-                value={barcode}
-                onChange={handleChange}
-                ref={companyCodeRef}
-              />
-              <button
-                type="submit"
-                className={`bg-gradient-to-r from-green-400 to-green-600 text-white px-6 py-3 font-semibold rounded-r-lg hover:bg-green-700 transition duration-200 ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
-                disabled={loading}
-              >
-                {loading ? <ClipLoader size={20} color="#fff" /> : 'Go'}
-              </button>
+        {jobDetails.jobFlag === 'Return' && (
+          <div className="px-8 py-4 bg-gray-50">
+            <h3 className="text-lg font-semibold mb-2">Return Details</h3>
+            <div className="grid grid-cols-2 gap-4 mb-4">
+              <p><strong>Alloy Wt:</strong> 0.000</p>
+              <p><strong>Lab Grown:</strong> 0.000</p>
+              <p><strong>Diamond:</strong> 0.000</p>
+              <p><strong>Color Stone:</strong> 0.000</p>
+              <p><strong>Misc:</strong> 0.000</p>
+              <p><strong>Current Net:</strong> 0.000</p>
+              <p><strong>Current Gross:</strong> 0.000</p>
+              <p><strong>Loss Weight:</strong> 0.000</p>
+              <p><strong>Actual Loss:</strong> 0.000</p>
+              <p><strong>Scrap Loss:</strong> 0.000</p>
+              <p><strong>Exp Loss:</strong> 0</p>
+              <p><strong>Exp Loss %:</strong> 0</p>
             </div>
-          </form>
+            <input
+              type="number"
+              value={mountWeight}
+              onChange={(e) => setMountWeight(e.target.value)}
+              placeholder="Enter Mount Weight"
+              className="w-full p-2 border rounded mb-4 focus:border-indigo-500 focus:ring focus:ring-indigo-200"
+            />
+            <button
+              onClick={() => {
+                alert("Job successfully returned");
+                setJobDetails(null);
+              }}
+              className="w-full bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 transition duration-300 flex items-center justify-center"
+            >
+              Return Job <FaArrowRight className="ml-2" />
+            </button>
+          </div>
+        )}
+      </div>
+    )
+  );
+
+  const renderRfBagDetails = () => (
+    rfBagDetails && (
+      <div className="bg-white shadow-lg rounded-lg overflow-hidden mt-8 transition-all duration-300 ease-in-out transform hover:scale-102">
+        <div className="p-8">
+          <h2 className="text-2xl font-bold mb-4">RF Bag Details</h2>
+          <div className="grid grid-cols-2 gap-4">
+            <p><strong>RF Bag ID:</strong> {rfBagDetails.rfbagid}</p>
+            <p><strong>Material:</strong> {rfBagDetails.Material}</p>
+            <p><strong>Type:</strong> {rfBagDetails.Type}</p>
+            <p><strong>Color:</strong> {rfBagDetails.Color}</p>
+            <p><strong>Purity:</strong> {rfBagDetails.Purity}</p>
+            <p><strong>Weight:</strong> {rfBagDetails.Gm}</p>
+          </div>
+          <div className="mt-6">
+            <h3 className="font-semibold mb-2">Material Requirements</h3>
+            <input
+              type="number"
+              value={mountWeight}
+              onChange={(e) => setMountWeight(e.target.value)}
+              placeholder="Enter Required Weight (Gm)"
+              className="w-full p-2 border rounded mb-2 focus:border-indigo-500 focus:ring focus:ring-indigo-200"
+            />
+            <input
+              type="number"
+              value={pcs}
+              onChange={(e) => setPcs(e.target.value)}
+              placeholder="Enter Number of Pieces"
+              className="w-full p-2 border rounded mb-2 focus:border-indigo-500 focus:ring focus:ring-indigo-200"
+            />
+            <button
+              onClick={() => {
+                alert(`Weight: ${mountWeight} Gm, Pieces: ${pcs}`);
+              }}
+              className="w-full bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 transition duration-300 flex items-center justify-center"
+            >
+              Save Material Requirements <FaArrowRight className="ml-2" />
+            </button>
+          </div>
+        </div>
+      </div>
+    )
+  );
+
+  return (
+    <div className="min-h-screen bg-gray-100 p-6">
+      <div className="max-w-7xl mx-auto">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+          <div className="lg:col-span-3">
+            <div className="bg-white p-6 rounded-lg shadow-lg mb-8 transition-all duration-300 ease-in-out transform hover:scale-102">
+              <div className="flex flex-col items-center space-y-4">
+                <img src={ScannerIcon} alt="Scanner Icon" className="w-20 h-20" />
+                <input
+                  type="text"
+                  placeholder="Scan or Enter Job Code"
+                  value={scannedCode}
+                  onChange={(e) => setScannedCode(e.target.value)}
+                  className="w-full md:w-2/3 p-2 border rounded focus:border-indigo-500 focus:ring focus:ring-indigo-200"
+                />
+                <button
+                  onClick={handleScanSubmit}
+                  className="w-full md:w-auto bg-indigo-600 text-white px-6 py-2 rounded hover:bg-indigo-700 transition duration-300 flex items-center justify-center"
+                >
+                  <FaQrcode className="mr-2" /> Scan Job
+                </button>
+              </div>
+            </div>
+            {renderJobDetails()}
+            {renderRfBagDetails()}
+          </div>
+          <div className="lg:col-span-1">
+            <div className="bg-white p-6 rounded-lg shadow-lg mb-8 transition-all duration-300 ease-in-out transform hover:scale-102">
+              <h2 className="text-2xl font-bold mb-4">Employee Details</h2>
+              <div className="space-y-2">
+                <p><FaUser className="inline mr-2 text-indigo-500" /> Pradeep Varma</p>
+                <p><FaBriefcase className="inline mr-2 text-indigo-500" /> Filing</p>
+                <p><FaCheckCircle className="inline mr-2 text-green-500" /> Active</p>
+              </div>
+            </div>
+            <div className="bg-white p-6 rounded-lg shadow-lg transition-all duration-300 ease-in-out transform hover:scale-102">
+              <div className="flex space-x-4 mb-4">
+                <button
+                  onClick={() => setActiveTab('summary')}
+                  className={`flex-1 py-2 px-4 rounded transition duration-300 ${activeTab === 'summary' ? 'bg-indigo-600 text-white' : 'bg-gray-200 hover:bg-gray-300'}`}
+                >
+                  Summary
+                </button>
+                <button
+                  onClick={() => setActiveTab('details')}
+                  className={`flex-1 py-2 px-4 rounded transition duration-300 ${activeTab === 'details' ? 'bg-indigo-600 text-white' : 'bg-gray-200 hover:bg-gray-300'}`}
+                >
+                  Details
+                </button>
+              </div>
+              <div className="bg-gray-50 p-4 rounded">
+                {activeTab === 'summary' ? (
+                  <p>Summary information will be displayed here.</p>
+                ) : (
+                  <p>Detailed information will be displayed here.</p>
+                )}
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
   );
-};
-
-export default ScannerPage;
+}

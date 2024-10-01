@@ -36,10 +36,10 @@ const Login = () => {
       const response = await axios.post('https://api.optigoapps.com/ReactStore/ReactStore.aspx', {
         con: JSON.stringify({
           id: "",
-          mode: "INITQC",
+          mode: "INITTXN",
           appuserid: "kp23@gmail.com"
         }),
-        p: "eyJQYWNrYWdlSWQxIjoiMSIsIkZyb250RW5kX1JlZ05vMSI6Ijgw",
+        p: "eyJQYWNrYWdlSWQxIjoiMSJ9",
         dp: JSON.stringify({
           empbarcode: "",
           deviceid: "DeviceID_SMIT1",
@@ -58,7 +58,7 @@ const Login = () => {
         headers: {
           Authorization: "proqc_json_api",
           Version: "v1",
-          sp: "4",
+          sp: "5",
           domain: "",
           sv:'0',
           "Content-Type": "application/json",
@@ -111,7 +111,7 @@ const Login = () => {
           Authorization: proqctoken,
           Yearcode: yearcode,
           Version: "v1",
-          sp: '4',
+          sp: '5',
           sv:'0',
           domain: '',
           'Content-Type': 'application/json',
@@ -120,7 +120,7 @@ const Login = () => {
 
         const data = {
           con: '{"id":"","mode":"GETMASTER","appuserid":"kp23@gmail.com"}',
-          p: 'eyJQYWNrYWdlSWQxIjoiMSIsIkZyb250RW5kX1JlZ05vMSI6Ijgwa2dpemJpZHV3NWU3Z2ciLCJDdXN0b21lcmlkMSI6IjEwIn0=',
+          p: 'eyJQYWNrYWdlSWQxIjoiMSJ9',
           dp: '{"PackageId":"1","FrontEnd_RegNo":"80kgizbiduw5e7gg","Customerid":"10"}',
         };
 
@@ -143,7 +143,8 @@ const Login = () => {
   }, [proqctoken, yearcode]);
 
   return (
-    <div className="w-screen h-screen flex items-center justify-center bg-gradient-to-r from-blue-100 via-indigo-50 to-green-100 p-4">
+<div className="w-screen h-screen flex items-center justify-center bg-blue-50 p-4">
+{/* <div className="w-screen h-screen flex items-center justify-center bg-[#E8EEEC] p-4"> */}
       <div className="w-full max-w-4xl flex flex-col md:flex-row bg-white rounded-xl shadow-2xl max-h-[97vh] overflow-auto ">
         <div className="w-full md:w-1/2 hidden md:flex items-center justify-center  h-60 md:h-auto">
           <img src={banner} alt="banner" className="object-contain w-full h-full md:h-auto md:rounded-none rounded-xl md:rounded-l-xl" />

@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 import QrScanner from 'qr-scanner';
 import axios from 'axios';
-import { faArrowRight } from '@fortawesome/free-solid-svg-icons';
+import { faArrowLeft,faClose } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useRecoilValue } from 'recoil';
 import { UploadLogicalPathState, ukeyState, rd3State, rd4State, YearCodeState } from '../Recoil/FetchDataComponent';
@@ -10,6 +10,7 @@ import { FaCheckCircle } from 'react-icons/fa';
 import { ClipLoader } from 'react-spinners';
 import { MdOutlineQrCodeScanner } from "react-icons/md";
 import '../components/Scanner.css';
+// import Scannericon from '../Assets/Qrcode.png';
 import Scannericon from '../Assets/Qrcode.png';
 import { FaGem } from 'react-icons/fa';  
 
@@ -19,6 +20,7 @@ const useQueryParams = () => {
 };
 
 const SideDetails = ({ togglepanel, onScannerStateChange, showScanner,handlemodalopen }) => {
+
   const [data, setData] = useState([]);
   const [history, setHistory] = useState([]);
   const [hasCamera, setHasCamera] = useState(true);
@@ -27,7 +29,6 @@ const SideDetails = ({ togglepanel, onScannerStateChange, showScanner,handlemoda
   const [loading, setLoading] = useState(false);
   const [showDetails, setShowDetails] = useState(false);
   const [imgError, setImgError] = useState(false);
-
   const videoRef = useRef(null);
   const scannerRef = useRef(null);
   const eveid = localStorage.getItem('eventId');
@@ -37,6 +38,7 @@ const SideDetails = ({ togglepanel, onScannerStateChange, showScanner,handlemoda
   const ukeylink = localStorage.getItem('ukey');
   const yc = localStorage.getItem('yearcode');
   const token = localStorage.getItem('proqctoken');
+
 
   useEffect(() => {
     if (videoRef.current && !scannerRef.current && hasCamera) {
@@ -102,7 +104,7 @@ const SideDetails = ({ togglepanel, onScannerStateChange, showScanner,handlemoda
             Authorization: token,
             Yearcode: yc,
             Version: 'v1',
-            sp: '4',
+            sp: '5',
             sv: '0',
             'Content-Type': 'application/json',
           },
@@ -203,11 +205,12 @@ const SideDetails = ({ togglepanel, onScannerStateChange, showScanner,handlemoda
         <div className="space-y-6">
           <div className="flex justify-between items-center mb-4">
             <button className="p-2 bg-gray-500 text-white rounded" onClick={handleToggleScanner}>
-              <MdOutlineQrCodeScanner size={24} />
+              {/* <MdOutlineQrCodeScanner size={24} /> */}
+              <FontAwesomeIcon icon={faClose} />
             </button>
             {productData && <h3 className="text-2xl font-bold text-gray-700">{productData.jobserialno}</h3>}
             <button className="p-2 bg-gray-500 text-white rounded" onClick={togglepanel}>
-              <FontAwesomeIcon icon={faArrowRight} />
+              <FontAwesomeIcon icon={faArrowLeft} />
             </button>
           </div>
           {productData ? (
@@ -258,23 +261,24 @@ const SideDetails = ({ togglepanel, onScannerStateChange, showScanner,handlemoda
 
               <div className="mt-6">
                 <div className="flex justify-between items-center">
-                  <span className="text-sm text-gray-400">
-                    Status:
-                    <span className={`px-4 pl-1 py-2 rounded-md font-semibold ${
-                      productData.qccurrentstatus === 'Approved' ? 'text-xl text-green-600' :
-                      productData.qccurrentstatus === 'Rejected' ? 'text-xl text-red-600' :
-                      productData.qccurrentstatus === 'Pending' ? 'text-xl text-yellow-500' :
-                      'text-xl text-gray-300'
-                    }`}>
-                      {productData.qccurrentstatus}
-                    </span>
-                  </span>
+                <span className="text-sm text-gray-400">
+  Last QC Status:
+  <span className={`px-4 pl-1 py-2 rounded-md font-semibold ${
+    productData.qccurrentstatus === 'Approved' ? 'text-xl text-green-600' :
+    productData.qccurrentstatus === 'Rejected' ? 'text-xl text-red-600' : // do background colour lighter 
+    productData.qccurrentstatus === 'Pending' ? 'text-xl text-yellow-500' :
+    'text-xl text-gray-300'
+  }`}>
+    {productData.qccurrentstatus === 'Approved' ? 'Final Approved' : productData.qccurrentstatus}
+  </span>
+</span>
+
                 </div>
               </div>
               <div className='w-full flex justify-center'>
               {history.length > 0 && (
                 <button
-                className="mt-6 p-3 bg-[#9369ba] text-white rounded-lg shadow-md hover:shadow-xl transition duration-300 transform hover:scale-105 flex items-center justify-center"
+                className="mt-6 p-3 bg-[#9369ba] text-white md:hidden rounded-lg shadow-md hover:shadow-xl transition duration-300 transform hover:scale-105 flex items-center justify-center"
                 onClick={handlemodalopen}
               >
                 <FaCheckCircle className="mr-2 text-lg" />
@@ -282,6 +286,23 @@ const SideDetails = ({ togglepanel, onScannerStateChange, showScanner,handlemoda
               </button>
                
               )}
+
+              {/* {statusObj?.status && (
+      <div className="rounded-lg p-4 flex items-center justify-center mt-4" style={{ backgroundColor: statusObj?.bgcolor }}>
+  
+        <div className="flex items-center">
+          <div className="text-3xl mr-4" style={{ color:'white' }}>
+            {statusObj?.icon}
+          </div>
+          <div>
+            <h4 className="text-xl font-semibold" style={{ color: statusObj?.iconcolor }}>
+              {statusObj?.status}
+            </h4>
+            {statusObj?.rem && <p className="text-gray-700">{statusObj?.rem}</p>}
+          </div>
+        </div>
+      </div>
+    )} */}
               </div>
             </div>
           ) : (
@@ -294,22 +315,25 @@ const SideDetails = ({ togglepanel, onScannerStateChange, showScanner,handlemoda
         <div className="w-full max-w-lg flex flex-col items-center justify-center  pt-2">
           <div className="flex justify-end w-full items-center mb-4">
             <button className="p-2 bg-gray-500 text-white rounded" onClick={togglepanel}>
-              <FontAwesomeIcon icon={faArrowRight} />
+              <FontAwesomeIcon icon={faArrowLeft} />
             </button>
           </div>
           {hasCamera ? (
-            <div className="h-64 w-64 flex items-center justify-center bg-gray-100 rounded-lg shadow-lg mx-auto">
-              <video ref={videoRef} style={{ width: '16rem', height: '16rem' }} />
-            </div>
+            // <div className="h-64 w-64 flex items-center justify-center bg-gray-100 rounded-lg shadow-lg mx-auto">
+            //   <video ref={videoRef} style={{ width: '16rem', height: '16rem' }} />
+            // </div>
+            <div className="w-64 h-64 bg-gray-100 rounded-lg shadow-lg overflow-hidden">
+          <video ref={videoRef} className="w-full h-full object-cover" />
+        </div>
           ) : (
-            <div className="relative h-64 w-64 bg-gray-50 rounded-lg shadow-lg overflow-hidden flex items-center justify-center">
+            <div className="relative h-64 w-64 bg-gray-50 rounded-lg shadow-lg overflow-hidden flex items-center justify-center" onClick={handleToggleScanner}>
               <img src={Scannericon} alt="scanner" className="absolute inset-0 w-full h-full object-cover" />
               <div className="absolute top-0 left-0 w-full h-full">
                 <div className="absolute top-0 w-full h-1 bg-red-500 animate-scanner-line"></div>
               </div>
-              <button onClick={handleToggleScanner} className="relative z-10 p-4 bg-[#f9fafb] text-indigo-500 text-xl font-bold">
-                Click here to scan
-              </button>
+              {/* <button  className="relative z-10 p-4 bg-[#f9fafb] text-indigo-500 text-xl font-bold">
+                Click here to scan 
+              </button> */}
             </div>
           )}
           <div className='h-[1.5rem] my-4'>

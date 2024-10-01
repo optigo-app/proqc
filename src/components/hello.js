@@ -1,156 +1,133 @@
-import { useState } from "react";
-import { motion } from "framer-motion"; // Importing Framer Motion
-import { FaChevronDown, FaChevronUp } from "react-icons/fa";
-import { TbMoodEmpty } from "react-icons/tb";
+import React, { useState, useRef, useEffect } from 'react';
+import Scannericon from '../../Assets/Qrcode.png';
+import img from '../../Assets/Jew.jpg';
+import '../../components/Scanner.css';
+import QrScanner from 'qr-scanner';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';  
+import { faArrowLeft } from '@fortawesome/free-solid-svg-icons'; 
+import ClipLoader from 'react-spinners/ClipLoader';
+const JobScan = () => {
+  const [scannedCode, setScannedCode] = useState('');
+  const [barcode, setBarcode] = useState('');
+  const [jobDetailsVisible, setJobDetailsVisible] = useState(false);
+  const [activeTab, setActiveTab] = useState('summary');
+  const [hasCamera, setHasCamera] = useState(true);
+  const [errorMessage, setErrorMessage] = useState(''); 
+  const [loading, setLoading] = useState(false); 
+  const videoRef = useRef(null);
+  const scannerRef = useRef(null);
 
-function Survey({ onSuccess }) {
-  const [isMenuOpen, setIsMenuOpen] = useState({});
-  const [visibleLevel, setVisibleLevel] = useState(null); // Track which level is currently visible
+  useEffect(() => {
+    if (videoRef.current && !scannerRef.current && hasCamera) {
+      scannerRef.current = new QrScanner(
+        videoRef.current,
+        (result) => handleScan(result.data),
+        {
+          onDecodeError: (err) => console.log(err),
+          preferredCamera: 'environment',
+          highlightScanRegion: true,
+          highlightCodeOutline: true,
+        }
+      );
 
-  const handleOptionClick = (option) => {
-    const selectedOptions = answers[currentQuestion.id] || [];
-    if (selectedOptions.includes(option)) {
-      // Toggle menu open/close on the same option click
-      setIsMenuOpen((prev) => ({ ...prev, [option]: !prev[option] }));
-      return;
+      scannerRef.current.start().catch((err) => {
+        console.error(err);
+        setHasCamera(false);
+      });
     }
-    const updatedOptions = [...selectedOptions, option];
-    const updatedAnswers = { ...answers, [currentQuestion.id]: updatedOptions };
-    setAnswers(updatedAnswers);
-    localStorage.setItem('answers', JSON.stringify(updatedAnswers));
-    setSelectedOption(option);
-    setIsMenuOpen((prev) => ({ ...prev, [option]: true })); // Open the menu for the new option
-    setVisibleLevel(0); // Start showing levels from the beginning
-    if (!intensities[option]) {
-      setIntensities((prev) => ({ ...prev, [option]: 0 }));
+
+    const handleScan = (result) => {
+      if (result) {
+        setBarcode(result);
+        setHasCamera(false);
+        handleCodeSubmit(result);
+      }
+    };
+    return () => {
+      if (scannerRef.current) {
+        scannerRef.current.stop();
+        scannerRef.current = null;
+      }
+    };
+  }, [hasCamera]);
+
+  const togglepanel = () => {
+    console.log('Toggling panel'); // Add your logic to toggle the panel
+  };
+
+  const handleCodeSubmit = (code) => {
+    if (code.length === 10) {
+      // If the code is an RF Bag ID
+      console.log('RF Bag ID:', code);
+      // Add your logic to show RF Bag details
+    } else if (code.startsWith('1/')) {
+      // If the code is a Job ID
+      console.log('Job ID:', code);
+      // Add your logic to show job details
+      setJobDetailsVisible(true);
+    } else {
+      setErrorMessage('Invalid code. Please try again.');
     }
   };
 
-  const handleIntensityChange = (value) => {
-    if (selectedOption) {
-      setIntensities((prev) => ({ ...prev, [selectedOption]: value }));
-    }
+  const handleToggleScanner = () => {
+    setHasCamera(!hasCamera); // Add logic to toggle the scanner on and off
   };
 
-  const handleCancel = () => {
-    if (selectedOption) {
-      setIntensities((prev) => ({ ...prev, [selectedOption]: 0 }));
-      setSelectedOption(null);
-      const updatedOptions = (answers[currentQuestion.id] || []).filter((opt) => opt !== selectedOption);
-      setAnswers((prev) => ({ ...prev, [currentQuestion.id]: updatedOptions }));
-      localStorage.setItem('answers', JSON.stringify({ ...answers, [currentQuestion.id]: updatedOptions }));
-    }
+  const handleChange = (e) => {
+    setBarcode(e.target.value);
+    setErrorMessage('');
   };
-
-  const getBackgroundColor = (intensity) => {
-    const startColor = [86, 164, 255]; // #56a4ff
-    const endColor = [147, 105, 186]; // #9369ba
-    const ratio = intensity / 5; // Adjusting for 5 levels
-    const interpolatedColor = startColor.map((start, index) => {
-      return Math.round(start + ratio * (endColor[index] - start));
-    });
-    return `rgb(${interpolatedColor.join(",")})`;
-  };
-
-  const intensityLevels = [
-    { value: 1, label: "Negligible" },
-    { value: 2, label: "Minor" },
-    { value: 3, label: "Moderate" },
-    { value: 4, label: "Significant" },
-    { value: 5, label: "Critical" },
-  ];
 
   return (
-    <div className="flex flex-col lg:flex-row max-w-screen w-full lg:w-[60vw] min-h-[80vh] mb-5 md:mb-5 h-fit overflow-auto mx-auto p-6 bg-white shadow-md rounded-lg">
-      {hasQuestions && allQuestions ? (
-        <div className="flex w-full flex-col lg:flex-row lg:pr-4">
-          <div className="flex flex-col justify-between h-full w-full">
-            <div>
-              <div className="flex items-center mb-6">
-                <h2 className="text-2xl flex-1">{currentQuestion.question}</h2>
-              </div>
-              <div className="flex flex-wrap gap-3 mb-6 relative">
-                {currentQuestion.options.split(',').map((option) => (
-                  <div key={option} className="relative z-10">
-                    <button
-                      onClick={() => handleOptionClick(option)}
-                      style={{
-                        backgroundColor: answers[currentQuestion.id]?.includes(option)
-                          ? getBackgroundColor(intensities[option] || 0)
-                          : 'white',
-                      }}
-                      className={`py-2 px-4 rounded-full shadow-md border border-gray-300 
-                        ${answers[currentQuestion.id]?.includes(option) ? 'text-white' : ''}`}
-                    >
-                      {option}
-                      {isMenuOpen[option] ? (
-                        <FaChevronUp className="inline ml-2 text-sm text-gray-500" />
-                      ) : (
-                        <FaChevronDown className="inline ml-2 text-sm text-gray-500" />
-                      )}
-                    </button>
-                    {isMenuOpen[option] && (
-                      <motion.div
-                        initial={{ opacity: 0, height: 0 }}
-                        animate={{ opacity: 1, height: "auto" }}
-                        exit={{ opacity: 0, height: 0 }}
-                        transition={{ duration: 0.3 }} // Duration for the animation
-                        className={`absolute left-0 top-full mt-2 w-48 p-4 bg-white border border-gray-300 rounded-lg shadow-md z-20`}
-                      >
-                        <p className="mb-2 font-medium">Select Intensity:</p>
-                        <div className="flex flex-col space-y-2">
-                          {intensityLevels.slice(0, visibleLevel + 1).map((level) => (
-                            <label key={level.value} className="flex items-center">
-                              <input
-                                type="radio"
-                                value={level.value}
-                                checked={intensities[option] === level.value}
-                                onChange={() => handleIntensityChange(level.value)}
-                                className="mr-2"
-                              />
-                              {level.label}
-                            </label>
-                          ))}
-                        </div>
-                        <button
-                          onClick={handleCancel}
-                          className="mt-4 py-1 px-3 text-gray-600 rounded-full"
-                        >
-                          Cancel
-                        </button>
-                      </motion.div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </div>
+    <div className="flex flex-col lg:flex-row h-screen bg-gray-100">
+      <div className="w-full max-w-lg flex flex-col items-center justify-center pt-2">
+        <div className="flex justify-end w-full items-center mb-4">
+          <button className="p-2 bg-gray-500 text-white rounded" onClick={togglepanel}>
+            <FontAwesomeIcon icon={faArrowLeft} />
+          </button>
+        </div>
 
-            <div className="flex justify-between">
-              <button
-                onClick={handlePrevious}
-                disabled={currentQuestionIndex === 0}
-                className="py-2 px-4 bg-[#39aa78] rounded-full text-white shadow-md disabled:bg-gray-200"
-              >
-                Previous
-              </button>
-              <button
-                onClick={handleNext}
-                className="py-2 px-4 bg-[#9369ba] text-white rounded-full shadow-md"
-              >
-                Next
-              </button>
+        {hasCamera ? (
+          <div className="w-64 h-64 bg-gray-100 rounded-lg shadow-lg overflow-hidden">
+            <video ref={videoRef} className="w-full h-full object-cover" />
+          </div>
+        ) : (
+          <div className="relative h-64 w-64 bg-gray-50 rounded-lg shadow-lg overflow-hidden flex items-center justify-center" onClick={handleToggleScanner}>
+            <img src={Scannericon} alt="scanner" className="absolute inset-0 w-full h-full object-cover" />
+            <div className="absolute top-0 left-0 w-full h-full">
+              <div className="absolute top-0 w-full h-1 bg-red-500 animate-scanner-line"></div>
             </div>
           </div>
+        )}
+
+        <div className='h-[1.5rem] my-4'>
+          {errorMessage && <p className="text-red-600 text-base text-center">{errorMessage}</p>}
         </div>
-      ) : (
-        <div className="flex-1 flex flex-col items-center justify-center p-6 bg-white">
-          <TbMoodEmpty className="text-5xl text-gray-600 mb-4" />
-          <h2 className="text-3xl font-semibold text-gray-600">No Questions Available</h2>
-          <p className="text-gray-600 mt-2">Please try again later or contact support.</p>
+
+        <div>
+          <form onSubmit={(e) => { e.preventDefault(); handleCodeSubmit(barcode); }} className="flex flex-col items-center">
+            <div className="flex items-center justify-between bg-white border border-gray-300 rounded-lg shadow-lg overflow-hidden w-full">
+              <input
+                type="text"
+                className="p-3 w-full text-gray-700 placeholder-gray-400 focus:outline-none"
+                placeholder="Enter job# or RF Bag#"
+                value={barcode}
+                onChange={handleChange}
+              />
+              <button
+                type="submit"
+                className={`bg-gradient-to-r from-green-400 to-green-600 text-white px-6 py-3 font-semibold rounded-r-lg hover:bg-green-700 transition duration-200 ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                disabled={loading}
+              >
+                {loading ? <ClipLoader size={20} color="#fff" /> : 'Go'}
+              </button>
+            </div>
+          </form>
         </div>
-      )}
+      </div>
     </div>
   );
-}
+};
 
-export default Survey;
+export default JobScan;

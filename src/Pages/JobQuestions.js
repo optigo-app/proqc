@@ -1,3 +1,4 @@
+// make this ui more attractoive and responsive
 import React, { useState } from 'react';
 import SideDetails from '../components/SideDetails';
 import Survey from '../components/Survey';
@@ -7,10 +8,13 @@ import { ImCross } from 'react-icons/im';
 import { MdOutlineReadMore, MdArrowBack, MdClose } from 'react-icons/md';
 import { useNavigate } from "react-router-dom";
 import { ClipLoader } from 'react-spinners';
-import { FaGem } from 'react-icons/fa';  // A jewelry-related icon from react-icons
+import { FaGem } from 'react-icons/fa';  
+import JobDetails from '../components/JobDetails';
+import { motion, AnimatePresence } from "framer-motion"
 
 
-const Conclusion = [
+
+export const Conclusion = [
   { id: '1', status: 'Approved', icon: <FaRegThumbsUp />, iconcolor: '#4CAF50', bgcolor: '#4CAF5030' },
   { id: '2', status: 'Rejected', icon: <FaRegThumbsDown />, iconcolor: '#F44336', bgcolor: '#F4433630' },
   { id: '3', status: 'Final Approved', icon: <SiTicktick />, iconcolor: '#4CAF50', bgcolor: '#4CAF5030' },
@@ -65,7 +69,16 @@ const Modal = ({ isOpen, onClose, finalHistory }) => {
             ))}
           </ul>
         ) : (
-          <p className="text-gray-500">No questions and answers available.</p>
+          <p className="text-gray-500">
+          {statusObj?.status === 'Approved' || statusObj?.status === 'Final Approved' ? (
+            <h4 className="text-xl font-semibold" style={{ color: statusObj?.iconcolor }}>
+              {statusObj?.status}
+            </h4>
+          ) : (
+            'No questions and answers available.'
+          )}
+        </p>
+        
         )}
       </div>
   
@@ -134,7 +147,7 @@ const JobQuestions = () => {
   };
 
   return (
-    <div className="flex flex-col md:flex-row w-screen h-screen bg-gray-50 relative">
+    <div className="flex flex-col md:flex-row w-screen h-screen overflow-hidden bg-gray-50 relative">
       <div className="md:h-screen mb-2 md:mb-0 h-fit w-fit p-5">
         {!isPanelOpen && (
           <button
@@ -147,9 +160,7 @@ const JobQuestions = () => {
       </div>
 
       <div
-        className={`fixed top-0 left-0 flex flex-col w-fit h-screen overflow-y-auto bg-[#f4f4f4] shadow-2xl transform transition-transform duration-500 ease-in-out ${
-          isPanelOpen ? 'translate-x-0' : '-translate-x-full'
-        }`}
+        className={`fixed top-0 left-0 flex flex-col w-fit h-screen overflow-y-auto bg-[#f4f4f4] shadow-2xl transform transition-transform duration-500 ease-in-out ${ isPanelOpen ? 'translate-x-0' : '-translate-x-full'}`}
         style={{ zIndex: 100}}
       >
         <SideDetails 
@@ -161,28 +172,47 @@ const JobQuestions = () => {
       </div>
 
       <div
-        className={`flex px-3 justify-center h-full min-h-screen w-screen overflow-y-auto mt-3 items-center transition-transform duration-500 ease-in-out ${
-          isPanelOpen && window.innerWidth > 768 ? 'transform translate-x-48' : ''
-        }`}
+        className={`flex px-3 justify-center h-full min-h-screen w-screen overflow-y-auto mt-3 items-center transition-transform duration-500 `}
       >
         {isScanning ? (
-          <div className="flex flex-col items-center justify-center text-center">
-            <ClipLoader size={50} color="#4A90E2" />
-            <p className="mt-4 text-xl font-semibold text-gray-700">Scanning Process Running, Please Wait...</p>
-          </div>
+       <motion.div 
+       initial={{ opacity: 0, y: 20 }}
+       animate={{ opacity: 1, y: 0 }}
+       transition={{ duration: 0.5 }}
+       className="flex items-center justify-center h-full"
+     >
+       <p className="text-xl font-semibold text-gray-700 animate-pulse">
+         Please Scan The Job To Continue...
+       </p>
+     </motion.div>
         ) : (
+          <div>
           <Survey onSuccess={handleOpenScanner} />
+          {finalhistory.length > 0 && (
+    <div className="fixed top-0 right-0 md:flex flex-col h-screen overflow-y-auto w-72 bg-[#f4f4f4] shadow-2xl transform transition-transform duration-500 ease-in-out" style={{ zIndex: 100 }}>
+        <JobDetails finalHistory={finalhistory} />
+    </div>
+)}
+
+          {/* <div
+          className={`fixed top-0 right-0 md:flex flex-col h-screen overflow-y-auto hidden w-72  bg-[#f4f4f4] shadow-2xl transform transition-transform duration-500 ease-in-ou`}
+          style={{ zIndex: 100}}
+        >
+          <JobDetails finalHistory={finalhistory} />
+        </div> */}
+        </div>
         )}
       </div>
-
-      <button
+     
+      {/* <button
         onClick={handleBackClick}
         className="absolute top-4 right-8 p-3 text-blue-500 rounded-full shadow-lg transition-transform transform hover:scale-105 flex items-center"
         aria-label="Back"
+        style={{'zIndex':100}}
       >
         <MdArrowBack className="text-2xl font-bold" />
         <span className="ml-2 font-bold">Back</span>
-      </button>
+      </button> */}
 
       <Modal isOpen={isModalOpen} onClose={handleCloseModal} finalHistory={finalhistory} />
     </div>

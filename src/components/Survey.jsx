@@ -18,11 +18,49 @@ import { ClipLoader } from 'react-spinners';
 import { MdOutlineArrowBackIosNew } from 'react-icons/md';
 import { Slider } from '@mui/material'; 
 import { motion } from 'framer-motion';
+import { AiFillStar, AiOutlineStar } from 'react-icons/ai'; 
+import './Scrollbar.css'
 
 const useQueryParams = () => {
 const location = useLocation();
 return new URLSearchParams(location.search);
 };
+
+
+
+
+function interpolateColor(startColor, endColor, ratio) {
+  return startColor.map((start, index) => {
+    return Math.round(start + ratio * (endColor[index] - start));
+  });
+}
+
+function getStarColor(intensity, maxIntensity) {
+  const yellow = [255, 215, 0];
+  const orange = [255, 90, 0]; 
+  const ratio = intensity / maxIntensity;
+  
+  const interpolatedColor = interpolateColor(yellow, orange, ratio);
+  
+  return `rgb(${interpolatedColor.join(",")})`;
+}
+
+function Star({ filled, intensity, maxIntensity, onClick }) {
+  const color = filled ? getStarColor(intensity, maxIntensity) : 'rgb(203, 213, 225)'; 
+
+  return (
+    <motion.span
+      onClick={onClick}
+      className={`cursor-pointer text-2xl`}
+      style={{ color }} 
+      whileHover={{ scale: 1.2 }}
+      transition={{ type: "spring", stiffness: 300 }}
+    >
+      {filled ? <AiFillStar size={30} /> : <AiOutlineStar size={30}/>}
+    </motion.span>
+  );
+}
+
 
 function Survey({onSuccess }) {
   const navigate = useNavigate();
@@ -35,13 +73,14 @@ const [showSuccessMessage, setShowSuccessMessage] = useState(false);
 const [remarks, setRemarks] = useState({});
 const [editingRemark, setEditingRemark] = useState(null);
 const [images, setImages] = useState([]); 
-const [selectedOption, setSelectedOption] = useState(null); // New state for the selected option
+const [showHelp, setShowHelp] = useState(false); 
+const [selectedOption, setSelectedOption] = useState(null); 
 const [imageUrls, setImageUrls] = useState([]); 
 const queryParams = useQueryParams();
 const [loading, setLoading] = useState(false);
 const [showConclusionSlide, setShowConclusionSlide] = useState(false);
 const [errorMessage, setErrorMessage] = useState("");
-const [intensities, setIntensities] = useState({}); // State to store intensities per option
+const [intensities, setIntensities] = useState({}); 
 const qcID = atob(queryParams.get('QCID'));
 const empbarcode = atob(queryParams.get('empbarcode'));
 // const jobid = atob(queryParams.get('jobid'));
@@ -101,6 +140,9 @@ useEffect(() => {
   }
 }, [editingRemark]);
 
+const handleHelpClick = () => {
+  setShowHelp(!showHelp);
+};
 
 
 const Conclusion = [
@@ -165,7 +207,9 @@ useEffect(() => {
 //     }, 10000);
 //   }
 // }, [showSuccessMessage, navigate, qcID, empbarcode]);
-
+const reloadPage = () => {
+  window.location.reload(); // This will reload the current page
+};
 useEffect(() => {
   let timeoutId;
 
@@ -177,6 +221,7 @@ useEffect(() => {
       setShowSelection(true);
       // navigate(`/Scannerpage?QCID=${btoa(qcID)}&empbarcode=${btoa(empbarcode)}&employeeid=${btoa(empid)}&eventid=${btoa(eveid)} `);
   onSuccess();
+  reloadPage(); 
 
     }, 10000);
   }
@@ -187,6 +232,7 @@ const handleContinue = () => {
   setShowSuccessMessage(false); 
   // navigate(`/Scannerpage?QCID=${btoa(qcID)}&empbarcode=${btoa(empbarcode)}&employeeid=${btoa(empid)}&eventid=${btoa(eveid)} `);
   onSuccess();
+  reloadPage(); 
 };
 
 
@@ -200,57 +246,38 @@ const handleContinue = () => {
 //   localStorage.setItem('answers', JSON.stringify(updatedAnswers));
 // };
 
-const intensityLevels = [
-  { value: 1, label: "Negligible" },
-  { value: 2, label: "Minor" },
-  { value: 3, label: "Moderate" },
-  { value: 4, label: "Significant" },
-  { value: 5, label: "Critical" },
-];
+const intensityLevels = [1, 2, 3, 4, 5];
 
-const handleOptionClick = (option) => {
-  const selectedOptions = answers[currentQuestion.id] || [];
-  if (selectedOptions.includes(option)) {
-    // Toggle logic: if option is already selected, deselect it
-    setSelectedOption(selectedOption === option ? null : option);
-  } else {
-    // Otherwise, add the new option
-    setSelectedOption(option);
-    const updatedOptions = [...selectedOptions, option];
-    const updatedAnswers = { ...answers, [currentQuestion.id]: updatedOptions };
-    setAnswers(updatedAnswers);
-    localStorage.setItem('answers', JSON.stringify(updatedAnswers));
-    if (!intensities[option]) {
-      setIntensities((prev) => ({ ...prev, [option]: 0 }));
+  const handleOptionClick = (option) => {
+    const selectedOptions = answers[currentQuestion.id] || []
+    if (selectedOptions.includes(option)) {
+      const updatedOptions = selectedOptions.filter(opt => opt !== option)
+      setAnswers({ ...answers, [currentQuestion.id]: updatedOptions })
+      setIntensities(prev => ({ ...prev, [option]: undefined }))
+      setSelectedOption(null)
+    } else {
+      setSelectedOption(option)
+      const updatedOptions = [...selectedOptions, option]
+      setAnswers({ ...answers, [currentQuestion.id]: updatedOptions })
+      setIntensities(prev => ({ ...prev, [option]: 1 }))
     }
   }
-};
 
-const handleIntensityChange = (value) => {
-  if (selectedOption) {
-    setIntensities((prev) => ({ ...prev, [selectedOption]: value }));
+  const handleStarClick = (option, value) => {
+    if (answers[currentQuestion.id]?.includes(option)) {
+      setIntensities(prev => ({ ...prev, [option]: value }))
+    }
   }
-};
 
-const handleCancel = () => {
-  if (selectedOption) {
-    setIntensities((prev) => ({ ...prev, [selectedOption]: 0 }));
-    setSelectedOption(null);
-    const updatedOptions = (answers[currentQuestion.id] || []).filter((opt) => opt !== selectedOption);
-    setAnswers((prev) => ({ ...prev, [currentQuestion.id]: updatedOptions }));
-    localStorage.setItem('answers', JSON.stringify({ ...answers, [currentQuestion.id]: updatedOptions }));
+  const getBackgroundColor = (intensity) => {
+    const startColor = [86, 164, 255]
+    const endColor = [147, 105, 186]
+    const ratio = intensity / 5
+    const interpolatedColor = startColor.map((start, index) => {
+      return Math.round(start + ratio * (endColor[index] - start))
+    })
+    return `rgb(${interpolatedColor.join(",")})`
   }
-};
-
-const getBackgroundColor = (intensity) => {
-  const startColor = [86, 164, 255]; // #56a4ff
-  const endColor = [147, 105, 186]; // #9369ba
-  const ratio = intensity / 5; // Adjusting for 5 levels
-  const interpolatedColor = startColor.map((start, index) => {
-    return Math.round(start + ratio * (endColor[index] - start));
-  });
-  return `rgb(${interpolatedColor.join(",")})`;
-};
 
 // const handleNext = () => {
 //   if (currentQuestionIndex < questionsToDisplay.length - 1) {
@@ -434,6 +461,8 @@ function mapValuesToIds(valueString) {
   const ids = values.map(value => optionMap[value]);
   return ids.join(","); 
 }
+
+
 const handleSubmit = async (statusid) => {
   setLoading(true);
   const ipResponse = await axios.get('https://api.ipify.org?format=json');
@@ -475,7 +504,7 @@ const handleSubmit = async (statusid) => {
         Authorization: token,
         Yearcode: `${yc}`,
         Version: "v1",
-        sp: "4",
+        sp: '5',
         sv: '0',
         domain: "",
         "Content-Type": "application/json",
@@ -554,7 +583,7 @@ const totalQuestions = allQuestions.length;
 console.log("allQuestions",allQuestions); 
 
 return (
-  <div className="flex flex-col lg:flex-row max-w-screen w-full  lg:w-[60vw]  min-h-[80vh] mb-5 md:mb-5 h-fit  overflow-auto mx-auto p-6 bg-white shadow-md rounded-lg">
+  <div className="flex flex-col lg:flex-row max-w-screen w-full   lg:w-[50vw]  min-h-[80vh] scroll-pb-10  md:mb-5 h-fit  overflow-auto mx-auto p-6 mb-20 bg-white shadow-md rounded-lg">
     {showSuccessMessage ? (
     <>
       <div className="flex-1  flex flex-col items-center justify-center p-6 bg-green-100 rounded-lg shadow-md">
@@ -573,7 +602,6 @@ return (
         <div className='h-64'></div>
         </div>
     </>
- 
     ) :  showConclusionSlide ? (
       <>
          <div className="mt-6 flex flex-col justify-between " style={{ width: '100%', }}>
@@ -727,8 +755,7 @@ return (
 </div>          
     </>
     ) : hasQuestions  && allQuestions ? ( 
-
-      <div className="flex w-full flex-col lg:flex-row lg:pr-4 ">
+      <div className="flex w-full flex-col  lg:flex-row lg:pr-4 ">
         <div className=" flex flex-col justify-between h-full " style={{width:'-webkit-fill-available'}}>
             <>
         <div>
@@ -781,55 +808,75 @@ return (
                   <FaRegEdit className="text-2xl transition text-blue-600 duration-300 ease-in-out hover:text-blue-200" />
                 </button>
               </div>
-              <div className="flex flex-wrap gap-3 mb-6 relative">
-                {currentQuestion.options.split(',').map((option) => (
-                  <div key={option} className="relative">
-                    <button
-                      onClick={() => handleOptionClick(option)}
-                      style={{
-                        backgroundColor: answers[currentQuestion.id]?.includes(option)
-                          ? getBackgroundColor(intensities[option] || 0)
-                          : 'white',
-                      }}
-                      className={`py-2 px-4 rounded-full shadow-md border border-gray-300 
-                        ${answers[currentQuestion.id]?.includes(option) ? 'text-white' : ''}`}
-                    >
-                      {option}
-                    </button>
-                    {selectedOption === option && (
-                      <motion.div
-                        className={`absolute left-0 top-full mt-2 w-48 p-4 bg-white border border-gray-300 rounded-lg shadow-md z-10`}
-                        initial={{ opacity: 0, height: 0 }}
-                        animate={{ opacity: 1, height: 'auto' }}
-                        exit={{ opacity: 0, height: 0 }}
-                        transition={{ duration: 0.3 }}
-                      >
-                        <p className="mb-2 font-medium">Select Intensity:</p>
-                        <div className="flex flex-col space-y-2">
-                          {intensityLevels.map((level) => (
-                            <label key={level.value} className="flex items-center">
-                              <input
-                                type="radio"
-                                value={level.value}
-                                checked={intensities[option] === level.value}
-                                onChange={() => handleIntensityChange(level.value)}
-                                className="mr-2"
-                              />
-                              {level.label}
-                            </label>
-                          ))}
-                        </div>
-                        <button
-                          onClick={handleCancel}
-                          className="mt-4 py-1 px-3 text-blue-600 rounded-full"
-                        >
-                        Deselect
-                        </button>
-                      </motion.div>
-                    )}
-                  </div>
-                ))}
-              </div>
+
+              {/* <div id="style-4" className="flex h-[50vh] overflow-auto flex-col gap-3 mb-6 p-3">
+  {currentQuestion.options.split(',').map((option) => (
+    <div key={option} className="relative flex flex-col md:flex-row items-start md:items-center">
+      <button
+        onClick={() => handleOptionClick(option)}
+        style={{
+          backgroundColor: answers[currentQuestion.id]?.includes(option)
+            ? getBackgroundColor(intensities[option] || 0)
+            : '#eceeee',
+        }}
+        className={`py-3 px-4 rounded-full shadow-md border border-gray-300 ${
+          answers[currentQuestion.id]?.includes(option) ? 'text-white' : ''
+        }`}
+      >
+        {option}
+      </button>
+      {answers[currentQuestion.id]?.includes(option) && (
+        <div className="flex ml-0 md:ml-3 mt-2 md:mt-0 flex-wrap md:flex-nowrap">
+          {intensityLevels.map((level) => (
+            <Star
+              key={level}
+              filled={intensities[option] >= level}
+              intensity={level} // Current star intensity level
+              maxIntensity={intensityLevels.length} // Total number of stars or max intensity
+              onClick={() => handleStarClick(option, level)}
+            />
+          ))}
+        </div>
+      )}
+    </div>
+  ))}
+</div> */}
+{/* <div id="style-4" className="grid grid-cols-1 md:grid-cols-2  gap-3 h-[50vh] overflow-auto mb-6 p-3"> */}
+<div id="style-4" className="grid grid-cols-1 lg:grid-cols-2  gap-3 h-fit max-h-[50vh] overflow-auto mb-6 p-3 items-start">
+
+  {currentQuestion.options.split(',').map((option) => (
+    <div key={option} className="relative flex flex-col gap-2 md:flex-row items-start md:items-center">
+    <button
+        onClick={() => handleOptionClick(option)}
+        style={{
+          backgroundColor: answers[currentQuestion.id]?.includes(option)
+            ? getBackgroundColor(intensities[option] || 0)
+            : '#eceeee',
+        }}
+        className={`py-3 px-4 rounded-full shadow-md border border-gray-300 w-52 ${
+          answers[currentQuestion.id]?.includes(option) ? 'text-white' : ''
+        }`}
+      >
+        {option}
+      </button>
+
+      {answers[currentQuestion.id]?.includes(option) && (
+        <div className="flex ml-3 flex-wrap justify-start">
+          {intensityLevels.map((level) => (
+            <Star
+              key={level}
+              filled={intensities[option] >= level}
+              intensity={level} // Current star intensity level
+              maxIntensity={intensityLevels.length} // Total number of stars or max intensity
+              onClick={() => handleStarClick(option, level)}
+            />
+          ))}
+        </div>
+      )}
+    </div>
+  ))}
+</div>
+
         </div>
         
         {/* <div className='h-96'>
@@ -920,7 +967,7 @@ return (
                 <button
                   onClick={handlePrevious}
                   disabled={currentQuestionIndex === 0}
-                  className="py-2 px-4 bg-[#39aa78] rounded-full disabled:text-gray-700 text-white shadow-md disabled:bg-gray-200"
+                  className="py-2 px-4 bg-[#39aa78] rounded-full disabled:text-gray-700 text-white shadow-md disabled:bg-gray-50"
                 >
                   Previous
                 </button>

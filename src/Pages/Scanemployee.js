@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
@@ -12,7 +13,7 @@ import { FaEye, FaEyeSlash, FaArrowLeft } from 'react-icons/fa';
 
 const Scanemp = () => {
   useEffect(() => {
-    localStorage.setItem('lastScreen', 'empscan'); // Make sure you're storing the correct path here
+    localStorage.setItem('lastScreen', 'empscan'); 
   }, []);
   const navigate = useNavigate();
   const [barcode, setBarcode] = useState('');
@@ -99,129 +100,28 @@ const Scanemp = () => {
     if (pin.trim() === '') {
       setErrorMessage('Please enter your PIN.');
     } else {
-      senddatatoapi(barcode, pin);
+      handlebuttonclick();
     }
   };
 
-  const senddatatoapi = (barcode, pin) => {
-    setLoading(true);
-    const myHeaders = {
-      Authorization: token,
-      Yearcode: yc,
-      Version: "v1",
-      sp: "4",
-      sv:'0',
-      domain: "",
-      "Content-Type": "application/json",
-    };
-
-    const raw = JSON.stringify({
-      con: "{\"id\":\"\",\"mode\":\"SCANEMP\",\"appuserid\":\"kp23@gmail.com\"}",
-      p: "eyJQYWNrYWdlSWQxIjoiMSIsIkZyb250RW5kX1JlZ05vMSI6Ijgwa2tpemJpZHV3NWU3Z2ciLCJDdXN0b21lcmlkMSI6IjEwIn0=",
-      dp: `{\"empbarcode\":\"${barcode}\",\"FrontEnd_RegNo\":\"\",\"pin\":\"${pin}\",\"Customerid\":\"\"}`,
-    });
-
-    axios.post('https://api.optigoapps.com/ReactStore/ReactStore.aspx', raw, { headers: myHeaders })
-      .then((response) => {
-        setLoading(false);
-        const status = response.data.Data.rd[0].stat;
-        if (status === 1) {
-          const qcdepartment = response.data.Data.rd[0].qcdept.split(',');
-          const empid = response.data.Data.rd[0].emp_id;
-          const eveid = response.data.Data.rd[0].eventid;
-          const qcdept = response.data.Data.rd[0].qcdept;
-          const fname = response.data.Data.rd[0].emp_firstname;
-          const lname = response.data.Data.rd[0].emp_lastname;
-          
-          localStorage.setItem('empfname', fname);
-          localStorage.setItem('emplname', lname);
-          localStorage.setItem('empid', empid);
-          localStorage.setItem('qcdept', qcdept);
-          localStorage.setItem('eventId', eveid);
-          setEmployeeid(empid);
-          setEventid(eveid);
-
-          const filteredQcdeptNames = rd4
-            .filter(item => qcdepartment.includes(item.id.toString()))
-            .map(item => item.qcdeptname);
-
-          const filteredQcdeptIds = rd4
-            .filter(item => qcdepartment.includes(item.id.toString()))
-            .map(item => item.id);
-
-          setQcdept(filteredQcdeptNames);
-
-          if (filteredQcdeptNames.length > 1) {
-            setModalButtons(filteredQcdeptNames);
-            setIsModalOpen(true);
-          } else if (filteredQcdeptNames.length === 1) {
-            const qcdeptId = filteredQcdeptIds[0];
-            navigate(`/job-questions?QCID=${btoa(qcdeptId)}&empbarcode=${btoa(barcode)}&employeeid=${btoa(empid)}}`);
-          }
-        } else {
-          setErrorMessage("Invalid Employee Barcode or pin . Please try again.");
-        }
-      })
-      .catch((error) => {
-        setLoading(false);
-        setErrorMessage("Some ErrorOccured. Please try again.");
-        console.error(' ', error);
-      });
-  };
+ 
 
   const handlebuttonclick = (qcdeptId) => {
-    navigate(`/job-questions?QCID=${btoa(qcdeptId)}&empbarcode=${btoa(barcode)}&employeeid=${btoa(employeeid)}`);
+    navigate(`/JobScan`);
   };
 
 
-  const Modal = ({ buttons, onClose }) => (
-    <div className="fixed inset-0 flex items-center justify-center bg-gray-800 p-4 md:p-20 bg-opacity-30 z-50">
-      <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-xl flex flex-col justify-center items-center relative">
-        <button
-          onClick={onClose}
-          className="absolute top-2 right-2 text-gray-600 hover:text-gray-900 transition duration-200"
-        >
-          <FaTimes size={20} />
-        </button>
-        <h3 className="text-2xl font-bold mb-6 text-center text-gray-700">Select QC Department</h3>
-        <div className="grid grid-cols-1 lg:grid-cols-3 sm:grid-cols-2  gap-4">
-          {buttons.map(({ name, id }) => (
-            <div
-              key={id}
-              onClick={() => handlebuttonclick(id)}
-              className=" text-lg h-24 px-6 flex items-center justify-center bg-blue-50 hover:bg-green-100 border border-gray-300 rounded-lg shadow-md hover:shadow-lg transition duration-200 cursor-pointer"
-            >
-              <p className="text-gray-800 font-semibold">{name}</p>
-            </div>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-  useEffect(() => {
-    if (isSlideVisible && PinRef.current) {
-      PinRef.current.focus();
-    }
-  }, [isSlideVisible]);
+
   
 
   const handleLogout = () => {
-    localStorage.removeItem('UploadLogicalPath');
-    localStorage.removeItem('ukey');
-    localStorage.removeItem('yearcode');
-    localStorage.removeItem('proqctoken');
-    localStorage.removeItem('rd');
-    localStorage.removeItem('rd1');
-    localStorage.removeItem('rd2');
-    localStorage.removeItem('rd3');
-    localStorage.removeItem('rd4');
-    localStorage.removeItem('rd5');
+
     navigate('/');
   };
   
 
   return (
-    <div className="relative w-screen h-screen flex items-center justify-center bg-gradient-to-r from-blue-100 via-indigo-50 to-green-100 p-4">
+    <div className="relative w-screen h-screen flex items-center justify-center bg-[#E8EEEC] p-4">
       <div className="absolute top-4 right-4">
         <button
           onClick={handleLogout}
@@ -349,13 +249,7 @@ const Scanemp = () => {
                       )}
                     </AnimatePresence>
               
-                    {isModalOpen && (
-             
-                      <Modal
-                        buttons={modalButtons.map(name => ({ name, id: rd4.find(item => item.qcdeptname === name)?.id }))}
-                        onClose={() => setIsModalOpen(false)}
-                      />
-                    )}
+              
                   </div>
                 );
             
