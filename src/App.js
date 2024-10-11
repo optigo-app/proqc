@@ -6,6 +6,7 @@ import Scanemp from './Pages/Scanemployee';
 import FetchDataComponent from './Recoil/FetchDataComponent'
 import Login from './Pages/Login';
 import JobScan from './Pages/JobScan/JobScan';
+import ScannerAndDetails from './Pages/ScannerAndDetails/ScannerAndDetails';
 
 const App = () => {
   return (
@@ -24,7 +25,8 @@ const App = () => {
     <Route path="/empscan" element={ <><FetchDataComponent /><Scanemp/></>} />
     <Route path="/ScannerPage/*" element={<ScannerPage />} />
     <Route path="/job-questions" element={<JobQuestions />} />
-    <Route path="/JobScan" element={<JobScan />} />
+    {/* <Route path="/JobScan" element={<JobScan />} /> */}
+    <Route path="/JobScan" element={<ScannerAndDetails />} />
   </Routes>
 {/* </Router> */}
    </>

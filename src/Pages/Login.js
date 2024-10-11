@@ -5,6 +5,8 @@ import { ClipLoader } from 'react-spinners';
 import axios from 'axios';
 import banner from '../Assets/proqc.png';
 import horizontalbanner from '../Assets/banner.png'
+
+
 const Login = () => {
   const [companyCode, setCompanyCode] = useState('');
   const [userName, setUserName] = useState('');
@@ -15,7 +17,6 @@ const Login = () => {
   const [yearcode, setYearcode] = useState('');
   const [loading, setLoading] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
-
   const navigate = useNavigate();
   const companyCodeRef = useRef(null);
 
@@ -143,19 +144,31 @@ const Login = () => {
   }, [proqctoken, yearcode]);
 
   return (
-<div className="w-screen h-screen flex items-center justify-center bg-blue-50 p-4">
+<div className="w-screen h-screen flex items-center justify-center  bg-blue-50 p-4">
 {/* <div className="w-screen h-screen flex items-center justify-center bg-[#E8EEEC] p-4"> */}
-      <div className="w-full max-w-4xl flex flex-col md:flex-row bg-white rounded-xl shadow-2xl max-h-[97vh] overflow-auto ">
-        <div className="w-full md:w-1/2 hidden md:flex items-center justify-center  h-60 md:h-auto">
-          <img src={banner} alt="banner" className="object-contain w-full h-full md:h-auto md:rounded-none rounded-xl md:rounded-l-xl" />
-        </div>
-        <div className="w-full  flex md:hidden items-center justify-center  bg-yellow-400 h-60 md:h-auto">
-          <img src={horizontalbanner} alt="banner" className="object-contain w-full h-fit md:h-auto md:rounded-none rounded-xl md:rounded-l-xl" />
-        </div>
+      {/* <div className="w-full max-w-4xl h-fit flex flex-col md:flex-row bg-white  rounded-xl shadow-2xl max-h-[97vh] overflow-auto "> */}
+      <div className="w-full max-w-4xl h-[80vh] flex flex-col md:flex-row bg-white rounded-xl shadow-2xl max-h-[97vh] overflow-auto">
+  <div className="h-full object-cover md:w-1/2 hidden md:flex items-center justify-center">
+    <img 
+      src={banner} 
+      alt="banner" 
+      className="object-cover w-full h-full md:rounded-none rounded-xl md:rounded-l-xl" 
+    />
+  </div>
+  <div className="w-full h-full flex md:hidden items-center justify-center">
+    <img 
+      src={horizontalbanner} 
+      alt="banner" 
+      className="w-full h-full object-cover md:rounded-none rounded-xl md:rounded-l-xl" 
+    />
+  </div>
+{/* </div> */}
+
         <div className="w-full md:w-1/2 flex flex-col items-center min-h-[75vh] justify-center p-6">
           <h2 className="text-3xl font-semibold text-gray-800 text-center mb-6">Sign In</h2>
           <div className="h-7">
-            {errorMessage && (
+            {errorMessage &&
+             (
               <div className="mb-3 text-center text-red-600 rounded-lg">
                 {errorMessage}
               </div>
@@ -165,6 +178,7 @@ const Login = () => {
             <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="companyCode">
               Company Code
             </label>
+            
             <input
               id="companyCode"
               type="text"
@@ -172,25 +186,12 @@ const Login = () => {
               value={companyCode}
               onChange={(e) => {setCompanyCode(e.target.value); clearError(); }}
               onKeyDown={handleKeyDown}
-              className="w-full px-3 py-2 border rounded-lg shadow-sm focus:outline-none"
+              className="w-full px-3 py-2 outline-none focus:border-[#e8e8e8] rounded-l-lg border rounded-lg shadow-sm"
               ref={companyCodeRef} 
 
             />
           </div>
-          {/* <div className="mb-4 w-full">
-            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="companyCode">
-User Name            </label>
-            <input
-              id="userName"
-              type="text"
-              placeholder="Enter your User Name"
-              value={userName}
-              onChange={(e) => { setUserName(e.target.value); clearError(); }}
-              onKeyDown={handleKeyDown}
-              className="w-full px-3 py-2 border rounded-lg shadow-sm focus:outline-none"
-            />
-          </div> */}
-
+      
           <div className="mb-6 w-full">
             <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="password">
               Password
@@ -241,3 +242,4 @@ User Name            </label>
 };
 
 export default Login;
+
