@@ -45,9 +45,9 @@ const Scanemp = () => {
     };
   }, []);
 
-  const yc = localStorage.getItem('yearcode');
-  const token = localStorage.getItem('proqctoken');
-  const rd4 = useRecoilValue(rd4State);
+  // const yc = localStorage.getItem('yearcode');
+  // const token = localStorage.getItem('proqctoken');
+  // const rd4 = useRecoilValue(rd4State);
   const EmployeeCodeRef = useRef(null); 
   const PinRef = useRef(null); 
 
@@ -189,7 +189,7 @@ const Scanemp = () => {
                               </div>
                             </form>
                           
-                          </div>
+                          </div>                         
                         </div>
                       ) : (
                         

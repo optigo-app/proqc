@@ -2,7 +2,7 @@
   "name": "proqc",
   "version": "0.1.0",
   "private": true,
-  "homepage": "/Protnx",
+  "homepage": "/Protxn",
   "dependencies": {
     "@emotion/react": "^11.13.3",
     "@emotion/styled": "^11.13.0",
@@ -17,9 +17,6 @@
     "axios": "^1.7.6",
     "framer-motion": "^11.3.30",
     "js-base64": "^3.7.7",
-    "lottie-react": "^2.4.0",
-    "lottie-web": "^5.12.2",
-    "lucide-react": "^0.451.0",
     "qr-scanner": "^1.4.2",
     "rc-slider": "^11.1.6",
     "react": "^18.3.1",

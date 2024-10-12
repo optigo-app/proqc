@@ -64,7 +64,11 @@ const jobData = [
       location: "INDIA",
       jobFlag: 'Return',
        'Misc Add in Gross wt':'NO',
-       'Is HMW Job?':'No'
+       'Is HMW Job?':'No',
+       DiamondPcs:'3',
+       DiamondWt:'10 Ctw',
+       Metal:'100 Gm',
+       SprewWt:'20 Gm'
     },
     { 
       jobId: "1/222222",
@@ -80,7 +84,11 @@ const jobData = [
       // jobFlag: 'Return',
       jobFlag: 'Issue',
       'Misc Add in Gross wt':'Yes',
-      'Is HMW Job?':'No'
+      'Is HMW Job?':'No',
+      DiamondPcs:'3',
+       DiamondWt:'10 Ctw',
+       Metal:'100 Gm',
+       SprewWt:'20 Gm'
     },
     {
       jobId: "1/333333",
@@ -95,7 +103,11 @@ const jobData = [
       location: "INDIA",
       jobFlag: 'Issue',
        'Misc Add in Gross wt':'NO',
-       'Is HMW Job?':'No'
+       'Is HMW Job?':'No',
+       DiamondPcs:'3',
+       DiamondWt:'10 Ctw',
+       Metal:'100 Gm',
+       SprewWt:'20 Gm'
     },
     { 
       jobId: "1/555555",
@@ -111,7 +123,11 @@ const jobData = [
       // jobFlag: 'Return',
       jobFlag: 'Issue',
       'Misc Add in Gross wt':'Yes',
-      'Is HMW Job?':'No'
+      'Is HMW Job?':'No',
+      DiamondPcs:'3',
+       DiamondWt:'10 Ctw',
+       Metal:'100 Gm',
+       SprewWt:'20 Gm'
     },
     {
       jobId: "1/666666",
@@ -126,7 +142,11 @@ const jobData = [
       location: "INDIA",
       jobFlag: 'Issue',
        'Misc Add in Gross wt':'NO',
-       'Is HMW Job?':'No'
+       'Is HMW Job?':'No',
+       DiamondPcs:'3',
+       DiamondWt:'10 Ctw',
+       Metal:'100 Gm',
+       SprewWt:'20 Gm'
     },
     { 
       jobId: "1/444444",
@@ -142,7 +162,11 @@ const jobData = [
       // jobFlag: 'Return',
       jobFlag: 'Issue',
       'Misc Add in Gross wt':'Yes',
-      'Is HMW Job?':'No'
+      'Is HMW Job?':'No',
+      DiamondPcs:'3',
+       DiamondWt:'10 Ctw',
+       Metal:'100 Gm',
+       SprewWt:'20 Gm'
     },
     {
       jobId: "1/777777",
@@ -157,7 +181,11 @@ const jobData = [
       location: "INDIA",
       jobFlag: 'Issue',
        'Misc Add in Gross wt':'NO',
-       'Is HMW Job?':'No'
+       'Is HMW Job?':'No',
+       DiamondPcs:'3',
+       DiamondWt:'10 Ctw',
+       Metal:'100 Gm',
+       SprewWt:'20 Gm'
     },
     { 
       jobId: "1/888888",
@@ -173,7 +201,11 @@ const jobData = [
       // jobFlag: 'Return',
       jobFlag: 'Issue',
       'Misc Add in Gross wt':'Yes',
-      'Is HMW Job?':'No'
+      'Is HMW Job?':'No',
+      DiamondPcs:'3',
+       DiamondWt:'10 Ctw',
+       Metal:'100 Gm',
+       SprewWt:'20 Gm'
     },
     {
       jobId: "1/999999",
@@ -188,7 +220,11 @@ const jobData = [
       location: "INDIA",
       jobFlag: 'Issue',
        'Misc Add in Gross wt':'NO',
-       'Is HMW Job?':'No'
+       'Is HMW Job?':'No',
+       DiamondPcs:'3',
+       DiamondWt:'10 Ctw',
+       Metal:'100 Gm',
+       SprewWt:'20 Gm'
     },
     { 
       jobId: "1/1234566",
@@ -204,7 +240,11 @@ const jobData = [
       // jobFlag: 'Return',
       jobFlag: 'Issue',
       'Misc Add in Gross wt':'Yes',
-      'Is HMW Job?':'No'
+      'Is HMW Job?':'No',
+      DiamondPcs:'3',
+       DiamondWt:'10 Ctw',
+       Metal:'100 Gm',
+       SprewWt:'20 Gm'
     },
     {
       jobId: "1/123455",
@@ -219,7 +259,11 @@ const jobData = [
       location: "INDIA",
       jobFlag: 'Issue',
        'Misc Add in Gross wt':'NO',
-       'Is HMW Job?':'No'
+       'Is HMW Job?':'No',
+       DiamondPcs:'3',
+       DiamondWt:'10 Ctw',
+       Metal:'100 Gm',
+       SprewWt:'20 Gm'
     },
     { 
       jobId: "1/123456",
@@ -235,7 +279,11 @@ const jobData = [
       // jobFlag: 'Return',
       jobFlag: 'Issue',
       'Misc Add in Gross wt':'Yes',
-      'Is HMW Job?':'No'
+      'Is HMW Job?':'No',
+       DiamondPcs:'3',
+       DiamondWt:'10 Ctw',
+       Metal:'100 Gm',
+       SprewWt:'20 Gm'
     },
   ];
   const rfBags = [
