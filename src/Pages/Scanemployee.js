@@ -1,4 +1,3 @@
-// in this code  if pin slide isSlideVisible then the textfield should be on focus.. i mean cursour will be in text field if any of slide is open 
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
@@ -89,8 +88,9 @@ const Scanemp = () => {
   };
 
   const handleChange = (e) => {
-    setBarcode(e.target.value);
-    setScannedCode(e.target.value);
+    const value = e.target.value.toUpperCase(); 
+    setBarcode(value);
+    setScannedCode(value);
     if (errorMessage) setErrorMessage('');
   };
 
@@ -173,7 +173,7 @@ const Scanemp = () => {
                                   type="text"
                                   className="p-3 w-full text-gray-700 placeholder-gray-400 focus:outline-none"
                                   placeholder="Enter Employee Barcode"
-                                  value={barcode}
+                                  value={barcode.toUpperCase()}
                                   onChange={handleChange}
                                   onKeyDown={(e) => e.key === 'Enter' && handleSubmit(e)}
                                   ref={EmployeeCodeRef} 
