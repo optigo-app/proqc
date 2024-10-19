@@ -16,7 +16,7 @@ const RfBagDetails = ({ bagDetails, setBagDetails }) => {
      setExpandedIndex(expandedIndex === index ? null : index);
      const selectedBag = bagDetails[index];
      setTempWeight(issuedWeight[selectedBag.rfbagid] || '');
-     setTempPcs(selectedBag.Material === 'DIAMOND' ? pcs[selectedBag.rfbagid] || '' : '');
+     setTempPcs(selectedBag.Material !== 'METAL' ? pcs[selectedBag.rfbagid] || '' : '');
      setErrorMessage(''); 
 };
 
@@ -42,36 +42,27 @@ const RfBagDetails = ({ bagDetails, setBagDetails }) => {
   
   const handleIssue = (index) => {
     const selectedBag = bagDetails[index];
-
-    // Check if weight or pcs is empty
-    if (!tempWeight || (selectedBag.Material === 'DIAMOND' && !tempPcs)) {
+    if (!tempWeight || (selectedBag.Material !== 'METAL' && !tempPcs)) {
       setErrorMessage('Weight and Pcs must not be empty.');
-      return; // Stop the issuing process
+      return; 
     }
-
     setIssuedWeight((prev) => ({
       ...prev,
       [selectedBag.rfbagid]: tempWeight,
     }));
-
-    if (selectedBag.Material === 'DIAMOND') {
+    if (selectedBag.Material !== 'METAL') {
       setPcs((prev) => ({
         ...prev,
         [selectedBag.rfbagid]: tempPcs, 
       }));
     }
-
-    // Automatically expand next item if there are more than 2 items in the list
     if (bagDetails.length > 2) {
       if (index < bagDetails.length - 1) {
-        // Open the next item
         setExpandedIndex(index + 1);
-        // Reset temporary values for the next item
         const nextBag = bagDetails[index + 1];
         setTempWeight(issuedWeight[nextBag.rfbagid] || '');
-        setTempPcs(nextBag.Material === 'DIAMOND' ? pcs[nextBag.rfbagid] || '' : '');
+        setTempPcs(nextBag.Material !== 'METAL' ? pcs[nextBag.rfbagid] || '' : '');
       } else {
-        // If the last item was issued, stay on the last one
         setExpandedIndex(bagDetails.length - 1);
       }
     }
@@ -91,14 +82,15 @@ const RfBagDetails = ({ bagDetails, setBagDetails }) => {
                     {rfBagDetails.Material === 'METAL' && (
                       <p className='text-gray-500 text-sm font-medium'>{rfBagDetails.Purity} {rfBagDetails.Color} {rfBagDetails.Type}</p>
                     )}
-                    {rfBagDetails.Material === 'DIAMOND' && (
-                      <p className='text-gray-500 text-sm font-medium'>{rfBagDetails.Material} ({rfBagDetails.Shape} {rfBagDetails.Ctw} {rfBagDetails.Color} {rfBagDetails.Size})</p>
+                    {rfBagDetails.Material !== 'METAL' && (
+                      <p className='text-gray-500 text-sm font-medium'>{rfBagDetails.Material} ({rfBagDetails.Shape} {rfBagDetails.Clarity} {rfBagDetails.Color} {rfBagDetails.Size})</p>
                     )}
                   </span>
                 </h3>
                 <div className='flex flex-row gap-3'>
-                  <p>
-                    {rfBagDetails.Material === "DIAMOND" && issuedWeight[rfBagDetails.rfbagid] && (
+                  <div>
+                  
+                    {rfBagDetails.Material !== "METAL" && issuedWeight[rfBagDetails.rfbagid] && (
                       <div className="text-base font-medium text-gray-800">
                         | Issued Weight: {issuedWeight[rfBagDetails.rfbagid]} Ctw | Pcs: {pcs[rfBagDetails.rfbagid] || '0'}
                       </div>
@@ -108,7 +100,8 @@ const RfBagDetails = ({ bagDetails, setBagDetails }) => {
                         | Issued Weight: {issuedWeight[rfBagDetails.rfbagid]} Gm
                       </div>
                     )}
-                  </p>
+                  
+                  </div>
                   <div className="flex items-center">
                     <button onClick={() => handleRemove(index)} className="text-gray-400 hover:text-gray-600">
                       <FaTimes size={18} />
@@ -133,8 +126,8 @@ const RfBagDetails = ({ bagDetails, setBagDetails }) => {
                   {bagDetails[expandedIndex].Material === 'METAL' && (
                     <p className='text-gray-500 text-lg'>{bagDetails[expandedIndex].Purity} {bagDetails[expandedIndex].Color} {bagDetails[expandedIndex].Type}</p>
                   )}
-                  {bagDetails[expandedIndex].Material === 'DIAMOND' && (
-                    <p className='text-gray-500 text-lg'>{bagDetails[expandedIndex].Material} ({bagDetails[expandedIndex].Shape} {bagDetails[expandedIndex].Ctw} {bagDetails[expandedIndex].Color} {bagDetails[expandedIndex].Size})</p>
+                  {bagDetails[expandedIndex].Material !== "METAL" && (
+                    <p className='text-gray-500 text-lg'>{bagDetails[expandedIndex].Material} ({bagDetails[expandedIndex].Shape} {bagDetails[expandedIndex].Clarity} {bagDetails[expandedIndex].Color} {bagDetails[expandedIndex].Size})</p>
                   )}
                 </div>
                 <div className='w-full justify-center flex'>
@@ -150,7 +143,7 @@ const RfBagDetails = ({ bagDetails, setBagDetails }) => {
                         }}
                         onKeyDown={(e) => {
                           if (e.key === 'Enter') { 
-                            if (bagDetails[expandedIndex].Material === 'DIAMOND') {
+                            if (bagDetails[expandedIndex].Material !== "METAL") {
                               pcsInputRef.current.focus(); 
                             } else {
                               handleIssue(expandedIndex); 
@@ -163,7 +156,7 @@ const RfBagDetails = ({ bagDetails, setBagDetails }) => {
 
                       />
 
-                      {bagDetails[expandedIndex].Material === 'DIAMOND' && (
+                      {bagDetails[expandedIndex].Material !== "METAL" && (
                         <>
                           <h4 className="text-right text-gray-500 text-base">Issued Pcs:</h4>
                           <input

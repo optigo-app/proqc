@@ -1,3 +1,4 @@
+// this is parent component of 
 import React, { useState, useRef, useEffect } from 'react';
 import { FaQrcode, FaUser, FaEdit } from 'react-icons/fa';
 import QrScanner from 'qr-scanner';
@@ -38,7 +39,7 @@ const [jobflag,setJobflag]=useState('');
 const [mode, setMode] = useState('Issue');
 const EmployeeCodeRef = useRef(null); 
 const JobRef = useRef(null); 
-
+const[rows,setRows]=useState();
   useEffect(() => {
     if (mode === 'Issue' && !employeeScanned && EmployeeCodeRef.current) {
       EmployeeCodeRef.current.focus();
@@ -69,451 +70,20 @@ const JobRef = useRef(null);
   };
   
 const jobData = dbJobdetails;
-// const jobData = [
-//     {
-//       jobId: "1/111111",
-//       name: "GOLD 10K Shine Gold",
-//       designNumber: "FD4",
-//       serialFor: "WOMENS", 
-//       image: img,
-//       customerName: "ashok01",
-//       poNumber: "Misc",
-//       lastReceived: "1.000 Gm",
-//       currentStatus: "Filing-Issue",
-//       location: "INDIA",
-//       jobFlag: 'Return',
-//        'Misc Add in Gross wt':'NO',
-//        'Is HMW Job?':'No',
-//        DiamondPcs:'3',
-//        DiamondWt:10,
-//        ColorStone:0.000,
-//        Metal:1.000,
-//        SprewWt:'20 Gm',
-//        'AlloyWt':	'0.000',
-//        LabGrown:0.000,
-//        Diamond:1.000,
-//        ColorStone:0.000,
-//        Misc:0.000,
-//        CurrentNet:.000,
-//        CurrentGross:2.000,
-//        actloss:0.00,
-//        exploss:0,
-//        losswt:1.00,
-//        maxloss:2,
-//     },
-//     { 
-// jobId: "1/222222",
-// name: "GOLD 18K Shine Yellow",
-// designNumber: "NEW-COP",
-// serialFor: "Titan Earring",
-// image: img,
-// customerName: "amolpatil",
-// poNumber: "Misc",
-// lastReceived: "0.000 Gm",
-// currentStatus: "EC QC1-Issue",
-// location: "INDIA",
-// // jobFlag: 'Return',
-// jobFlag: 'Issue',
-// 'Misc Add in Gross wt':'Yes',
-// 'Is HMW Job?':'No',
-// DiamondPcs:'3',
-//  DiamondWt:10,
-//  Metal:1.000,
-//  SprewWt:'20 Gm',
-//  AlloyWt:	'0.000',
-// LabGrown:0.000,
-// Diamond:1.000,
-// ColorStone:0.000,
-// Misc:0.000,
-// CurrentNet:1.000,
-// CurrentGross:2.000,
-// actloss:0.00,
-// exploss:0,
-// losswt:1.00,
-// maxloss:2
-// },
-// {
-// jobId: "1/333333",
-// name: "GOLD 10K Shine Gold",
-// designNumber: "FD4",
-// serialFor: "WOMENS", 
-// image: img,
-// customerName: "ashok01",
-// poNumber: "Misc",
-// lastReceived: "1.000 Gm",
-// currentStatus: "Filing-Issue",
-// location: "INDIA",
-// jobFlag: 'Issue',
-// 'Misc Add in Gross wt':'NO',
-// 'Is HMW Job?':'No',
-// DiamondPcs:'3',
-// DiamondWt:10,
-// Metal:1.000,
-// SprewWt:'20 Gm',
-// AlloyWt:	'0.000',
-// LabGrown:0.000,
-// Diamond:1.000,
-// ColorStone:0.000,
-// Misc:0.000,
-// CurrentNet:1.000,
-// CurrentGross:2.000,
-// actloss:0.00,
-// exploss:0,
-// losswt:1.00,
-// maxloss:2
 
-
-// },
-//     { 
-// jobId: "1/555555",
-// name: "GOLD 18K Shine Yellow",
-// designNumber: "NEW-COP",
-// serialFor: "Titan Earring",
-// image: img,
-// customerName: "amolpatil",
-// poNumber: "Misc",
-// lastReceived: "0.000 Gm",
-// currentStatus: "EC QC1-Issue",
-// location: "INDIA",
-// // jobFlag: 'Return',
-// jobFlag: 'Issue',
-// 'Misc Add in Gross wt':'Yes',
-// 'Is HMW Job?':'No',
-// DiamondPcs:'3',
-// DiamondWt:10,
-// Metal:1.000,
-// SprewWt:'20 Gm',
-// AlloyWt:	'0.000',
-// LabGrown:0.000,
-// Diamond:1.000,
-// ColorStone:0.000,
-// Misc:0.000,
-// CurrentNet:1.000,
-// CurrentGross:2.000,
-// actloss:0.00,
-// exploss:0,
-// losswt:1.00,
-// maxloss:2
-
-
-// },
-//     {
-//       jobId: "1/666666",
-//       name: "GOLD 10K Shine Gold",
-//       designNumber: "FD4",
-//       serialFor: "WOMENS", 
-//       image: img,
-//       customerName: "ashok01",
-//       poNumber: "Misc",
-//       lastReceived: "1.000 Gm",
-//       currentStatus: "Filing-Issue",
-//       location: "INDIA",
-//       jobFlag: 'Issue',
-//        'Misc Add in Gross wt':'NO',
-//        'Is HMW Job?':'No',
-//        DiamondPcs:'3',
-//        DiamondWt:10,
-//        Metal:1.000,
-//        SprewWt:'20 Gm',
-//         AlloyWt:	'0.000',
-// LabGrown:0.000,
-// Diamond:1.000,
-// ColorStone:0.000,
-// Misc:0.000,
-// CurrentNet:1.000,
-// CurrentGross:2.000,
-// actloss:0.00,
-// exploss:0,
-// losswt:1.00,
-// maxloss:2
-
-
-// },
-//     { 
-// jobId: "1/444444",
-// name: "GOLD 18K Shine Yellow",
-// designNumber: "NEW-COP",
-// serialFor: "Titan Earring",
-// image: img,
-// customerName: "amolpatil",
-// poNumber: "Misc",
-// lastReceived: "0.000 Gm",
-// currentStatus: "EC QC1-Issue",
-// location: "INDIA",
-// // jobFlag: 'Return',
-// jobFlag: 'Issue',
-// 'Misc Add in Gross wt':'Yes',
-// 'Is HMW Job?':'No',
-// DiamondPcs:'3',
-//  DiamondWt:10,
-//  Metal:1.000,
-//  SprewWt:'20 Gm',
-//   AlloyWt:	'0.000',
-// LabGrown:0.000,
-// Diamond:1.000,
-// ColorStone:0.000,
-// Misc:0.000,
-// CurrentNet:1.000,
-// CurrentGross:2.000,
-// actloss:0.00,
-// exploss:0,
-// losswt:1.00,
-// maxloss:2
-
-
-// },
-//     {
-//       jobId: "1/777777",
-//       name: "GOLD 10K Shine Gold",
-//       designNumber: "FD4",
-//       serialFor: "WOMENS", 
-//       image: img,
-//       customerName: "ashok01",
-//       poNumber: "Misc",
-//       lastReceived: "1.000 Gm",
-//       currentStatus: "Filing-Issue",
-//       location: "INDIA",
-//       jobFlag: 'Issue',
-//        'Misc Add in Gross wt':'NO',
-//        'Is HMW Job?':'No',
-//        DiamondPcs:'3',
-//        DiamondWt:10,
-//        Metal:1.000,
-//        SprewWt:'20 Gm',
-//         AlloyWt:	'0.000',
-// LabGrown:0.000,
-// Diamond:1.000,
-// ColorStone:0.000,
-// Misc:0.000,
-// CurrentNet:1.000,
-// CurrentGross:2.000,
-// actloss:0.00,
-// exploss:0,
-// losswt:1.00,
-// maxloss:2
-
-
-// },
-//     { 
-//       jobId: "1/888888",
-//       name: "GOLD 18K Shine Yellow",
-//       designNumber: "NEW-COP",
-//       serialFor: "Titan Earring",
-//       image: img,
-//       customerName: "amolpatil",
-//       poNumber: "Misc",
-//       lastReceived: "0.000 Gm",
-//       currentStatus: "EC QC1-Issue",
-//       location: "INDIA",
-//       // jobFlag: 'Return',
-//       jobFlag: 'Issue',
-//       'Misc Add in Gross wt':'Yes',
-//       'Is HMW Job?':'No',
-//       DiamondPcs:'3',
-//        DiamondWt:10,
-//        Metal:1.000,
-//        SprewWt:'20 Gm',
-//         AlloyWt:	'0.000',
-// LabGrown:0.000,
-// Diamond:1.000,
-// ColorStone:0.000,
-// Misc:0.000,
-// CurrentNet:1.000,
-// CurrentGross:2.000,
-// actloss:0.00,
-// exploss:0,
-// losswt:1.00,
-// maxloss:2
-
-
-// },
-//     {
-//       jobId: "1/999999",
-//       name: "GOLD 10K Shine Gold",
-//       designNumber: "FD4",
-//       serialFor: "WOMENS", 
-//       image: img,
-//       customerName: "ashok01",
-//       poNumber: "Misc",
-//       lastReceived: "1.000 Gm",
-//       currentStatus: "Filing-Issue",  
-//       location: "INDIA",
-//       jobFlag: 'Issue',
-//        'Misc Add in Gross wt':'NO',
-//        'Is HMW Job?':'No',
-//        DiamondPcs:'3',
-//        DiamondWt:10,
-//        Metal:1.000,
-//        SprewWt:'20 Gm',
-//         AlloyWt:	'0.000',
-// LabGrown:0.000,
-// Diamond:1.000,
-// ColorStone:0.000,
-// Misc:0.000,
-// CurrentNet:1.000,
-// CurrentGross:2.000,
-// actloss:0.00,
-// exploss:0,
-// losswt:1.00,
-// maxloss:2
-
-
-// },
-//     { 
-//       jobId: "1/1234566",
-//       name: "GOLD 18K Shine Yellow",
-//       designNumber: "NEW-COP",
-//       serialFor: "Titan Earring",
-//       image: img,
-//       customerName: "amolpatil",
-//       poNumber: "Misc",
-//       lastReceived: "0.000 Gm",
-//       currentStatus: "EC QC1-Issue",
-//       location: "INDIA",
-//       // jobFlag: 'Return',
-//       jobFlag: 'Issue',
-//       'Misc Add in Gross wt':'Yes',
-//       'Is HMW Job?':'No',
-//       DiamondPcs:'3',
-//        DiamondWt:10,
-//        Metal:1.000,
-//        SprewWt:'20 Gm',
-//        Diamond:1.000,
-//        ColorStone:0.000,
-//        Misc:0.000,
-//        CurrentNet:1.000,
-//        CurrentGross:2.000,
-//        actloss:0.00,
-//        exploss:0,
-//        losswt:1.00,
-//        maxloss:2
-
-
-// },
-//     {
-//jobId: "1/123455",
-//name: "GOLD 10K Shine Gold",
-//designNumber: "FD4",
-//serialFor: "WOMENS", 
-//image: img,
-//customerName: "ashok01",
-//poNumber: "Misc",
-//lastReceived: "1.000 Gm",
-//currentStatus: "Filing-Issue",
-//location: "INDIA",
-//jobFlag: 'Issue',
-// 'Misc Add in Gross wt':'NO',
-// 'Is HMW Job?':'No',
-// DiamondPcs:'3',
-// DiamondWt:10,
-// Metal:1.000,
-// SprewWt:'20 Gm',
-//  AlloyWt:	'0.000',
-// LabGrown:0.000,
-// Diamond:1.000,
-// ColorStone:0.000,
-// Misc:0.000,
-// CurrentNet:1.000,
-// CurrentGross:2.000,
-// actloss:0.00,
-// exploss:0,
-// losswt:1.00,
-// maxloss:2
-
-
-// },
-//     { 
-//       jobId: "1/123456",
-//       name: "GOLD 18K Shine Yellow",
-//       designNumber: "NEW-COP",
-//       serialFor: "Titan Earring",
-//       image: img,
-//       customerName: "amolpatil",
-//       poNumber: "Misc",
-//       lastReceived: "0.000 Gm",
-//       currentStatus: "EC QC1-Issue",
-//       location: "INDIA",
-//       // jobFlag: 'Return',
-//       jobFlag: 'Issue',
-//       'Misc Add in Gross wt':'Yes',
-//       'Is HMW Job?':'No',
-//        DiamondPcs:'3',
-//        DiamondWt:10,
-//        Metal:1.000,
-//        SprewWt:'20 Gm',
-//         AlloyWt:	'0.000',
-// LabGrown:0.000,
-// Diamond:1.000,
-// ColorStone:0.000,
-// Misc:0.000,
-// CurrentNet:1.000,
-// CurrentGross:2.000,
-// actloss:0.00,
-// exploss:0,
-// losswt:1.00,
-// maxloss:2
-
-
-// },
-//   ];
-  const rfBags = [
-    {
-      rfbagid: "0000008992",
-      Material: "METAL",
-      Type: "GOLD",
-      Color: "YELLOW",
-      Purity: "14K",
-      Gm: "16.912/16.912"
-    },
-    {
-      rfbagid: "0000008991",
-      Lot: "1",
-      Material: "DIAMOND",
-      Shape: "ROUND",
-      Color: "IJ",
-      Size: "MIX",
-      Clarity: "SI",
-      Ctw: "97/100"
-    },
-    {
-      rfbagid: "0000008993",
-      Material: "METAL",
-      Type: "GOLD",
-      Color: "YELLOW",
-      Purity: "14K",
-      Gm: "16.912/16.912"
-    },
-    {
-      rfbagid: "0000008994",
-      Lot: "1",
-      Material: "DIAMOND",
-      Shape: "ROUND",
-      Color: "IJ",
-      Size: "MIX",
-      Clarity: "SI",
-      Ctw: "97/100"
-    },
-    {
-      rfbagid: "0000008995",
-      Lot: "1",
-      Material: "DIAMOND",
-      Shape: "ROUND",
-      Color: "IJ",
-      Size: "MIX",
-      Clarity: "SI",
-      Ctw: "97/100"
-    }
-  ];
+const rfBags = Rmbag;
   const Employees = [
     {
       empid: 'E1203',
       workerfname: "John",
       workerlname: "Doe",
+      location:'india',
     },
     {
       empid: 'E0522',
       workerfname: "Lilly",
       workerlname: "Johnson",
+      location:'India',
     },
   ];
 
@@ -558,115 +128,150 @@ const handleScan = (result) => {
     }
   };
 
-const handleScanSubmit = () => {
-  setErrorMessage('');
+  const handleengageunlock= (selectedRowIds) => {
+    setRows((prevRows) =>
+      prevRows.map((row) =>
+        selectedRowIds.includes(row.id) ? { ...row, flag: 1 } : row
+      )
+    );
+  };
+
+  const handleScanSubmit = () => {
+    setErrorMessage('');
   
-  if (mode === 'Issue' && !employeeScanned) {
-    if (!scannedCode) { 
-      setErrorMessage('Please enter employee code.');
-    } else {
-      const employeeFound = Employees.find(emp => emp.empid === scannedCode);
-      if (employeeFound) {
-        setEmployeeDetails(employeeFound);
-        setEmployeeScanned(true);
+    if (mode === 'Issue' && !employeeScanned) {
+      if (!scannedCode) { 
+        setErrorMessage('Please enter employee code.');
+      } else {
+        const employeeFound = Employees.find(emp => emp.empid === scannedCode);
+        if (employeeFound) {
+          setEmployeeDetails(employeeFound);
+          setEmployeeScanned(true);
+          setErrorMessage('');
+          setScannedCode('');
+        } else {
+          setErrorMessage('Employee not found.');
+        }
+      }
+    } else if (mode === 'Issue' && employeeScanned) {
+      const isJobId = scannedCode.startsWith("1/") && scannedCode.length > 2;
+      if (isJobId) {
+        const jobFound = jobData.find(job => job.jobId === scannedCode);
+        if (jobFound) {
+          if (jobFound?.location?.toUpperCase() !== employeeDetails?.location?.toUpperCase()) {
+            setErrorMessage('Job Is not In Same Location');
+          } 
+          
+          else {
+            setRfBagArray([]);
+            setJobDetails(null);
+            setBulkscancheck(false);
+            setReturnjobdetails(null);
+  
+            if (jobFound.jobFlag === 'Issue') {
+              setJobDetails(jobFound);
+              setBulkscancheck(true);
+  
+              if (bulkScan) {
+                setBulkJobDetails(prev => {
+                  const updatedBulkJobs = prev.filter(existingJob => existingJob.jobId !== jobFound.jobId);
+                  console.log("updatedBulkJobs", bulkJobDetails);
+                  return [jobFound, ...updatedBulkJobs];
+                });
+              } else {
+                setJobDetails(jobFound);
+                setBulkJobDetails([]);
+              }
+              setScannedCode('');
+            } else {
+              setReturnjobdetails(jobFound);
+              if (bulkScan) {
+                setErrorMessage('Job already Issued');
+                setBulkscancheck(true);
+              } else {
+                setBulkJobDetails([]);
+                setScannedCode('');
+              }
+            }
+          }
+        } else {
+          setErrorMessage('Job ID not found.');
+        }
+      } else if (scannedCode.length === 10) {
+        if (jobDetails || returnjobdetails) {
+          const rfBagFound = rfBags.find(bag => bag.rfbagid === scannedCode);
+          if (rfBagFound) {
+            const job = jobDetails || returnjobdetails;
+  
+            if (rfBagFound?.Location?.toUpperCase() !== job?.location?.toUpperCase()) {
+              setErrorMessage('RM Bag is not in the same location.');
+            }
+            else if (rfBagFound?.Material?.toUpperCase() === 'METAL') {
+              if (
+                rfBagFound?.Type?.toUpperCase() !== job?.metal?.toUpperCase() || 
+                rfBagFound?.Purity?.toUpperCase() !== job?.metalpurity?.toUpperCase()
+              ) {
+                setErrorMessage('Please scan a valid RM bag for metal.');
+              } else {
+                setRfBagArray(prev => [rfBagFound, ...prev]);
+                setScannedCode('');
+              }
+            }
+            else if (rfBagFound?.Material?.toUpperCase() !== 'METAL') {
+              if (
+                rfBagFound?.customerName?.toUpperCase() !== (job?.customerName?.toUpperCase() || 'STOCK') &&
+                rfBagFound?.customerName?.toUpperCase() !== 'STOCK'
+              ) {
+                console.log('rfBagFound?.customerName?.toUpperCase()', rfBagFound?.customerName?.toUpperCase());
+                setErrorMessage('Please scan a valid customer\'s RM bag.');
+              }
+              
+              
+              else {
+                setRfBagArray(prev => [rfBagFound, ...prev]);
+                setScannedCode('');
+              }
+            }
+          } else {
+            setErrorMessage('RM Bag ID not found.');
+          }
+        } else {
+          setErrorMessage('Please scan a job before scanning RM Bag.');
+        }
+      } else {
         setErrorMessage('');
-        setScannedCode('');
-      } else {
-        setErrorMessage('Employee not found.');
       }
-    }
-  }
-    else if (mode === 'Issue' && employeeScanned) {
-    const isJobId = scannedCode.startsWith("1/") && scannedCode.length > 2;
-    
-    if (isJobId) {
-      const jobFound = jobData.find(job => job.jobId === scannedCode);
-      if (jobFound) {
-        setRfBagArray([]);
-        setJobDetails(null);
-        setBulkscancheck(false);
-        setReturnjobdetails(null);
-        
-        if (jobFound.jobFlag === 'Issue') {
-          setJobDetails(jobFound);
-          setBulkscancheck(true);
-
-          if (bulkScan) {
-            setBulkJobDetails(prev => {
-              const updatedBulkJobs = prev.filter(existingJob => existingJob.jobId !== jobFound.jobId);
-              console.log("updatedBulkJobs",bulkJobDetails);
-
-              return [jobFound, ...updatedBulkJobs];
-            });
-          } else {
-            setJobDetails(jobFound);
-            setBulkJobDetails([]);
-          }
+    } else if (mode === 'Return') {
+      const trimmedScannedCode = scannedCode.trim();
+      const isJobId = trimmedScannedCode.startsWith("1/") && trimmedScannedCode.length > 2;
+      if (isJobId) {
+        const jobFound = jobData.find(job => job.jobId === trimmedScannedCode && job.jobFlag === 'Return');
+        console.log("Return Mode Job Found:", jobFound);
+  
+        if (jobFound) {
+          setReturnModeJob(jobFound); 
           setScannedCode('');
         } else {
-          setReturnjobdetails(jobFound);
-          if (bulkScan) {
-            setErrorMessage('Job already Issued');
-            setBulkscancheck(true);
-          } else {
-            setBulkJobDetails([]);
-            setScannedCode('');
-          }
+          setErrorMessage('Job Is Not Issued Yet!');
         }
-      } else {
-        setErrorMessage('Job ID not found.');
-      }
-    } 
-    else if (scannedCode.length === 10) {
-      if (jobDetails || returnjobdetails) {
+      } else if (scannedCode.length === 10) {
         const rfBagFound = rfBags.find(bag => bag.rfbagid === scannedCode);
-        if (rfBagFound) {
-          setRfBagArray(prev => [rfBagFound, ...prev]);
+        if (rfBagFound && returnModeJob) {
+          setRfBagArray(prev => [rfBagFound, ...prev]); 
+          setEmployeeScanned(true);
+          setEmployeeDetails({empid: 'E1203', workerfname: "John", workerlname: "Doe"}); 
+          setMode('Issue'); 
+          setReturnjobdetails(returnModeJob);
           setScannedCode('');
         } else {
-          setErrorMessage('RM Bag ID not found.');
+          setErrorMessage('RM Bag ID not found or no Job scanned yet.');
         }
       } else {
-        setErrorMessage('Please scan a job before scanning RM Bag.');
+        setErrorMessage('');
       }
-    } else {
-      setErrorMessage('');
     }
-  } 
-  else if (mode === 'Return') {
-    const trimmedScannedCode = scannedCode.trim();
-    const isJobId = trimmedScannedCode.startsWith("1/") && trimmedScannedCode.length > 2;
-    if (isJobId) {
-      const jobFound = jobData.find(job => job.jobId === trimmedScannedCode && job.jobFlag === 'Return');
-      console.log("Return Mode Job Found:", jobFound);
-      
-      if (jobFound) {
-        setReturnModeJob(jobFound); 
-        setScannedCode('');
-      } else {
-        setErrorMessage('Job Is Not Issued Yet!');
-      }
-    } 
-    
-    else if (scannedCode.length === 10) {
-      const rfBagFound = rfBags.find(bag => bag.rfbagid === scannedCode);
-      if (rfBagFound && returnModeJob) {
-        setRfBagArray(prev => [rfBagFound, ...prev]); 
-        setEmployeeScanned(true);
-        setEmployeeDetails({empid: 'E1203',
-        workerfname: "John",
-        workerlname: "Doe", }); 
-        setMode('Issue'); 
-        setReturnjobdetails(returnModeJob);
-        setScannedCode('');
-      } else {
-        setErrorMessage('RM Bag ID not found or no Job scanned yet.');
-      }
-    } else {
-      setErrorMessage('');
-    }
-  }
-};
+  };
+  
 
 const handleChange = (e) => {
     setScannedCode(e.target.value); 
@@ -745,8 +350,7 @@ const handleissuesubmit = () =>{
           </button>
         </div>
       </div>
-    
-<select className="w-full p-2 border rounded-lg mb-4 focus:border-indigo-600 focus:ring focus:ring-indigo-200">
+      <select className="w-full p-2 border rounded-lg mb-4 focus:border-indigo-600 focus:ring focus:ring-indigo-200">
                     <option value="dept1">Locker 1</option>
                     <option value="dept2">Locker 2</option>
                     <option value="dept3">Locker 3</option>
@@ -929,7 +533,7 @@ Change
 <div className='flex flex-col'> 
 {!returnjobdetails && !bulkScan &&  (
   <button
-  onClick={handleissuesubmit}
+  onClick={handleengageunlock}
   className={`bg-gradient-to-r from-orange-300 to-orange-500 m-3 rounded-md   flex items-center justify-center text-lg text-white px-6 py-3 mt-4 font-semibold hover:bg-green-700 transition duration-200 ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
   disabled={loading}
 >
@@ -996,7 +600,7 @@ Change
                   <RfBagDetails bagDetails={rfBagArray}     setBagDetails={setRfBagArray}/> 
                 </div>
               )}
-                <JobDetailsTab jobDetail={jobDetails}/>
+                <JobDetailsTab jobDetail={jobDetails} />
                </div>
                 
               )}

@@ -1,7 +1,4 @@
 
-
-
-// in this coode on hover and selection of row the background colour will not change it will be of the colour of row  .MuiDataGrid-row.Mui-selected'    '& .MuiDataGrid-row:hover'
 import React,{useEffect, useState} from 'react';
 import { DataGrid, GridColDef } from '@mui/x-data-grid';
 import Tooltip from '@mui/material/Tooltip';
@@ -175,7 +172,7 @@ const handleCloseModal = () => {
     if (params.row.flag === 1) {
       return 'bg-[#FFF3E8]';
     } else if (params.row.flag === 2) {
-      return 'bg-[#EEEDFD]';
+      return 'bg-[#E7F7FF]';
     }
     return '';
   };
@@ -207,14 +204,14 @@ const handleCloseModal = () => {
     <div className="w-full bg-white h-[40vh] overflow-auto">
       <ThemeProvider theme={theme}>
       <DataGrid
-  rows={rows}
-  columns={columns}
-  pageSize={5}
-  rowsPerPageOptions={[5]}
-  checkboxSelection={(params) => params.row.flag === 1 || params.row.flag === 2}
-  isRowSelectable={(params) => params.row.flag === 1 || params.row.flag === 2}
-  getRowClassName={getRowClassName}
-  sx={{
+        rows={rows}
+        columns={columns}
+        pageSize={5}
+        rowsPerPageOptions={[5]}
+        checkboxSelection={(params) => params.row.flag === 1 || params.row.flag === 2}
+        isRowSelectable={(params) => params.row.flag === 1 || params.row.flag === 2}
+        getRowClassName={getRowClassName}
+        sx={{
     '& .MuiDataGrid-columnHeader:focus, & .MuiDataGrid-cell:focus': {
       outline: 'none',
       boxShadow: 'none',
