@@ -1,6 +1,5 @@
 import img from '../Assets/Jew.jpg';
 
-
 export const dbJobdetails = [
     {
         jobId: "1/111111",
@@ -98,7 +97,7 @@ export const dbJobdetails = [
         image: img,
         customerName: "Guddu v patel",
         poNumber: "Test",
-        location: "surat",
+        location: "INDIA",
         currentStatus: "Filing-Issue",
         metal:'GOLD',
         metalpurity:'10K',
@@ -142,7 +141,7 @@ export const dbJobdetails = [
         image: img,
         customerName: "Guddu v patel",
         poNumber: "Test",
-        location: "Surat",
+        location: "INDIA",
         currentStatus: "Filing-Issue",
         metal:'GOLD',
         metalpurity:'10K',
@@ -186,7 +185,7 @@ export const dbJobdetails = [
         image: img,
         customerName: "Guddu v patel",
         poNumber: "Test",
-        location: "Surat",
+        location: "INDIA",
         currentStatus: "Filing-Issue",
         metal:'GOLD',
         metalpurity:'10K',
@@ -230,7 +229,7 @@ export const dbJobdetails = [
         image: img,
         customerName: "Guddu v patel",
         poNumber: "Test",
-        location: "Surat",
+        location: "INDIA",
         currentStatus: "Filing-Issue",
         metal:'GOLD',
         metalpurity:'10K',
@@ -274,7 +273,7 @@ export const dbJobdetails = [
         image: img,
         customerName: "Guddu v patel",
         poNumber: "Test",
-        location: "Surat",
+        location: "INDIA",
         currentStatus: "Filing-Issue",
         metal:'GOLD',
         metalpurity:'10K',
@@ -318,7 +317,7 @@ export const dbJobdetails = [
         image: img,
         customerName: "Guddu v patel",
         poNumber: "Test",
-        location: "Surat",
+        location: "INDIA",
         currentStatus: "Filing-Issue",
         metal:'GOLD',
         metalpurity:'10K',

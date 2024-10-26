@@ -1,4 +1,4 @@
-// this is parent component of 
+
 import React, { useState, useRef, useEffect } from 'react';
 import { FaQrcode, FaUser, FaEdit } from 'react-icons/fa';
 import QrScanner from 'qr-scanner';
@@ -15,8 +15,12 @@ import ReturnJobDetails from './ReturnJobDetails';
 import { TfiUnlock } from "react-icons/tfi";
 import { dbJobdetails } from '../../fakeapi/JobDetails';
 import { Rmbag } from '../../fakeapi/Rmbag';
+import { useRows } from '../../Context/RowsContext';
+import Swal from 'sweetalert2';
+
 
 const ScannerAndDetails = () => {
+  const { updateFlags } = useRows(); 
 const [scannedCode, setScannedCode] = useState('');
 const [jobDetails, setJobDetails] = useState(null);
 const [bulkJobDetails, setBulkJobDetails] = useState([]);
@@ -38,23 +42,78 @@ const [returnModeJob,setReturnModeJob] = useState(null);
 const [jobflag,setJobflag]=useState('');
 const [mode, setMode] = useState('Issue');
 const EmployeeCodeRef = useRef(null); 
+const [selectedRowIds, setSelectedRowIds] = useState([]); 
 const JobRef = useRef(null); 
-const[rows,setRows]=useState();
-  useEffect(() => {
-    if (mode === 'Issue' && !employeeScanned && EmployeeCodeRef.current) {
-      EmployeeCodeRef.current.focus();
-    }
-  }, [!employeeScanned, mode]);
+
+useEffect(() => {
+    const handleFocus = () => {
+      if (mode === 'Issue' && !employeeScanned && EmployeeCodeRef.current) {
+        EmployeeCodeRef.current.focus();
+      } else if (mode === 'Return' && JobRef.current) {
+        JobRef.current.focus();
+      }
+    };
+
+ const timeoutId = setTimeout(handleFocus, 0);
+    return () => clearTimeout(timeoutId);
+  }, [employeeScanned, mode]);  
 
   useEffect(() => {
-    if (mode === 'Issue' && employeeScanned && JobRef.current) {
-      JobRef.current.focus();
-    }
-    if (mode === 'Return'  && JobRef.current) {
-      JobRef.current.focus();
-    }
-  },  [mode]);
+    const handleKeyDown = (event) => {
+      if (event.target.tagName !== 'INPUT') {
+        event.preventDefault();
+        const key = event.key.toUpperCase();  
+        if (key === 'E' && EmployeeCodeRef.current) {
+          EmployeeCodeRef.current.focus();
+        } else if (/^[0-9]$/.test(key) && JobRef.current) {
+          JobRef.current.focus();
+        } else if (event.key.length === 1 && /^[0-9]$/.test(key) && scannedCode.length < 10) {
+          setScannedCode(prev => prev + key);
+        }
+        if (scannedCode.length === 10) {
+          handleScanSubmit();
+        }
+      }
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [scannedCode]);
 
+  const handleSelectedRowsChange = (selectedRows) => {
+    setSelectedRowIds(selectedRows);
+  };
+
+  const handleUnlockEngage = () => {
+    // if (selectedRowIds.length > 0) {
+    //   updateFlags(selectedRowIds, 0); // Update flags as necessary
+      
+    //   // Show a SweetAlert2 notification after the flags have been updated
+    //   Swal.fire({
+    //     icon: 'success',
+    //     title: 'Material Engaged',
+    //     text: 'The selected materials have been successfully engaged!',
+    //     confirmButtonText: 'OK'
+    //   });
+    // } else {
+    //   // Optionally, show an alert if no row is selected
+    //   Swal.fire({
+    //     icon: 'warning',
+    //     title: 'No Materials Selected',
+    //     text: 'Please select at least one material to engage.',
+    //     confirmButtonText: 'OK'
+    //   });
+    // }
+
+    Swal.fire({
+      icon: 'success',
+      title: 'Material Unlocked',
+      timer: 10000,
+      text: 'The selected materials have been successfully Unlocked!',
+      confirmButtonText: 'OK'
+    });
+  };
 
   const handleModeToggle = (mode) => {
     setMode(mode);  
@@ -87,7 +146,6 @@ const rfBags = Rmbag;
     },
   ];
 
-
   useEffect(() => {
     if (videoRef.current && !scannerRef.current && hasCamera) {
       scannerRef.current = new QrScanner(
@@ -106,7 +164,6 @@ const rfBags = Rmbag;
         setHasCamera(false);
       });
     }
-
     return () => {
       if (scannerRef.current) {
         scannerRef.current.stop();
@@ -128,13 +185,6 @@ const handleScan = (result) => {
     }
   };
 
-  const handleengageunlock= (selectedRowIds) => {
-    setRows((prevRows) =>
-      prevRows.map((row) =>
-        selectedRowIds.includes(row.id) ? { ...row, flag: 1 } : row
-      )
-    );
-  };
 
   const handleScanSubmit = () => {
     setErrorMessage('');
@@ -405,9 +455,9 @@ const handleissuesubmit = () =>{
               </div>
             </div>
           ) : (
-            <div className='flex flex-row w-screen  h-screen overflow-auto flexoverflow-x-hidden'>
-  <div className="flex flex-col justify-between max-w-96 bg-white h-screen">   
-  <div className=''>
+<div className='flex flex-row w-screen  h-screen overflow-auto flexoverflow-x-hidden'>
+<div className="flex flex-col justify-between max-w-96 bg-white h-screen">   
+<div className=''>
 <div className="p-4 mb-2 bg-indigo-50">
 <div className="flex items-center justify-center mb-4">
 <div className="relative bg-gray-200 rounded-full inline-flex">
@@ -422,8 +472,8 @@ const handleissuesubmit = () =>{
             Issue
           </button>
           <button
-            className={`px-4 py-2 text-sm font-medium rounded-full focus:outline-none ${
-              mode === 'Return'
+            className={`px-4 py-2 text-sm font-medium rounded-full focus:outline-none 
+            ${  mode === 'Return'
                 ? 'bg-indigo-600 text-white'
                 : 'bg-gray-200 text-gray-700 '
             }`}
@@ -533,7 +583,7 @@ Change
 <div className='flex flex-col'> 
 {!returnjobdetails && !bulkScan &&  (
   <button
-  onClick={handleengageunlock}
+  onClick={handleUnlockEngage}
   className={`bg-gradient-to-r from-orange-300 to-orange-500 m-3 rounded-md   flex items-center justify-center text-lg text-white px-6 py-3 mt-4 font-semibold hover:bg-green-700 transition duration-200 ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
   disabled={loading}
 >
@@ -592,7 +642,7 @@ Change
   
   </div>
               ) : (
-                jobDetails &&   
+                jobDetails &&     
                <div className='p-4 w-full h-screen flex flex-col justify-between' >
                 <Jobdetails jobDetail={jobDetails} />
                 {rfBagArray.length > 0 && (
@@ -600,7 +650,7 @@ Change
                   <RfBagDetails bagDetails={rfBagArray}     setBagDetails={setRfBagArray}/> 
                 </div>
               )}
-                <JobDetailsTab jobDetail={jobDetails} />
+                <JobDetailsTab onSelectedRowsChange={handleSelectedRowsChange}  jobflag={jobDetails?.jobFlag?.toUpperCase() !== 'RETURN' ? 1 : 0} jobDetail={jobDetails} />
                </div>
                 
               )}
@@ -614,7 +664,7 @@ Change
           <RfBagDetails bagDetails={rfBagArray}  setBagDetails={setRfBagArray}  />
         </div>
       )}
-        <JobDetailsTab jobDetail={returnjobdetails} />
+        <JobDetailsTab onSelectedRowsChange={handleSelectedRowsChange}  jobflag={returnjobdetails?.jobFlag?.toUpperCase() !== 'RETURN' ? 1 : 0} jobDetail={returnjobdetails} />
        </div>
 </>
 )}
@@ -624,7 +674,7 @@ Change
   <div className='p-4 w-full h-screen flex flex-col justify-between' >  
     <Jobdetails jobDetail={returnModeJob} />
     <ReturnJobDetails jobDetails={returnModeJob}/>
-    <JobDetailsTab jobDetail={returnModeJob} />
+    <JobDetailsTab onSelectedRowsChange={handleSelectedRowsChange}  jobflag={returnModeJob?.jobFlag?.toUpperCase() !== 'RETURN' ? 1 : 0} jobDetail={returnModeJob} />
  </div>
   )}
 </>)}
@@ -638,4 +688,7 @@ Change
 };
 
 export default ScannerAndDetails;
+
+
+
 

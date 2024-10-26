@@ -1,145 +1,305 @@
-import React, { useState } from 'react';
-import SummaryTable from '../JobScan/SummeryTable';
+import React, { useEffect, useState,useRef } from 'react';
+import { DataGrid, GridColDef } from '@mui/x-data-grid';
+import Tooltip from '@mui/material/Tooltip';
+import IconButton from '@mui/material/IconButton';
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import Button from '@mui/material/Button';
+import Dialog from '@mui/material/Dialog';
+import DialogActions from '@mui/material/DialogActions';
+import DialogContent from '@mui/material/DialogContent';
+import DialogTitle from '@mui/material/DialogTitle';
+import '../../components/Scrollbar.css';
+import { createTheme, ThemeProvider } from '@mui/material/styles';
+import { IoSwapHorizontal } from "react-icons/io5";
 import DetailsTable from '../JobScan/DetailsTable';
+import { IoClose } from 'react-icons/io5'; 
+import { IoMdReturnRight } from "react-icons/io";
 import { GrTransaction } from "react-icons/gr";
+import '../../components/Scanner.css';
+import { ReturnRmBags } from '../../fakeapi/ReturnRmBags';
+import initialRows from '../../fakeapi/initialrws';
+import ReturnModal from './RFReturnModal';
+
+const theme = createTheme({
+  components: {
+    MuiDataGrid: {
+      styleOverrides: {
+        root: {
+          border: 'none',
+          backgroundColor: 'white',
+          '& .MuiDataGrid-cell': {
+            borderBottom: '1px solid #f4f5fa',
+          },
+          '& .MuiDataGrid-columnHeaders': {
+            backgroundColor: '#f9fafc',
+            color: '#6e6b7b',
+            borderBottom: 'none',
+          },
+          '& .MuiDataGrid-virtualScroller': {
+            '&::-webkit-scrollbar': {
+              width: '5px',
+              height: '5px',
+            },
+            '&::-webkit-scrollbar-track': {
+              backgroundColor: '#F5F5F5',
+            },
+            '&::-webkit-scrollbar-thumb': {
+              backgroundColor: '#14121986',
+              borderRadius: '6px',
+            },
+          },
+        },
+      },
+    },
+  },
+});
 
 
-const TabIcon = ({ icon: Icon, isActive }) => (
-  <Icon className={`w-8 h-8 ${isActive ? 'text-blue-600' : 'text-gray-600'}`} />
-);
 
-const TabContent = ({ children, isActive }) => (
-  <div
-    className={`transition-all duration-300 ${
-      isActive ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-4 absolute'
-    }`}
-  >
-    {children}
-  </div>
-);
+const JobDetailsTab = ({ jobflag,jobDetail}) => {
+  const [rows, setRows] = useState(initialRows);
+  const [open, setOpen] = useState(false);
+  const [openModal, setOpenModal] = useState(false);
+  const [openReturnModal, setOpenReturnModal] = useState(false);
+  const [selectedId, setSelectedId] = useState(null);
+  const [selectedRowData, setSelectedRowData] = useState(null);
+  const[rmbagDetails,setRmbagDetails] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [scannedCode, setScannedCode] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
+  const[showgrid,setShowgrid] = useState(false);
+  const [isWeightModalOpen, setIsWeightModalOpen] = useState(false);
+  const handleOpenWeightModal = () => setIsWeightModalOpen(true);
+  const handleCloseWeightModal = () => setIsWeightModalOpen(false);
+  const rmBags = ReturnRmBags; 
 
-const JobDetailsTab = ({ jobDetail }) => {
-  const [activeTab, setActiveTab] = useState('summary');
+    useEffect(() => {
+      const handleEscKey = (event) => {
+        if (event.key === 'Escape') {      
+          handleCloseWeightModal();
+          handleCloseReturnModal();
+        }
+      };
+      document.addEventListener('keydown', handleEscKey);
+      return () => document.removeEventListener('keydown', handleEscKey);
+    }, []);
 
-  const tabs = [
-    { id: 'summary', icon: TableIcon, content: <SummaryTable jobDetail={jobDetail} /> },
-    // { id: 'details', icon: ListIcon, content: <DetailsTable jobDetail={jobDetail} /> },
+
+  
+    const handleScanSubmit = () => {
+      const foundBag = rmBags.find((bag) => bag.rmbagid === scannedCode);
+      if (foundBag) {
+        setRmbagDetails(foundBag);
+        setErrorMessage('');
+      } else {
+        setErrorMessage('RM Bag not found');
+      }
+    };
+
+
+  const handleClose = () => {
+    setOpen(false);
+  };
+
+  const handleOpenModal = (id) => {
+    setSelectedId(id);
+    setOpenModal(true);
+  };
+
+  const handleCloseModal = () => {
+    setOpenModal(false);
+    setSelectedId(null);
+  };
+
+  const handleReturnAll = () => {
+    setRows(rows.filter((row) => row.id !== selectedId));
+    setOpen(false);
+  };
+
+  const handleOpenReturnModal = (id) => {
+    const rowData = rows.find(row => row.id === id);
+    setSelectedRowData(rowData);
+    setOpenReturnModal(true);
+  };
+  
+  const handleCloseReturnModal = () => {
+    setOpenReturnModal(false);
+    setSelectedRowData(null);
+  };
+
+  const columns = [
+    { field: 'sr', headerName: 'Sr#', width: 50 },
+    {
+      field: 'view',
+      headerName: 'View',
+      width: 80,
+      renderCell: (params) => (
+        <Tooltip title="View Details">
+          <IconButton
+            className="text-[#257BF0] hover:text-gray-600"
+            onClick={() => handleOpenModal(params.id)}
+            sx={{ color: '#257BF0', '&:hover': { color: 'gray' } }}
+          >
+            <VisibilityIcon sx={{ color: '#257BF0', fontSize: 20 }} />
+          </IconButton>
+        </Tooltip>
+      ),
+    },
+
+    // {
+    //   field: 'returnall',
+    //   headerName: 'Return All',
+    //   width: 70,
+    //   renderCell: (params) => (
+    //     params.row.flag === 0 ? (  
+    //       <IconButton
+    //         className="text-[#257BF0] cursor-pointer hover:text-blue-600"
+    //         onClick={() => handleClickOpen(params.id)}
+    //         sx={{ color: '#257BF0', '&:hover': { color: 'gray' } }}
+    //       >
+    //         <IoSwapHorizontal size={20} />
+    //       </IconButton>
+    //     ) : null  
+    //   ),
+    // },    
+    
+    {
+      field: 'return',
+      headerName: 'Return',
+      width: 70,
+      renderCell: (params) => (
+        params.row.flag === 0 ? (    <IconButton
+          className="text-[#257BF0] cursor-pointer hover:text-blue-600"
+          onClick={() => handleOpenReturnModal(params.id)}
+          sx={{ color: '#257BF0', '&:hover': { color: 'gray' } }}
+        >
+          <IoMdReturnRight size={20} />
+        </IconButton>):null
+      ),
+    },
+    { field: 'bagPrepBy', headerName: 'BagPrepBy', width: 100 },
+    { field: 'employee', headerName: 'Employee', width: 150 },
+    { field: 'dept', headerName: 'Dept', width: 100 },
+    { field: 'item', headerName: 'Item', width: 140 },
+    { field: 'mType', headerName: 'M.Type', width: 100 },
+    { field: 'type', headerName: 'Type', width: 100 },
+    { field: 'quality', headerName: 'Quality', width: 100 },
+    { field: 'color', headerName: 'Color', width: 120 },
+    { field: 'size', headerName: 'Size', width: 80 },
+    { field: 'actualPcs', headerName: 'Actual PCs', width: 100 },
+    { field: 'actualUsed', headerName: 'Actual Used', width: 120 },
+    { field: 'receive', headerName: 'Receive', width: 100 },
+    { field: 'supplier', headerName: 'Supplier', width: 120 },
   ];
 
-  return (
-    <div className="bg-white rounded-lg shadow-lg p-6 pb-0 w-full  mx-auto">
-      <div className="flex justify-start mb-2 text-blue-600 gap-3 text-lg  items-center">
-        {/* {tabs.map((tab) => (
-          <button
-            key={tab.id}
-            onClick={() => setActiveTab(tab.id)}
-            className={`flex items-center justify-center px-4  py-3 text-sm font-medium transition-all duration-200 ease-in-out rounded-md mr-2 last:mr-0 ${
-              activeTab === tab.id
-                ? 'bg-blue-100 text-blue-600'
-                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-            }`}
-          >
-            <TabIcon icon={tab.icon} isActive={activeTab === tab.id} />
-            <span className="ml-2 capitalize">{tab.id}</span>
-          </button>
-        ))}
-        */}
+  const getRowClassName = (params) => {
+    if (jobflag === 1 && params.row.flag === 1) {
+        return 'bg-custom-hover';
+    } else if (jobflag === 1 && params.row.flag === 2) {
+        return 'bg-cusyellow-50';
+    }
+    return '';
+};
 
-        <GrTransaction/>
+  const CustomModal = ({ isOpen, onClose, children }) => {
+    if (!isOpen) return null;
+    return (
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+        <div className="bg-white w-2/3 p-4 rounded-lg">
+          <div className='w-full h-full flex justify-end'>
+            <IconButton
+              className="text-gray-600 hover:text-red-600"
+              onClick={onClose}
+            >
+              <IoClose size={24} />
+            </IconButton>
+          </div>
+          {children}
+        </div>
+      </div>
+    );
+  };
+
+
+  const handleshowgrid =() =>{
+    setShowgrid(!showgrid);
+  }
+
+  return (
+    <div className="bg-white rounded-lg shadow-lg p-6 pb-0 w-full mx-auto">
+      <div className="flex w-fit justify-start mb-2 text-blue-600 gap-3 text-lg items-center cursor-pointer" onClick={handleshowgrid}>
+        <GrTransaction />
         Transactions
       </div>
       <div className="relative overflow-hidden">
-        {/* {tabs.map((tab) => (
-          <TabContent key={tab.id} isActive={activeTab === tab.id}>
-            {tab.content}
-          </TabContent>
-        ))} */}
+        <div className="w-full bg-white h-[40vh] overflow-auto">
+         
+         
+         
+        {showgrid&&
+        
+        <ThemeProvider theme={theme}>
+        <DataGrid
+      rows={rows}
+      columns={columns}
+      pageSize={5}
+      rowsPerPageOptions={[5]}
+      checkboxSelection={jobflag === 1}
+      isRowSelectable={(params) => jobflag === 1 && ( params.row.flag === 1)}
+      getRowClassName={getRowClassName}
+      sx={{ 
+          '& .MuiDataGrid-columnHeader:focus, & .MuiDataGrid-cell:focus': {
+          outline: 'none',
+          boxShadow: 'none',
+        },
+        '& .MuiDataGrid-columnHeader:focus-within, & .MuiDataGrid-cell:focus-within': {
+          outline: 'none',
+          boxShadow: 'none',
+        },
+        '& .css-de9k3v-MuiDataGrid-selectedRowCount': {
+          visibility: 'hidden',
+        },
+        '& .MuiDataGrid-row.Mui-selected': {
+          backgroundColor: '#d1e7fd !important',
+        },
+        '&  .Mui-disabled' :{
+          color:'transparent !important'
+        }
+       }
+      }
+        />
+        </ThemeProvider>
+        }
+        
+          <CustomModal isOpen={openModal} onClose={handleCloseModal}>
+            <DetailsTable />
+          </CustomModal>
 
-        <SummaryTable/>
+            {openReturnModal && selectedRowData && (
+            <ReturnModal
+            isOpen={openReturnModal}
+            handleCloseReturnModal={handleCloseReturnModal}
+            selectedRowData={selectedRowData}
+            isWeightModalOpen={openReturnModal}
+            handleScanSubmit={handleScanSubmit}
+            loading={loading}
+          />
+            )}
+
+          <Dialog open={open} onClose={handleClose}>
+            <DialogTitle>Confirm Return All</DialogTitle>
+            <DialogContent>
+              Are you sure you want to return all items from this RM bag?
+            </DialogContent>
+            <DialogActions>
+              <Button onClick={handleClose} color="primary">Cancel</Button>
+              <Button onClick={handleReturnAll} color="primary">Confirm</Button>
+            </DialogActions>
+          </Dialog>
+        </div>
       </div>
     </div>
   );
 };
 
-const TableIcon = ({ className }) => (
-  <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
-  </svg>
-);
-
-const ListIcon = ({ className }) => (
-  <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h16M4 18h16" />
-  </svg>
-);
-
 export default JobDetailsTab;
-
-// import React, { useState } from 'react';
-// import SummaryTable from '../JobScan/SummaryTable';
-// import DetailsTable from '../JobScan/DetailsTable';
-
-// const TabIcon = ({ icon: Icon, isActive }) => (
-//   <Icon className={`w-6 h-6 ${isActive ? 'text-blue-600' : 'text-gray-600'}`} />
-// );
-
-// const TabContent = ({ children, isActive }) => (
-//   <div
-//     className={`transition-all duration-500 ease-in-out absolute top-0 left-0 w-full ${
-//       isActive ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-8 pointer-events-none'
-//     }`}
-//   >
-//     {children}
-//   </div>
-// );
-
-// const JobDetailsTab = ({ jobDetail }) => {
-//   const [activeTab, setActiveTab] = useState('summary');
-
-//   const tabs = [
-//     { id: 'summary', icon: TableIcon, label: 'Summary', content: <SummaryTable jobDetail={jobDetail} /> },
-//     { id: 'details', icon: ListIcon, label: 'Details', content: <DetailsTable jobDetail={jobDetail} /> },
-//   ];
-
-//   return (
-//     <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-5xl mx-auto flex">
-//       <div className="w-48 flex flex-col space-y-2 mr-6">
-//         {tabs.map((tab) => (
-//           <button
-//             key={tab.id}
-//             onClick={() => setActiveTab(tab.id)}
-//             className={`flex items-center justify-start px-4 py-3 text-sm font-medium transition-all duration-300 ease-in-out rounded-md ${
-//               activeTab === tab.id
-//                 ? 'bg-blue-100 text-blue-600'
-//                 : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-//             }`}
-//           >
-//             <TabIcon icon={tab.icon} isActive={activeTab === tab.id} />
-//             <span className="ml-3">{tab.label}</span>
-//           </button>
-//         ))}
-//       </div>
-//       <div className="flex-1 relative overflow-hidden" style={{ minHeight: '400px' }}>
-//         {tabs.map((tab) => (
-//           <TabContent key={tab.id} isActive={activeTab === tab.id}>
-//             {tab.content}
-//           </TabContent>
-//         ))}
-//       </div>
-//     </div>
-//   );
-// };
-
-// const TableIcon = ({ className }) => (
-//   <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-//     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
-//   </svg>
-// );
-
-// const ListIcon = ({ className }) => (
-//   <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-//     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h16M4 18h16" />
-//   </svg>
-// );
-
-// export default JobDetailsTab;

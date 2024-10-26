@@ -92,3 +92,37 @@ input:focus {
   border-color: #6b5c7d;
   outline: none;
 }
+
+@keyframes blink {                      
+  0% {                      
+    opacity: 1;                      
+  }                      
+  50% {                      
+    opacity: 0.5;                      
+  }                      
+  100% {                      
+    opacity: 1;                      
+  }                      
+}                      
+.animate-blink {
+  animation: blink 1s infinite;
+}
+
+
+.bg-custom-hover {
+  background-color: #FFF3E8 !important ;
+  transition: background-color 0.3s ease;
+}
+
+.bg-custom-hover:hover {
+  background-color: #FFF3E8 !important;
+}
+
+.bg-cusyellow-50 {
+  background-color: #F9FBE7 !important; 
+  transition: background-color 0.3s ease;
+}
+
+.bg-cusyellow-50:hover {
+  background-color: #F9FBE7 !important; 
+}

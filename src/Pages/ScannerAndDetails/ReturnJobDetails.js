@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef,useEffect } from 'react';
 import { PiKeyReturnBold } from "react-icons/pi";
 
 const ReturnJobDetails = ({ jobDetails }) => {
@@ -6,15 +6,21 @@ const ReturnJobDetails = ({ jobDetails }) => {
   const [losswt, setLosswt] = useState('0.000');       
   const [expwt, setExpwt] = useState('0.000');         
   const [error, setError] = useState('');              
+const [isdisabled,setIsdisabled] = useState(true);
+const JobRef = useRef(null); 
+useEffect(() => {
+  if (JobRef.current) {
+    JobRef.current.focus();
+  }
+}, []);
 
   const grosswt = jobDetails.metalwt + (jobDetails.diamondwt / 5) + (jobDetails.cswt / 5) + (jobDetails.miscwt/5);
-
   const retjob = () => {
     if (mountWeight === '' || parseFloat(mountWeight) === 0) {
-      setMountWeight('');
-      setLosswt('0.000');
-      setExpwt('0.000');
-      setError('');
+    setMountWeight('');
+    setLosswt('0.000');
+    setExpwt('0.000');
+    setError('');
     } else if (parseFloat(mountWeight) <= grosswt) {
       const totalLoss = grosswt - parseFloat(mountWeight);
       setLosswt(totalLoss.toFixed(3));  
@@ -27,7 +33,10 @@ const ReturnJobDetails = ({ jobDetails }) => {
       setExpwt('0.000');
     }
   };
+
   const retwtchange = (e) => {
+    setIsdisabled(true)
+
     const value = e.target.value;
     setMountWeight(value);
     if (value === '' || parseFloat(value) <= grosswt) {
@@ -42,15 +51,18 @@ const ReturnJobDetails = ({ jobDetails }) => {
       const expLoss = (totalLoss / jobDetails?.metalwt) * 100;
       setExpwt(expLoss.toFixed(3));
       setError('');
-
+      setIsdisabled(false);
       if (parseFloat(totalLoss) > jobDetails?.metalwt) {
         setError('Loss Limit Exceeded');
+      setIsdisabled(true)
+
       }
 
     } else {
       setError('Return Wt. should not be more than Gross Wt.');
       setLosswt('0.000');
       setExpwt('0.000');
+      setIsdisabled(true)
     }
   };
 
@@ -75,6 +87,8 @@ const ReturnJobDetails = ({ jobDetails }) => {
                 onChange={retwtchange}  
                 placeholder="Enter Return Wt."
                 className="w-full p-3 text-xl border rounded-md "
+                ref={JobRef}
+
               />
             </div>
           </div>
@@ -90,7 +104,9 @@ const ReturnJobDetails = ({ jobDetails }) => {
             <div className='flex gap-4'>
               <button
                 onClick={retjob}
-                className="flex-1 bg-[#7367F0] text-white px-6 py-3 rounded-md hover:bg-blue-700 transition duration-300 shadow-md flex items-center justify-center text-lg font-semibold">
+                className="flex-1 bg-[#33a024f5] text-white disabled:bg-gray-300 px-6 py-3 rounded-md hover:bg-green-200 transition duration-300 shadow-md flex items-center disabled:cursor-not-allowed justify-center text-lg font-semibold"
+                disabled={isdisabled}
+                >
                 <PiKeyReturnBold size={24} className='mr-2' /> Return
               </button>
               <button
@@ -101,61 +117,61 @@ const ReturnJobDetails = ({ jobDetails }) => {
               </button>
             </div>
           </div>
-
         </div>
       </div>
       <div className='flex-1 p-2 px-6 bg-blue-50 overflow-auto h-full rounded-xl flex justify-center shadow-inner'>
-        <div className='grid grid-cols-2 gap-2 w-full text-gray-700'>
-          <div className='flex justify-between w-[80%] items-center'>
-            <span className='text-gray-500'>Diamond:</span>
-            <strong className='text-lg text-gray-800'>{(jobDetails?.diamondwt/5)?.toFixed(3)}</strong>
-          </div>
 
-          <div className='flex justify-between w-[80%] items-center'>
-            <span className='text-gray-500'>Current Net:</span>
-            <strong className='text-lg text-gray-800'>{jobDetails?.metalwt?.toFixed(3)}</strong>
-          </div>
+      <div className='grid grid-cols-2 gap-6 w-full text-gray-700'>
+  <div className='space-y-3 w-[80%]'>
+    <div className='flex justify-between items-center'>
+      <span className='text-gray-500'>Diamond:</span>
+      <strong className='text-lg text-gray-800'>{(jobDetails?.diamondwt / 5)?.toFixed(3)}</strong>
+    </div>
 
-          <div className='flex justify-between w-[80%] items-center'>
-            <span className='text-gray-500'>Misc:</span>
-            <strong className='text-lg text-gray-800'>{(jobDetails?.miscwt/5)?.toFixed(3)}</strong>
-          </div>
+    <div className='flex justify-between items-center'>
+      <span className='text-gray-500'>Misc:</span>
+      <strong className='text-lg text-gray-800'>{(jobDetails?.miscwt / 5)?.toFixed(3)}</strong>
+    </div>
 
-          <div className='flex justify-between w-[80%] items-center'>
-            <span className='text-gray-500'>Current Gross:</span>
-            <strong className='text-lg text-gray-800'>{grosswt?.toFixed(3)}</strong>
-          </div>
+    <div className='flex justify-between items-center'>
+      <span className='text-gray-500'>Color Stone:</span>
+      <strong className='text-lg text-gray-800'>{(jobDetails?.cswt / 5)?.toFixed(3)}</strong>
+    </div>
 
-          <div className='flex justify-between w-[80%] items-center'>
-            <span className='text-gray-500'>Color Stone:</span>
-            <strong className='text-lg text-gray-800'>{(jobDetails?.cswt/5)?.toFixed(3)}</strong>
-          </div>
+    <div className='flex justify-between items-center'>
+      <span className='text-gray-500'>Current Gross:</span>
+      <strong className='text-lg text-gray-800'>{grosswt?.toFixed(3)}</strong>
+    </div>
 
-          <hr className='col-span-2 border-gray-300 my-1' />
+    <div className='flex justify-between items-center'>
+      <span className='text-gray-500'>Current Net:</span>
+      <strong className='text-lg text-gray-800'>{jobDetails?.metalwt?.toFixed(3)}</strong>
+    </div>
+  </div>
 
-          <div className='flex justify-between w-[80%] items-center'>
-            <span className='text-gray-500'>Loss Weight:</span>
-            <strong className='text-lg text-gray-800'>0.000</strong>
-          </div>
+  <div className='space-y-3 w-[80%]'>
+    <div className='flex justify-between items-center'>
+      <span className='text-gray-500'>Loss Weight:</span>
+      <strong className='text-lg text-gray-800'>{losswt}</strong>
+    </div>
 
-          <div className='flex justify-between w-[80%] items-center'>
-            <span className='text-gray-500'>Actual Loss:</span>
-            <strong className='text-lg text-gray-800'>0.000</strong>
-          </div>
+    <div className='flex justify-between items-center'>
+      <span className='text-gray-500'>Actual Loss:</span>
+      <strong className='text-lg text-gray-800'>0.000</strong>
+    </div>
 
-          <hr className='col-span-2 border-gray-300 my-1' />
+    <div className='flex justify-between items-center'>
+      <span className='text-gray-500'>Exp Loss:</span>
+      <strong className='text-xl text-red-600'>{losswt}</strong>
+    </div>
 
-          <div className='flex justify-between w-[80%] items-center'>
-            <span className='text-gray-500'>Exp Loss:</span>
-            <strong className='text-xl text-red-600'>{losswt}</strong>
-          </div>
+    <div className='flex justify-between items-center'>
+      <span className='text-gray-500'>Exp Loss %:</span>
+      <strong className='text-lg text-gray-800'>{expwt}</strong>
+    </div>
+  </div>
+</div>
 
-          <div className='flex justify-between w-[80%] items-center'>
-            <span className='text-gray-500'>Exp Loss %:</span>
-            <strong className='text-lg text-gray-800'>{expwt}</strong>
-          </div>
-
-        </div>
       </div>
     </div>
   );

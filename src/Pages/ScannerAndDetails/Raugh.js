@@ -1,78 +1,101 @@
-import React, { useState } from 'react';
-import { DataGrid } from '@mui/x-data-grid';
-import Tooltip from '@mui/material/Tooltip';
-import IconButton from '@mui/material/IconButton';
-import VisibilityIcon from '@mui/icons-material/Visibility';
-import Button from '@mui/material/Button';
-import Dialog from '@mui/material/Dialog';
-import DialogActions from '@mui/material/DialogActions';
-import DialogContent from '@mui/material/DialogContent';
-import DialogTitle from '@mui/material/DialogTitle';
-import { IoSwapHorizontal, IoMdReturnRight } from "react-icons/io5";
+import React, { useEffect, useRef, useState } from 'react';
+import { AiOutlineClose } from 'react-icons/ai';
+import { FaQrcode } from 'react-icons/fa';
+import { ClipLoader } from 'react-spinners';
+import ScannerIcon from '../../Assets/Qrcode.png';
+import QrScanner from 'qr-scanner';
+import { ReturnRmBags } from '../../fakeapi/ReturnRmBags';
 
-const initialRows = [
-  { id: 1, sr: 1, employee: 'm admin', dept: 'filing', flag: 1 },
-  { id: 2, sr: 2, employee: 'm admin', dept: 'setting', flag: 2 },
-  { id: 3, sr: 3, employee: 'm admin', dept: 'filing', flag: 1 },
-  { id: 4, sr: 4, employee: 'm admin', dept: 'filing', flag: 0 },
-  // Other rows...
-];
+const ReturnModal = ({isOpen, handleCloseReturnModal, selectedRowData, isWeightModalOpen, loading}) => {
+  const rmBags = ReturnRmBags;
+  const [hasCamera, setHasCamera] = useState(false);
+  const [scannedCode, setScannedCode] = useState('');
+  const [rmbagDetails, setRmbagDetails] = useState(null);
+  const [errorMessage, setErrorMessage] = useState('');
+  const [pcs, setPcs] = useState('');
+  const [selectedReturnType, setSelectedReturnType] = useState(null); // New state for return type
+  const videoRef = useRef(null);
+  const scannerRef = useRef(null);
+  const JobRef = useRef(null);
+  const WtRef = useRef(null);
+  const [returnWeight, setReturnWeight] = useState('');
+  const [wterror, setWterror] = useState('');
 
-export default function SummaryTable({ unlock }) {
-  const [rows, setRows] = useState(initialRows);
-  const [open, setOpen] = useState(false);
-  const [selectedIds, setSelectedIds] = useState([]);
+  useEffect(() => {
+    if (isWeightModalOpen && JobRef.current) {
+      JobRef.current.focus();
+    }
+  }, [isWeightModalOpen]);
 
-  const handleSelectionModelChange = (ids) => {
-    setSelectedIds(ids);
+  useEffect(() => {
+    if (rmbagDetails && WtRef.current) {
+      WtRef.current.focus();
+    }
+  }, [rmbagDetails]);
+
+  const handleRMChange = (e) => {
+    const value = e.target.value.toUpperCase();
+    setErrorMessage('');
+    setScannedCode(value);
   };
 
-  const handleUnlockClick = () => {
-    unlock(selectedIds); // Pass selected row IDs to the parent component's unlock function
+  const handleScan = (result) => {
+    if (result) {
+      setScannedCode(result);
+      console.log("Scanned Result: ", result);
+    }
   };
 
-  const columns = [
-    { field: 'sr', headerName: 'Sr#', width: 50 },
-    { field: 'employee', headerName: 'Employee', width: 150 },
-    { field: 'dept', headerName: 'Dept', width: 100 },
-    {
-      field: 'view',
-      headerName: 'View',
-      width: 80,
-      renderCell: (params) => (
-        <Tooltip title="View Details">
-          <IconButton>
-            <VisibilityIcon />
-          </IconButton>
-        </Tooltip>
-      ),
-    },
-    {
-      field: 'return',
-      headerName: 'Return',
-      width: 70,
-      renderCell: (params) => (
-        <IconButton>
-          <IoMdReturnRight size={20} />
-        </IconButton>
-      ),
-    },
-  ];
+  const handleScanSubmit = () => {
+    console.log(scannedCode);
+    const foundBag = rmBags.find((bag) => bag.rmbagid === scannedCode);
+    // Logic for matching foundBag details
+  };
+
+  const handlewtchange = (e) => {
+    const value = e.target.value;
+    setReturnWeight(value);
+  };
+
+  if (!isOpen || !selectedRowData) return null;
 
   return (
-    <div>
-      <Button onClick={handleUnlockClick} variant="contained" color="primary">
-        Unlock Selected Rows
-      </Button>
-      <DataGrid
-        rows={rows}
-        columns={columns}
-        pageSize={5}
-        rowsPerPageOptions={[5]}
-        checkboxSelection
-        onSelectionModelChange={handleSelectionModelChange}
-        getRowClassName={(params) => (params.row.flag === 1 ? 'flagged' : '')}
-      />
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div className="bg-white rounded-lg shadow-xl p-6 w-[50vw] min-w-[30vw]">
+        <div className="flex justify-between items-center mb-6">
+          <button
+            onClick={handleCloseReturnModal}
+            className="text-gray-500 hover:text-red-600 transition-colors duration-200"
+          >
+            <AiOutlineClose className="text-2xl" />
+          </button>
+        </div>
+
+        <div className="flex flex-col items-center gap-4 mb-6">
+          {(selectedRowData?.item?.toUpperCase() === "DIAMOND" || 
+            selectedRowData?.item?.toUpperCase() === "MISC" || 
+            selectedRowData?.item?.toUpperCase() === "COLOR STONE") && (
+            <div className="flex gap-2">
+              {['Extra Return', 'Lost', 'Broken'].map((option) => (
+                <button
+                  key={option}
+                  onClick={() => setSelectedReturnType(option)}
+                  className={`px-4 py-2 rounded ${
+                    selectedReturnType === option ? 'bg-indigo-600 text-white' : 'bg-gray-200 text-gray-600'
+                  }`}
+                >
+                  {option}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Rest of your modal content (QR code scanner, form, etc.) */}
+
+      </div>
     </div>
   );
-}
+};
+
+export default ReturnModal;

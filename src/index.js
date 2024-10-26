@@ -11,7 +11,7 @@ root.render(
   <React.StrictMode>
     <RecoilRoot>
       <Router basename='/Protnx'>
-    <App />
+       <App />
       </Router>
     </RecoilRoot>
     
