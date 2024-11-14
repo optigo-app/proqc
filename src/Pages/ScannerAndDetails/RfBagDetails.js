@@ -1,9 +1,7 @@
-
-
-// in this code will remain is coming NAN
-import React, { useEffect, useState, useRef } from 'react';
+import React,{ useEffect, useState, useRef } from 'react';
 import { FaTimes, FaPlus } from 'react-icons/fa';
 import { IoIosArrowDropleftCircle } from 'react-icons/io';
+
 const RfBagDetails = ({ bagDetails, setBagDetails }) => {
   const [expandedIndex, setExpandedIndex] = useState(bagDetails.length - 1);
   const [issuedWeight, setIssuedWeight] = useState({});
@@ -14,15 +12,16 @@ const RfBagDetails = ({ bagDetails, setBagDetails }) => {
   const WeightRef = useRef(null); 
   const pcsInputRef = useRef(null); 
   const[willremain,setWillremain] = useState(bagDetails?.[expandedIndex]?.wt);
-const [isdisabled,setIsdisabled] = useState(true);
-  
- const toggleExpand = (index) => {
+  const [isdisabled,setIsdisabled] = useState(true);
+    
+  const toggleExpand = (index) => {
      setExpandedIndex(expandedIndex === index ? null : index);
      const selectedBag = bagDetails[index];
      setTempWeight(issuedWeight[selectedBag.rfbagid] || '');
      setTempPcs(selectedBag.Material !== 'METAL' ? pcs[selectedBag.rfbagid] || '' : '');
      setErrorMessage(''); 
-};
+    
+    };
 
   useEffect(() => {
     if (expandedIndex && WeightRef.current) {
@@ -105,16 +104,16 @@ const retwtchange = (e) => {
   console.log('willremain',willremain);
 
   return (
-    <div className="w-full h-[30vh] flex flex-row-reverse gap-3">
+      <div className="w-full h-[30vh] flex flex-row-reverse gap-3">
       <div className="w-1/2 pr-4 h-[30vh] overflow-auto">
-        {bagDetails.map((rfBagDetails, index) => ( 
-<div key={index} className={`w-full mx-auto shadow-lg overflow-hidden mt-1 transition-all duration-300 ease-in-out 
-${ expandedIndex === index ? 'bg-white ' : 'bg-white'}`}>
-<div className='flex flex-row h-full justify-start'>
-{expandedIndex === index ? (
-<div className='flex justify-center items-center '>
-<IoIosArrowDropleftCircle className="ml-2 text-[#28c76f] animate-pulse" size={30} />
-</div>
+      {bagDetails.map((rfBagDetails, index) => ( 
+      <div key={index} className={`w-full mx-auto shadow-lg overflow-hidden mt-1 transition-all duration-300 ease-in-out 
+      ${ expandedIndex === index ? 'bg-white ' : 'bg-white'}`}>
+      <div className='flex flex-row h-full justify-start'>
+      {expandedIndex === index ? (
+      <div className='flex justify-center items-center '>
+      <IoIosArrowDropleftCircle className="ml-2 text-[#28c76f] animate-pulse" size={30} />
+      </div>
 ):(
   <>
 <IoIosArrowDropleftCircle className="ml-2 text-transparent animate-pulse" size={30} />
@@ -126,17 +125,17 @@ ${ expandedIndex === index ? 'bg-white ' : 'bg-white'}`}>
         <span className="flex flex-row justify-center items-center gap-2">
           <span className={`p-1 px-3 ${expandedIndex === index ?  'bg-[#DCF6E8] text-[#28c76f]' : ' bg-gray-100 text-gray-400'}
            rounded-md`} style={{fontWeight:'500' }} >
-            {rfBagDetails.rfbagid}
+            {rfBagDetails?.['1']}
           </span> 
-          {rfBagDetails.Material === 'METAL' && (
+          {rfBagDetails?.['2'] === 1 && (
          <>
             <p className='text-gray-500 text-sm font-medium'>
-            (  {rfBagDetails.Purity} {rfBagDetails.Color} {rfBagDetails.Type} ) | {rfBagDetails.customerName}
+            (  {rfBagDetails?.['6']} {rfBagDetails?.['7']} {rfBagDetails?.['5']} ) 
             </p>
            
          </>
           )}
-          {rfBagDetails.Material !== 'METAL' && (
+          {rfBagDetails?.['2'] !== 1 && (
             <p className='text-gray-500 text-sm font-medium'>
               {rfBagDetails.Material} ({rfBagDetails.Shape} {rfBagDetails.Clarity} {rfBagDetails.Color} {rfBagDetails.Size}  {rfBagDetails?.Mtype} ) | {rfBagDetails.customerName}
             </p>
@@ -177,18 +176,17 @@ ${ expandedIndex === index ? 'bg-white ' : 'bg-white'}`}>
          <div className=' flex flex-row w-full justify-between '> 
          <div className=' flex flex-col '>
           <span className='p-1 px-3 bg-[#DCF6E8] text-[#28c76f] font-semibold rounded-md w-fit text-xl mb-1'>
-                {bagDetails[expandedIndex]?.rfbagid}
+                {bagDetails[expandedIndex]?.['1']}
               </span>
 
       <div className="grid grid-cols-1 gap-4 mb-2">
-               
-                  {bagDetails[expandedIndex]?.Material === 'METAL' && (
+                  {bagDetails[expandedIndex]?.['2'] === 1 && (
 <div className='flex flex-col '>
-<p className='text-gray-500 text-lg'>{bagDetails?.[expandedIndex]?.Purity} {bagDetails?.[expandedIndex]?.Color} {bagDetails?.[expandedIndex]?.Type}</p>  
+<p className='text-gray-500 text-lg'>{bagDetails?.[expandedIndex]?.['6']} {bagDetails?.[expandedIndex]?.['7']} {bagDetails?.[expandedIndex]?.['5']}</p>  
                   
 
 </div>                 )}
-                  {bagDetails[expandedIndex]?.Material !== "METAL" && (
+                  {bagDetails[expandedIndex]?.Material ?.['2'] !== 1 && (
                     <p className='text-gray-500 text-lg'>
                       {bagDetails?.[expandedIndex]?.Material} ({bagDetails?.[expandedIndex]?.Shape} {bagDetails?.[expandedIndex]?.Clarity} {bagDetails?.[expandedIndex]?.Color} {bagDetails?.[expandedIndex]?.Size})</p>
                   )}
@@ -303,11 +301,8 @@ Bag Wt:          </p>
 
 </div>
 )}
-              
-
 
 </div>
-
               </div>
             </div>
           </div>

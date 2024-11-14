@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { FaQrcode, FaUser, FaEdit } from 'react-icons/fa';
 import QrScanner from 'qr-scanner';
@@ -15,12 +14,10 @@ import ReturnJobDetails from './ReturnJobDetails';
 import { TfiUnlock } from "react-icons/tfi";
 import { dbJobdetails } from '../../fakeapi/JobDetails';
 import { Rmbag } from '../../fakeapi/Rmbag';
-import { useRows } from '../../Context/RowsContext';
 import Swal from 'sweetalert2';
-
+import { LocalSet,LocalGet } from './LocFunctions';
 
 const ScannerAndDetails = () => {
-  const { updateFlags } = useRows(); 
 const [scannedCode, setScannedCode] = useState('');
 const [jobDetails, setJobDetails] = useState(null);
 const [bulkJobDetails, setBulkJobDetails] = useState([]);
@@ -41,9 +38,20 @@ const [returnjobdetails,setReturnjobdetails] = useState(null);
 const [returnModeJob,setReturnModeJob] = useState(null);
 const [jobflag,setJobflag]=useState('');
 const [mode, setMode] = useState('Issue');
+const [jobmode,setJobmode] = useState('Issue');
 const EmployeeCodeRef = useRef(null); 
 const [selectedRowIds, setSelectedRowIds] = useState([]); 
 const JobRef = useRef(null); 
+const Operator = JSON.parse(localStorage.getItem('tnxoperator'));
+const tnxlocker = Operator?.["10"];
+const lockerarray = JSON.parse(localStorage.getItem('tnxlockerid'));
+const materialarray = JSON.parse(localStorage.getItem('tnxmaterialid'));
+const Employees = LocalGet("tnxemployees");
+const jobData = LocalGet("tnxjobs");
+const Location = LocalGet("tnxlocation");
+const rfBags = LocalGet("tnxrmbags");
+console.log(JSON.stringify(Location),'jobData');
+
 
 useEffect(() => {
     const handleFocus = () => {
@@ -53,11 +61,9 @@ useEffect(() => {
         JobRef.current.focus();
       }
     };
-
- const timeoutId = setTimeout(handleFocus, 0);
-    return () => clearTimeout(timeoutId);
-  }, [employeeScanned, mode]);  
-
+const timeoutId = setTimeout(handleFocus, 0);
+   return () => clearTimeout(timeoutId);
+ }, [employeeScanned, mode]);  
   useEffect(() => {
     const handleKeyDown = (event) => {
       if (event.target.tagName !== 'INPUT') {
@@ -85,27 +91,10 @@ useEffect(() => {
     setSelectedRowIds(selectedRows);
   };
 
-  const handleUnlockEngage = () => {
-    // if (selectedRowIds.length > 0) {
-    //   updateFlags(selectedRowIds, 0); // Update flags as necessary
-      
-    //   // Show a SweetAlert2 notification after the flags have been updated
-    //   Swal.fire({
-    //     icon: 'success',
-    //     title: 'Material Engaged',
-    //     text: 'The selected materials have been successfully engaged!',
-    //     confirmButtonText: 'OK'
-    //   });
-    // } else {
-    //   // Optionally, show an alert if no row is selected
-    //   Swal.fire({
-    //     icon: 'warning',
-    //     title: 'No Materials Selected',
-    //     text: 'Please select at least one material to engage.',
-    //     confirmButtonText: 'OK'
-    //   });
-    // }
 
+
+
+  const handleUnlockEngage = () => {
     Swal.fire({
       icon: 'success',
       title: 'Material Unlocked',
@@ -114,7 +103,27 @@ useEffect(() => {
       confirmButtonText: 'OK'
     });
   };
+  function getValuesByIds(idsStringOrNum, array, num, match) {
+    const ids = typeof idsStringOrNum === 'string' 
+                  ? idsStringOrNum.split(",").map(id => id.trim()) 
+                  : [idsStringOrNum];
+  
+    const result = [];
+    
+    ids.forEach(id => {
+      const matchingObj = array?.find(obj => obj[`${num}`] === Number(id));
+      if (matchingObj) {
+        result.push(matchingObj[`${match}`]);
+      }
+    });
+    
+    return result;
+  }
+  
+  const locker =  getValuesByIds(tnxlocker,lockerarray,1,2);
 
+
+  console.log("loc",locker);
   const handleModeToggle = (mode) => {
     setMode(mode);  
     setEmployeeScanned(false);
@@ -127,38 +136,19 @@ useEffect(() => {
     setReturnjobdetails(null);
     setReturnModeJob(null);
   };
-  
-const jobData = dbJobdetails;
 
-const rfBags = Rmbag;
-  const Employees = [
-    {
-      empid: 'E1203',
-      workerfname: "John",
-      workerlname: "Doe",
-      location:'india',
-    },
-    {
-      empid: 'E0522',
-      workerfname: "Lilly",
-      workerlname: "Johnson",
-      location:'India',
-    },
-  ];
-
-  useEffect(() => {
+useEffect(() => {
     if (videoRef.current && !scannerRef.current && hasCamera) {
       scannerRef.current = new QrScanner(
         videoRef.current,
         (result) => handleScan(result.data),
         {
-          onDecodeError: (err) => console.log(err),
-          preferredCamera: 'environment',
-          highlightScanRegion: true,
-          highlightCodeOutline: true,
+        onDecodeError: (err) => console.log(err),
+        preferredCamera: 'environment',
+        highlightScanRegion: true,
+        highlightCodeOutline: true,
         }
       );
-
       scannerRef.current.start().catch((err) => {
         console.error(err);
         setHasCamera(false);
@@ -172,13 +162,12 @@ const rfBags = Rmbag;
     };
   }, [hasCamera]);
   
-  const handleempChange = (e) => {
+const handleempChange = (e) => {
+    setErrorMessage('');
     const value = e.target.value.toUpperCase(); 
     setScannedCode(value); 
   };
-
-
-const handleScan = (result) => {
+  const handleScan = (result) => {
     if (result) {
       setBarcode(result);
       handleScanSubmit(result);
@@ -186,42 +175,55 @@ const handleScan = (result) => {
   };
 
 
-  const handleScanSubmit = () => {
+const handleScanSubmit = () => {
     setErrorMessage('');
-  
+    let emplocation = [];
+    let emplocker = [];
     if (mode === 'Issue' && !employeeScanned) {
       if (!scannedCode) { 
         setErrorMessage('Please enter employee code.');
       } else {
-        const employeeFound = Employees.find(emp => emp.empid === scannedCode);
+        const employeeFound = Employees.find(emp => emp["2"] === scannedCode);
+
         if (employeeFound) {
-          setEmployeeDetails(employeeFound);
-          setEmployeeScanned(true);
-          setErrorMessage('');
-          setScannedCode('');
+          if (employeeFound['10'] && employeeFound['9']) { 
+            const locationString = employeeFound['9'];
+            const lockerstring = employeeFound['10'];
+            const emplocation = getValuesByIds(locationString, Location, 1, 2);
+            const emplocker = getValuesByIds(lockerstring, lockerarray, 1, 2);
+
+            console.log(emplocation, 'location');
+            console.log(emplocker, 'emplocker');
+
+        
+            setEmployeeDetails(employeeFound);
+            setEmployeeScanned(true);
+            setErrorMessage('');
+            setScannedCode('');
+          } else {
+            setErrorMessage("Employee doesn't have any location rights");
+          }
         } else {
           setErrorMessage('Employee not found.');
         }
       }
     } else if (mode === 'Issue' && employeeScanned) {
-      const isJobId = scannedCode.startsWith("1/") && scannedCode.length > 2;
+      const isJobId = /^\d+\/\d+$/.test(scannedCode);
       if (isJobId) {
-        const jobFound = jobData.find(job => job.jobId === scannedCode);
+        const jobFound = jobData.find(job => job?.['2'] === scannedCode);
         if (jobFound) {
-          if (jobFound?.location?.toUpperCase() !== employeeDetails?.location?.toUpperCase()) {
+          if (emplocation.some(location => location.toUpperCase() !== jobFound?.['13']?.toUpperCase()))
+           {
             setErrorMessage('Job Is not In Same Location');
-          } 
-          
-          else {
+          } else {
             setRfBagArray([]);
             setJobDetails(null);
             setBulkscancheck(false);
             setReturnjobdetails(null);
-  
-            if (jobFound.jobFlag === 'Issue') {
+            if (jobFound?.['16'] === 0) {
               setJobDetails(jobFound);
+             
               setBulkscancheck(true);
-  
               if (bulkScan) {
                 setBulkJobDetails(prev => {
                   const updatedBulkJobs = prev.filter(existingJob => existingJob.jobId !== jobFound.jobId);
@@ -249,40 +251,55 @@ const handleScan = (result) => {
         }
       } else if (scannedCode.length === 10) {
         if (jobDetails || returnjobdetails) {
-          const rfBagFound = rfBags.find(bag => bag.rfbagid === scannedCode);
+          console.log("hiii");
+          const rfBagFound = rfBags.find(bag => bag?.['1'] === scannedCode);
+          console.log(rfBagFound,'rfBagFound')
           if (rfBagFound) {
-            const job = jobDetails || returnjobdetails;
-  
-            if (rfBagFound?.Location?.toUpperCase() !== job?.location?.toUpperCase()) {
-              setErrorMessage('RM Bag is not in the same location.');
-            }
-            else if (rfBagFound?.Material?.toUpperCase() === 'METAL') {
+            const rmlocker = getValuesByIds(rfBagFound['12'], lockerarray, 1, 2);
+            const rmlockerString = String(rmlocker?.[0] || '');
+          console.log(rmlockerString?.toLocaleUpperCase(),"abcd");
+            if (locker.some(tnxlocker => tnxlocker.toUpperCase() == rmlockerString?.toUpperCase())){
+            const tnxmaterial =  getValuesByIds(rfBagFound?.['2'],materialarray,1,2); 
+            const material = String(tnxmaterial?.[0] || '');
+            console.log(material);
+                const job = jobDetails || returnjobdetails;
+                console.log(material);
+            if (material === 'METAL') {
+              console.log(material,'material');
               if (
-                rfBagFound?.Type?.toUpperCase() !== job?.metal?.toUpperCase() || 
-                rfBagFound?.Purity?.toUpperCase() !== job?.metalpurity?.toUpperCase()
+                rfBagFound?.['5'].toUpperCase() !== job?.['8']?.toUpperCase() ||  rfBagFound?.['6']?.toUpperCase() !== job?.['9']?.toUpperCase()
               ) {
+                console.log(  rfBagFound?.['5'].toUpperCase(),job?.['8']?.toUpperCase(),'as');
+
                 setErrorMessage('Please scan a valid RM bag for metal.');
               } else {
+                console.log(  rfBagFound?.['5'].toUpperCase(),job?.['8']?.toUpperCase(),'abcd');
                 setRfBagArray(prev => [rfBagFound, ...prev]);
+                console.log(rfBagArray,'rfbag');
                 setScannedCode('');
               }
             }
-            else if (rfBagFound?.Material?.toUpperCase() !== 'METAL') {
+            else if (material !== 'METAL') {
+              console.log(rfBagFound,'rfbag');
+              console.log('cus',job);
               if (
-                rfBagFound?.customerName?.toUpperCase() !== (job?.customerName?.toUpperCase() || 'STOCK') &&
+                rfBagFound?.['14'].toUpperCase() !== (job?.['14']?.toUpperCase() || 'STOCK') &&
                 rfBagFound?.customerName?.toUpperCase() !== 'STOCK'
               ) {
                 console.log('rfBagFound?.customerName?.toUpperCase()', rfBagFound?.customerName?.toUpperCase());
                 setErrorMessage('Please scan a valid customer\'s RM bag.');
               }
-              
-              
               else {
                 setRfBagArray(prev => [rfBagFound, ...prev]);
                 setScannedCode('');
               }
             }
-          } else {
+        } 
+      // else{
+      //   setErrorMessage("RM Bag is not in the same locker")
+      // }
+      
+      } else {
             setErrorMessage('RM Bag ID not found.');
           }
         } else {
@@ -292,20 +309,19 @@ const handleScan = (result) => {
         setErrorMessage('');
       }
     } else if (mode === 'Return') {
-      const trimmedScannedCode = scannedCode.trim();
-      const isJobId = trimmedScannedCode.startsWith("1/") && trimmedScannedCode.length > 2;
+      const isJobId = /^\d+\/\d+$/.test(scannedCode);
       if (isJobId) {
-        const jobFound = jobData.find(job => job.jobId === trimmedScannedCode && job.jobFlag === 'Return');
-        console.log("Return Mode Job Found:", jobFound);
-  
-        if (jobFound) {
+        const jobFound = jobData.find(job => job?.['2'] === scannedCode );
+        console.log("Return Mode Job Found:", jobFound); 
+        if (jobFound && jobFound?.['16'] == 1 ) {
           setReturnModeJob(jobFound); 
           setScannedCode('');
         } else {
           setErrorMessage('Job Is Not Issued Yet!');
+          console.log(jobFound,'fj');
         }
       } else if (scannedCode.length === 10) {
-        const rfBagFound = rfBags.find(bag => bag.rfbagid === scannedCode);
+        const rfBagFound = rfBags.find(bag => bag?.['1'] === scannedCode);
         if (rfBagFound && returnModeJob) {
           setRfBagArray(prev => [rfBagFound, ...prev]); 
           setEmployeeScanned(true);
@@ -321,13 +337,13 @@ const handleScan = (result) => {
       }
     }
   };
-  
 
 const handleChange = (e) => {
     setScannedCode(e.target.value); 
     setErrorMessage(''); 
   };
-  const handleToggleBulkScan = (e) => {
+
+const handleToggleBulkScan = (e) => {
     const isBulkScanChecked = e.target.checked;
     setBulkScan(isBulkScanChecked);
 
@@ -338,12 +354,12 @@ const handleChange = (e) => {
       setBulkJobDetails((prev) => prev.slice(1));
     }
 };
-  const handleToggleScanner = () => {
-    setHasCamera(true);
-  };
-console.log("bagDetails",rfBagArray);
 
-  const handleChangeEmployee = () => {
+const handleToggleScanner = () => {
+    setHasCamera(true);
+};
+
+const handleChangeEmployee = () => {
     setEmployeeScanned(false);  
     setEmployeeDetails(null);      
     setBarcode('');                
@@ -355,17 +371,18 @@ console.log("bagDetails",rfBagArray);
     setRfBagArray([]);
     setErrorMessage('');        
 };
+
 const handleissuesubmit = () =>{
-  setBarcode('');                
-  setBulkJobDetails([]);    
-  setJobDetails(null);
-  setRfBagDetails(null); 
-  setReturnjobdetails(null);     
-  // setBulkScan(false);   
-  setRfBagArray([]);
-  setErrorMessage('');    
-  setBulkScan(false);    
-  setBulkscancheck(false);
+ setBarcode('');                
+ setBulkJobDetails([]);    
+ setJobDetails(null);
+ setRfBagDetails(null); 
+ setReturnjobdetails(null);     
+ // setBulkScan(false);   
+ setRfBagArray([]);
+ setErrorMessage('');    
+ setBulkScan(false);    
+ setBulkscancheck(false);
 }
 
   return (
@@ -400,11 +417,13 @@ const handleissuesubmit = () =>{
           </button>
         </div>
       </div>
-      <select className="w-full p-2 border rounded-lg mb-4 focus:border-indigo-600 focus:ring focus:ring-indigo-200">
-                    <option value="dept1">Locker 1</option>
-                    <option value="dept2">Locker 2</option>
-                    <option value="dept3">Locker 3</option>
-                  </select>
+      <select className="w-full p-2 border  rounded-lg mb-4 focus:border-indigo-600 focus:ring focus:ring-indigo-200">
+  {locker.map((lock, index) => (
+    <option key={index} value={lock}>
+      {lock}
+    </option>
+  ))}
+</select>
                 <h2 className="text-lg font-semibold">
                   <FaUser className="inline mr-2 text-indigo-500" /> Scan Employee ID
                 </h2>
@@ -436,8 +455,6 @@ const handleissuesubmit = () =>{
                     onChange={(e) => handleempChange(e)}
                     ref={EmployeeCodeRef} 
                     />
-
-
                       <button
                         onClick={handleScanSubmit}
                         className={`bg-gradient-to-r from-green-400 to-green-600 flex items-center justify-center text-white px-6 py-3 font-semibold rounded-r-lg hover:bg-green-700 transition duration-200 ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
@@ -483,20 +500,25 @@ const handleissuesubmit = () =>{
           </button>
         </div>
             </div>
-
-           <div className="flex flex-row gap-2 w-full justify-between h-fit items-center">
-             <select className="w-full p-2 border rounded-lg mb-4 focus:border-indigo-600 focus:ring focus:ring-indigo-200">
-               <option value="dept1">Locker 1</option>
-               <option value="dept2">Locker 2</option>
-               <option value="dept3">Locker 3</option>
-             </select>   
+           <div className="flex flex-row gap-2 w-full justify-between h-fit items-center">     
+      <select className="w-full p-2 border rounded-lg mb-4 focus:border-indigo-600 focus:ring focus:ring-indigo-200">
+  {locker.map((lock, index) => (
+    <option key={index} value={lock}>
+      {lock}
+    </option>
+  ))}
+</select>
            </div>
            {mode === 'Issue' && (
    <div className="w-full flex flex-wrap justify-between">
-   <p className="text-lg font-semibold">
+   <p className="text-lg font-semibold flex flex-row items-center gap-2">
      <FaUser className="inline mr-2 text-indigo-500" />
-     <strong className="text-blue-500">({employeeDetails.empid}) </strong>
-     {employeeDetails.workerfname} {employeeDetails.workerlname}
+     <div className='flex flex-col'>
+     <strong className="text-blue-500">({employeeDetails?.['2']}) </strong>
+      <p className="text-lg font-semibold">
+  {employeeDetails?.['4']} {employeeDetails?.['5']} </p>
+      </div>
+
    </p>
 <button
 onClick={handleChangeEmployee}
@@ -506,9 +528,7 @@ Change
  </div>  )}
         
          </div>
-
- 
-            
+        
          {(bulkScan || bulkscancheck) && (
   <div className="w-full flex flex-row justify-between pl-4">
     <div className="flex items-center">
@@ -525,10 +545,6 @@ Change
     </div>
   </div>
 )}
-
-
-
-
           <div className="p-2 mb-8 transition-all duration-300 ease-in-out transform hover:scale-102">
            <div className="w-full flex flex-col items-center justify-center pt-2">
              {hasCamera ? (
@@ -614,33 +630,13 @@ Change
 
 </div>
 )}
-{/* {bulkScan &&   &&(
-  <button
-    onClick={handleissuesubmit}
-    className={`bg-gradient-to-r from-blue-400 to-blue-600 flex items-center justify-center text-lg text-white px-6 py-3 mt-4 font-semibold  hover:bg-green-700 transition duration-200 ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
-    disabled={loading}
-  >
-    {loading ? <ClipLoader size={20} color="#fff" /> : (
-      <>
-         Issue All
-       <BiArrowToRight size={20} className="ml-2" />
-
-      </>
-    )}
-  </button>
-)}         */}
        </div>
 <div className='w-full  flex felx-col  h-screen overflow-auto '>
-
-
-
 {mode === 'Issue' ? (
 <>
   {bulkScan  ? (
   <div className='w-full h-full items-start flex flex-col justify-start'>
-                <Bulkjobscan jobList={bulkJobDetails} />
-  
-  </div>
+                <Bulkjobscan jobList={bulkJobDetails} /></div>
               ) : (
                 jobDetails &&     
                <div className='p-4 w-full h-screen flex flex-col justify-between' >
@@ -648,9 +644,10 @@ Change
                 {rfBagArray.length > 0 && (
                 <div className="h-[30vh] overflow-auto flex flex-col justify-end items-end ">
                   <RfBagDetails bagDetails={rfBagArray}     setBagDetails={setRfBagArray}/> 
+           
                 </div>
               )}
-                <JobDetailsTab onSelectedRowsChange={handleSelectedRowsChange}  jobflag={jobDetails?.jobFlag?.toUpperCase() !== 'RETURN' ? 1 : 0} jobDetail={jobDetails} />
+                <JobDetailsTab onSelectedRowsChange={handleSelectedRowsChange}  jobflag={jobDetails?.['16']} jobDetail={jobDetails} />
                </div>
                 
               )}
@@ -660,11 +657,11 @@ Change
 <div className='p-4 w-full h-screen flex flex-col justify-between' >
         <Jobdetails jobDetail={returnjobdetails} />
         {rfBagArray.length > 0 && (
-        <div className="h-[30vh] overflow-auto flex flex-col justify-end items-end ">
-          <RfBagDetails bagDetails={rfBagArray}  setBagDetails={setRfBagArray}  />
+        <div className="h-[30vh] overflow-auto  flex flex-col justify-end items-end ">
+  <RfBagDetails bagDetails={rfBagArray}     setBagDetails={setRfBagArray}/> 
         </div>
       )}
-        <JobDetailsTab onSelectedRowsChange={handleSelectedRowsChange}  jobflag={returnjobdetails?.jobFlag?.toUpperCase() !== 'RETURN' ? 1 : 0} jobDetail={returnjobdetails} />
+        <JobDetailsTab onSelectedRowsChange={handleSelectedRowsChange}  jobflag={returnjobdetails?.['16']} jobDetail={returnjobdetails} />
        </div>
 </>
 )}
@@ -674,7 +671,7 @@ Change
   <div className='p-4 w-full h-screen flex flex-col justify-between' >  
     <Jobdetails jobDetail={returnModeJob} />
     <ReturnJobDetails jobDetails={returnModeJob}/>
-    <JobDetailsTab onSelectedRowsChange={handleSelectedRowsChange}  jobflag={returnModeJob?.jobFlag?.toUpperCase() !== 'RETURN' ? 1 : 0} jobDetail={returnModeJob} />
+    <JobDetailsTab onSelectedRowsChange={handleSelectedRowsChange}  jobflag={returnModeJob?.['16']} jobDetail={returnModeJob} />
  </div>
   )}
 </>)}
@@ -688,6 +685,7 @@ Change
 };
 
 export default ScannerAndDetails;
+
 
 
 
