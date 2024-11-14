@@ -69,50 +69,7 @@ function FetchDataComponent() {
 
   const yc = localStorage.getItem('yearcode');
   const proqctoken = localStorage.getItem('proqctoken');
-  // useEffect(() => {
-  //   const fetchData = async () => {
-  //     try {
-  //       const config = {
-  //         headers: {
-  //           Authorization: '9726350724901930' ,
-  //           Yearcode: 'e3tsaXZlLm9wdGlnb2FwcHMuY29tfX17ezIwfX17e3Rlc3Q2OH19e3t0ZXN0Njh9fQ==',
-  //           Version: "v1",
-  //                       sp: '5',
-  //           domain: '',
-  //           'Content-Type': 'application/json',
-  //         },
-  //       };
-
-  //       const data = {
-  //         con: '{"id":"","mode":"INITQC","appuserid":"kp23@gmail.com"}',
-  //         p: 'eyJQYWNrYWdlSWQxIjoiMSIsIkZyb250RW5kX1JlZ05vMSI6Ijgwa2dpemJpZHV3NWU3Z2ciLCJDdXN0b21lcmlkMSI6IjEwIn0=',
-  //         dp: '{"empbarcode":"","deviceid":"DeviceID_SMIT1","deviceName":"DeviceName_SMIT1","brand":"mybrand","model":"mymodel","manufacturer":"mymanufacturer","appver":"appver1", "appvercode":"22","device_type":"android/ios","onesignal_uid":"abc123_onesignal_uid"}',
-  //       };
-
-  //       const response = await axios.post('https://api.optigoapps.com/ReactStore/ReactStore.aspx', data, config);
-  //       const responseData = response.data.Data.rd[0].yearcode;
-  //       const UploadLogicalPathData = response.data.Data.rd[0].UploadLogicalPath;
-  //       const ukeyData = response.data.Data.rd[0].ukey;
-  //       const salesrdData = response.data.Data.rd1;
-        
-  //       setSalesrd(salesrdData);
-  //       setYearCode(responseData);
-  //       setUploadLogicalPath(UploadLogicalPathData);
-  //       setUkey(ukeyData);
-  //       console.log("salesrdData",salesrdData);
-  //       localStorage.setItem('salesrd', JSON.stringify(salesrdData));
-  //       // localStorage.removeItem("salesrd"); 
-  //       localStorage.setItem('yearCode', responseData);
-  //       localStorage.setItem('UploadLogicalPath', UploadLogicalPathData);
-  //       localStorage.setItem('ukey', ukeyData);
-  //     } catch (error) {
-  //       console.error('Error fetching data:', error);
-  //     }
-  //   };
-  //   console.log("salesrd",salesrd);
-
-  //   fetchData();
-  // }, [setYearCode,setUploadLogicalPath,setUkey,setSalesrd]);
+  
 
   useEffect(() => {
     const headers = {
@@ -144,12 +101,13 @@ function FetchDataComponent() {
         setRd4(responseData.rd4);
         setRd5(responseData.rd5);
 
-        localStorage.setItem('rd', JSON.stringify(responseData.rd));
-        localStorage.setItem('rd1', JSON.stringify(responseData.rd1));
-        localStorage.setItem('rd2', JSON.stringify(responseData.rd2));
-        localStorage.setItem('rd3', JSON.stringify(responseData.rd3));
-        localStorage.setItem('rd4', JSON.stringify(responseData.rd4));
-        localStorage.setItem('rd5', JSON.stringify(responseData.rd5));
+        localStorage.setItem('tnxemployees', JSON.stringify(responseData.rd1));
+        localStorage.setItem('tnxjobs', JSON.stringify(responseData.rd3));
+        localStorage.setItem('tnxdept', JSON.stringify(responseData.rd5));
+        localStorage.setItem('tnxlocation', JSON.stringify(responseData.rd7));
+        localStorage.setItem('tnxrmbags', JSON.stringify(responseData.rd9));
+        localStorage.setItem('tnxlockerid', JSON.stringify(responseData.rd11));
+        localStorage.setItem('tnxmaterialid', JSON.stringify(responseData.rd13));
       })
       .catch((error) => {
         console.error('Error fetching data:', error);

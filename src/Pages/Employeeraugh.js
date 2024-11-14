@@ -12,9 +12,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { FaEye, FaEyeSlash, FaArrowLeft } from 'react-icons/fa';
 
 const Scanemp = () => {
-  useEffect(() => {
-    localStorage.setItem('lastScreen', 'empscan'); 
-  }, []);
+ 
   const navigate = useNavigate();
   const [barcode, setBarcode] = useState('');
   const [scannedCode, setScannedCode] = useState('');

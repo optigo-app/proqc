@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useRef } from 'react';
-import { FaQrcode, FaUser, FaBriefcase, FaCheckCircle, FaArrowRight } from 'react-icons/fa';
+import { FaQrcode, FaUser,  FaArrowRight } from 'react-icons/fa';
 import QrScanner from 'qr-scanner';
 import { ClipLoader } from 'react-spinners';
 import ScannerIcon from '../../Assets/Qrcode.png';
@@ -30,6 +30,15 @@ const departments = ['Filing', 'Casting', 'Polishing'];
 const handleDeptClick = (dept) => {
   setSelectedDept(dept);
 };
+const handleScan = (result) => {
+  if (result) {
+    setBarcode(result);
+    setHasCamera(false);
+    handleCodeSubmit(result);
+    handleScanSubmit(result);
+  }
+};
+
   useEffect(() => {
     if (videoRef.current && !scannerRef.current && hasCamera) {
       scannerRef.current = new QrScanner(
@@ -55,16 +64,8 @@ const handleDeptClick = (dept) => {
         scannerRef.current = null;
       }
     };
-  }, [hasCamera]);
+  }, [hasCamera,handleScan]);
 
-  const handleScan = (result) => {
-    if (result) {
-      setBarcode(result);
-      setHasCamera(false);
-      handleCodeSubmit(result);
-      handleScanSubmit(result);
-    }
-  };
 
   const handleCodeSubmit = async (scannedCode) => {
     if (barcode.trim() === '') {

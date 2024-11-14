@@ -11,16 +11,16 @@ import '../../components/Scanner.css';
 
 
 const Jobdetails = ({ jobDetail }) => {
-  const [scannedCode, setScannedCode] = useState('');
-  const [hasCamera, setHasCamera] = useState(true);
-  const [errorMessage, setErrorMessage] = useState('');
-  const videoRef = useRef(null);
-  const scannerRef = useRef(null);
-  const JobRef = useRef(null); 
-  const [returnWeight, setReturnWeight] = useState('');
-  const[rmbagDetails,setRmbagDetails] = useState(false);
-const[returnsprued,setReturnsprued] = useState('');
-  const [loading, setLoading] = useState(false);
+  const  [scannedCode, setScannedCode] = useState('');
+  const  [hasCamera, setHasCamera] = useState(true);
+  const  [errorMessage, setErrorMessage] = useState('');
+  const  videoRef = useRef(null);
+  const  scannerRef = useRef(null);
+  const  JobRef = useRef(null); 
+  const  [returnWeight, setReturnWeight] = useState('');
+  const [rmbagDetails,setRmbagDetails] = useState(false);
+  const [returnsprued,setReturnsprued] = useState('');
+  const  [loading, setLoading] = useState(false);
 
   const [isInfoModalOpen, setIsInfoModalOpen] = useState(false);
   const [isWeightModalOpen, setIsWeightModalOpen] = useState(false);
@@ -56,6 +56,7 @@ const submitretwt= ()=>{
     const value = e.target.value.toUpperCase(); 
     setScannedCode(value); 
   };
+
 
   useEffect(() => {
     if (videoRef.current && !scannerRef.current && hasCamera) {
@@ -135,11 +136,11 @@ const submitretwt= ()=>{
           />
           <div className="flex flex-col h-full justify-start">
             <h2 className="text-2xl font-bold text-indigo-600">
-              {jobDetail.jobId} ({jobDetail.designNumber})
+              {jobDetail?.['2']} ({jobDetail?.['11']})
             </h2>
             {/* <p className="text-lg font-semibold text-gray-700">{jobDetail.serialFor}</p> */}
-            <p className="text-sm text-gray-600 uppercase gap-3">{jobDetail.metalpurity} {jobDetail.metalcolor} {jobDetail.metal}</p>
-            <p className="text-sm text-gray-500">{jobDetail.location}</p>
+            <p className="text-sm text-gray-600 uppercase gap-3">{jobDetail?.['9']} {jobDetail?.['10']} {jobDetail?.['8']}</p>
+            <p className="text-sm text-gray-500">{jobDetail?.['13']}</p>
           </div>
         </div>
 
@@ -147,17 +148,17 @@ const submitretwt= ()=>{
           <div className="flex flex-col">
             <div className="flex items-center  gap-2">
               <IoPersonSharp className="text-indigo-500 h-[1.75rem]" size={20} />
-              <p className="text-xl  font-medium text-indigo-700 capitalize">{jobDetail.customerName} ({jobDetail.poNumber})</p>
+              <p className="text-xl  font-medium text-indigo-700 capitalize">{jobDetail?.['6']} ({jobDetail?.['12']})</p>
             </div>
            
             <div className="mt-2">
               <p className="text-sm text-gray-500">Add In Gross Wt: 
-                <strong className="text-lg font-medium   text-gray-700"> ({jobDetail['Misc Add in Gross wt']})</strong>
+                <strong className="text-lg font-medium   text-gray-700"> ({jobDetail?.['14'] == 0 ? "NO" :"YES"})</strong>
               </p>
             </div>
             <div className="mt-2">
               <p className="text-sm text-gray-500">HMW: 
-                <strong className="text-lg font-medium   text-gray-700"> ({jobDetail['Is HMW Job?']})</strong>
+                <strong className="text-lg font-medium   text-gray-700"> ({jobDetail?.['15'] == 0 ? "NO" :"YES"})</strong>
               </p>
             </div>
           </div>
@@ -402,3 +403,5 @@ const submitretwt= ()=>{
 };
 
 export default Jobdetails;
+
+

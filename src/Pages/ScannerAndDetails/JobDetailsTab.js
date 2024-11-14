@@ -54,8 +54,6 @@ const theme = createTheme({
   },
 });
 
-
-
 const JobDetailsTab = ({ jobflag,jobDetail}) => {
   const [rows, setRows] = useState(initialRows);
   const [open, setOpen] = useState(false);
@@ -73,29 +71,26 @@ const JobDetailsTab = ({ jobflag,jobDetail}) => {
   const handleCloseWeightModal = () => setIsWeightModalOpen(false);
   const rmBags = ReturnRmBags; 
 
-    useEffect(() => {
+  useEffect(() => {
       const handleEscKey = (event) => {
         if (event.key === 'Escape') {      
           handleCloseWeightModal();
           handleCloseReturnModal();
         }
       };
-      document.addEventListener('keydown', handleEscKey);
+            document.addEventListener('keydown', handleEscKey);
       return () => document.removeEventListener('keydown', handleEscKey);
     }, []);
 
-
-  
     const handleScanSubmit = () => {
-      const foundBag = rmBags.find((bag) => bag.rmbagid === scannedCode);
-      if (foundBag) {
+  const foundBag = rmBags.find((bag) => bag.rmbagid === scannedCode);
+  if (foundBag) {
         setRmbagDetails(foundBag);
         setErrorMessage('');
       } else {
         setErrorMessage('RM Bag not found');
       }
     };
-
 
   const handleClose = () => {
     setOpen(false);
@@ -111,7 +106,7 @@ const JobDetailsTab = ({ jobflag,jobDetail}) => {
     setSelectedId(null);
   };
 
-  const handleReturnAll = () => {
+const handleReturnAll = () => {
     setRows(rows.filter((row) => row.id !== selectedId));
     setOpen(false);
   };
@@ -193,9 +188,9 @@ const JobDetailsTab = ({ jobflag,jobDetail}) => {
   ];
 
   const getRowClassName = (params) => {
-    if (jobflag === 1 && params.row.flag === 1) {
+    if (jobflag === 0 && params.row.flag === 1) {
         return 'bg-custom-hover';
-    } else if (jobflag === 1 && params.row.flag === 2) {
+    } else if (jobflag === 0 && params.row.flag === 2) {
         return 'bg-cusyellow-50';
     }
     return '';
@@ -233,19 +228,15 @@ const JobDetailsTab = ({ jobflag,jobDetail}) => {
       </div>
       <div className="relative overflow-hidden">
         <div className="w-full bg-white h-[40vh] overflow-auto">
-         
-         
-         
-        {showgrid&&
-        
+        {showgrid &&     
         <ThemeProvider theme={theme}>
         <DataGrid
       rows={rows}
       columns={columns}
       pageSize={5}
       rowsPerPageOptions={[5]}
-      checkboxSelection={jobflag === 1}
-      isRowSelectable={(params) => jobflag === 1 && ( params.row.flag === 1)}
+      checkboxSelection={jobflag === 0}
+      isRowSelectable={(params) => jobflag === 0 && ( params.row.flag === 1)}
       getRowClassName={getRowClassName}
       sx={{ 
           '& .MuiDataGrid-columnHeader:focus, & .MuiDataGrid-cell:focus': {
@@ -265,8 +256,7 @@ const JobDetailsTab = ({ jobflag,jobDetail}) => {
         '&  .Mui-disabled' :{
           color:'transparent !important'
         }
-       }
-      }
+}}
         />
         </ThemeProvider>
         }

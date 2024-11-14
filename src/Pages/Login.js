@@ -6,7 +6,6 @@ import axios from 'axios';
 import banner from '../Assets/proqc.png';
 import horizontalbanner from '../Assets/banner.png'
 
-
 const Login = () => {
   const [companyCode, setCompanyCode] = useState('');
   const [userName, setUserName] = useState('');
@@ -55,7 +54,8 @@ const Login = () => {
           companycode: companyCode,
           companypass: password
         })
-      }, {
+      },
+       {
         headers: {
           Authorization: "proqc_json_api",
           Version: "v1",
@@ -65,7 +65,8 @@ const Login = () => {
           "Content-Type": "application/json",
           Cookie: "ASP.NET_SessionId=z2cfg3oh2v5rydatgx43dqqb"
         }
-      });
+      }
+      );
 
       if (response.data.Data.rd[0].stat === 1) {
         const yearcode = response.data.Data.rd[0].yearcode;
@@ -128,12 +129,14 @@ const Login = () => {
         try {
           const response = await axios.post('https://api.optigoapps.com/ReactStore/ReactStore.aspx', data, { headers });
           const responseData = response.data.Data;
-          localStorage.setItem('rd', JSON.stringify(responseData.rd));
-          localStorage.setItem('rd1', JSON.stringify(responseData.rd1));
-          localStorage.setItem('rd2', JSON.stringify(responseData.rd2));
-          localStorage.setItem('rd3', JSON.stringify(responseData.rd3));
-          localStorage.setItem('rd4', JSON.stringify(responseData.rd4));
-          localStorage.setItem('rd5', JSON.stringify(responseData.rd5));
+          localStorage.setItem('tnxemployees', JSON.stringify(responseData.rd1));
+          localStorage.setItem('tnxjobs', JSON.stringify(responseData.rd3));
+          localStorage.setItem('tnxdept', JSON.stringify(responseData.rd5));
+          localStorage.setItem('tnxlocation', JSON.stringify(responseData.rd7));
+          localStorage.setItem('tnxrmbags', JSON.stringify(responseData.rd9));
+          localStorage.setItem('tnxlockerid', JSON.stringify(responseData.rd11));
+        localStorage.setItem('tnxmaterialid', JSON.stringify(responseData.rd13));
+        
         } catch (error) {
           console.error('Error fetching data:', error);
         }
