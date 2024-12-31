@@ -28,7 +28,7 @@ const [pin, setPin] = useState('');
 const [isPinVisible, setIsPinVisible] = useState(false);
 const [isSlideVisible, setIsSlideVisible] = useState(false);
 const [isScannerActive, setIsScannerActive] = useState(false);
-const employees =LocalGet('tnxemployees') || '[]';
+const employees = LocalGet('tnxemployees') || '[]';
   // console.log('tnxemployees',employees);
 console.log("employees",employees);
 
