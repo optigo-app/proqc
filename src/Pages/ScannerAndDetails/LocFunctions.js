@@ -8,9 +8,9 @@ const LocalSet = (key, value) => {
     }
 
     try {
-        const serializedValue = JSON.stringify(value);
+        const serializedValue = JSON?.stringify(value);
 
-        localStorage.setItem(key, serializedValue);
+        localStorage?.setItem(key, serializedValue);
     } catch (error) {
         console.error('Error saving to localStorage:', error);
         return 'Failed to save data';
@@ -23,11 +23,11 @@ const LocalGet = (key) => {
     }
 
     try {
-        const res = localStorage.getItem(key);
+        const res = localStorage?.getItem(key);
         if (res === null) {
             return 'No data found for the provided key';
         }
-        const data = JSON.parse(res);
+        const data = JSON?.parse(res);
         return data;
     } catch (error) {
         console.error('Error retrieving from localStorage:', error);

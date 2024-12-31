@@ -91,9 +91,6 @@ const timeoutId = setTimeout(handleFocus, 0);
     setSelectedRowIds(selectedRows);
   };
 
-
-
-
   const handleUnlockEngage = () => {
     Swal.fire({
       icon: 'success',
@@ -173,8 +170,6 @@ const handleempChange = (e) => {
       handleScanSubmit(result);
     }
   };
-
-
 const handleScanSubmit = () => {
     setErrorMessage('');
     let emplocation = [];
@@ -191,11 +186,8 @@ const handleScanSubmit = () => {
             const lockerstring = employeeFound['10'];
             const emplocation = getValuesByIds(locationString, Location, 1, 2);
             const emplocker = getValuesByIds(lockerstring, lockerarray, 1, 2);
-
             console.log(emplocation, 'location');
             console.log(emplocker, 'emplocker');
-
-        
             setEmployeeDetails(employeeFound);
             setEmployeeScanned(true);
             setErrorMessage('');
@@ -252,60 +244,70 @@ const handleScanSubmit = () => {
       } else if (scannedCode.length === 10) {
         if (jobDetails || returnjobdetails) {
           console.log("hiii");
+          
           const rfBagFound = rfBags.find(bag => bag?.['1'] === scannedCode);
-          console.log(rfBagFound,'rfBagFound')
+          console.log(rfBagFound, 'rfBagFound');
+          
           if (rfBagFound) {
+            
             const rmlocker = getValuesByIds(rfBagFound['12'], lockerarray, 1, 2);
             const rmlockerString = String(rmlocker?.[0] || '');
-          console.log(rmlockerString?.toLocaleUpperCase(),"abcd");
-            if (locker.some(tnxlocker => tnxlocker.toUpperCase() == rmlockerString?.toUpperCase())){
-            const tnxmaterial =  getValuesByIds(rfBagFound?.['2'],materialarray,1,2); 
-            const material = String(tnxmaterial?.[0] || '');
-            console.log(material);
-                const job = jobDetails || returnjobdetails;
-                console.log(material);
-            if (material === 'METAL') {
-              console.log(material,'material');
-              if (
-                rfBagFound?.['5'].toUpperCase() !== job?.['8']?.toUpperCase() ||  rfBagFound?.['6']?.toUpperCase() !== job?.['9']?.toUpperCase()
-              ) {
-                console.log(  rfBagFound?.['5'].toUpperCase(),job?.['8']?.toUpperCase(),'as');
-
-                setErrorMessage('Please scan a valid RM bag for metal.');
-              } else {
-                console.log(  rfBagFound?.['5'].toUpperCase(),job?.['8']?.toUpperCase(),'abcd');
-                setRfBagArray(prev => [rfBagFound, ...prev]);
-                console.log(rfBagArray,'rfbag');
-                setScannedCode('');
-              }
-            }
-            else if (material !== 'METAL') {
-              console.log(rfBagFound,'rfbag');
-              console.log('cus',job);
-              if (
-                rfBagFound?.['14'].toUpperCase() !== (job?.['14']?.toUpperCase() || 'STOCK') &&
-                rfBagFound?.customerName?.toUpperCase() !== 'STOCK'
-              ) {
-                console.log('rfBagFound?.customerName?.toUpperCase()', rfBagFound?.customerName?.toUpperCase());
-                setErrorMessage('Please scan a valid customer\'s RM bag.');
-              }
-              else {
-                setRfBagArray(prev => [rfBagFound, ...prev]);
-                setScannedCode('');
-              }
-            }
-        } 
-      // else{
-      //   setErrorMessage("RM Bag is not in the same locker")
-      // }
+            console.log(rmlockerString?.toLocaleUpperCase(), "abcd");
+            
+            if (locker.some(tnxlocker => String(tnxlocker).toUpperCase() === rmlockerString.toUpperCase())) {
+              
+              const tnxmaterial = getValuesByIds(rfBagFound?.['2'], materialarray, 1, 2);
+              const material = String(tnxmaterial?.[0] || '');
+              console.log(material);
+              
+              const job = jobDetails || returnjobdetails;
+              console.log(material);
+              
+              if (material === 'METAL') {
+                console.log(material, 'material');
+                
+                const bagField5 = String(rfBagFound?.['5'] || '');
+                const jobField8 = String(job?.['8'] || '');
+                const bagField6 = String(rfBagFound?.['6'] || '');
+                const jobField9 = String(job?.['9'] || '');
       
-      } else {
+                if (bagField5.toUpperCase() !== jobField8.toUpperCase() || bagField6.toUpperCase() !== jobField9.toUpperCase()) {
+                  console.log(bagField5.toUpperCase(), jobField8.toUpperCase(), 'as');
+                  setErrorMessage('Please scan a valid RM bag for metal.');
+                } else {
+                  console.log(bagField5.toUpperCase(), jobField8.toUpperCase(), 'abcd');
+                  setRfBagArray(prev => [rfBagFound, ...prev]);
+                  console.log(rfBagArray, 'rfbag');
+                  setScannedCode('');
+                }
+                
+              } else if (material !== 'METAL') {
+                console.log(rfBagFound, 'rfbag');
+                console.log('cus', job);
+                
+                const bagField14 = String(rfBagFound?.['14'] || '');
+                const jobField14 = String(job?.['17'] || 'STOCK');
+      
+                if (bagField14.toUpperCase() !== jobField14.toUpperCase() && bagField14.toUpperCase() !== 'STOCK') {
+                  console.log('rfBagFound?.customerName?.toUpperCase()', bagField14.toUpperCase());
+                  setErrorMessage('Please scan a valid customer\'s RM bag.');
+                } else {
+                  setRfBagArray(prev => [rfBagFound, ...prev]);
+                  setScannedCode('');
+                }
+              }
+            } else {
+              setErrorMessage("RM Bag is not in the same locker");
+            }
+            
+          } else {
             setErrorMessage('RM Bag ID not found.');
           }
         } else {
           setErrorMessage('Please scan a job before scanning RM Bag.');
         }
-      } else {
+      }
+      else {
         setErrorMessage('');
       }
     } else if (mode === 'Return') {
@@ -479,11 +481,8 @@ const handleissuesubmit = () =>{
 <div className="flex items-center justify-center mb-4">
 <div className="relative bg-gray-200 rounded-full inline-flex">
           <button
-            className={`px-4 py-2 text-sm font-medium rounded-full   focus:outline-none ${
-              mode === 'Issue'
-                ? 'bg-indigo-600 text-white'
-                : 'bg-gray-200 text-gray-700 '
-            }`}
+            className={`px-4 py-2 text-sm font-medium rounded-full   focus:outline-none 
+            ${mode === 'Issue' ? 'bg-indigo-600 text-white' : 'bg-gray-200 text-gray-700 ' }`}
             onClick={() => handleModeToggle('Issue')}
             >
             Issue
@@ -587,12 +586,7 @@ Change
                </div>
              </form>
 </div>
-
-
-
 </div>  
-
-
 </div>  
 
 {mode === 'Issue' && (jobDetails || returnjobdetails || bulkJobDetails.length > 0) && (
@@ -667,7 +661,6 @@ Change
 )}
 </>):(<> 
 {returnModeJob && (
-  
   <div className='p-4 w-full h-screen flex flex-col justify-between' >  
     <Jobdetails jobDetail={returnModeJob} />
     <ReturnJobDetails jobDetails={returnModeJob}/>
@@ -676,7 +669,7 @@ Change
   )}
 </>)}
 </div>
-       </div>        
+       </div>   
           )}
     </div>
       </div>
